@@ -1,0 +1,8 @@
+{
+  "assets": {
+    "macos-arm64": {
+      "target": "aarch64-apple-darwin"
+    }
+  },
+  "schema": 1
+}

@@ -1,0 +1,78 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "unname – persönliche Daten lokal maskieren"
+authors = ["unname contributors"]
+license = "MIT"
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+base64 = "0.22"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+tauri = { version = "2.11.3", features = [] }
+tauri-plugin-log = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tokio = { version = "1", features = ["time", "sync"] }
+# Plain HTTP only to loopback for the sidecar. TLS (rustls with built‑in Mozilla roots,
+# no system certificates) is needed just for the model download in `models.rs`:
+# only on user click, only to hosts of the selected source, only HTTPS.
+# Otherwise the shell does not communicate with the network.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+# Language models are distributed as a Wheel (ZIP); the same package is used for devices without
+# internet. Only files listed in the manifest are extracted.
+zip = { version = "2", default-features = false, features = ["deflate"] }
+sha2 = "0.10.9"
+tempfile = "3.27.0"
+tauri-plugin-clipboard-manager = "2"
+# Show “n files ready” when the window is not in front.
+tauri-plugin-notification = "2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# Native Foundation APIs for persistent security‑scoped bookmarks and the
+# NSURLIsExcludedFromBackupKey resource value. Keeping these target‑specific
+# preserves a dependency‑free fallback on Windows and Linux.
+objc2 = "0.6.4"
+objc2-foundation = { version = "0.3.2", features = [
+    "NSArray",
+    "NSData",
+    "NSDictionary",
+    "NSError",
+    "NSFileCoordinator",
+    "NSFileManager",
+    "NSFilePresenter",
+    "NSObject",
+    "NSProcessInfo",
+    "NSString",
+    "NSURL",
+    "NSValue",
+    "block2",
+] }
+# Clipboard access on this Mac uses `NSPasteboard` with `currentHostOnly`
+# and the markers from nspasteboard.org.
+objc2-app-kit = { version = "0.3.2", default-features = false, features = [
+    "std",
+    "NSPasteboard",
+] }
+# Coordinated reads from iCloud Drive and file providers.
+block2 = "0.6"
+
+# Build scripts and proc‑macros are not shipped, so they are not stripped.
+# On macOS 27 stripping freshly built proc‑macro dylibs makes their Rust metadata unreadable;
+# the release build would then fail with “can't find crate for `zerocopy_derive`”.
+# The app binary continues to be stripped.
+[profile.release.build-override]
+strip = false

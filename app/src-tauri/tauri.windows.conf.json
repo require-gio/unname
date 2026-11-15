@@ -1,0 +1,23 @@
+{
+	"bundle": {
+		"targets": ["msi", "nsis"],
+		"windows": {
+			"allowDowngrades": false,
+			"digestAlgorithm": "sha256",
+			"webviewInstallMode": {
+				"type": "offlineInstaller",
+				"silent": true
+			},
+			"wix": {
+				"upgradeCode": "3a92fbe5-90ee-529d-8264-008752ae64c1",
+				"language": "de-DE"
+			},
+			"nsis": {
+				"installMode": "currentUser",
+				"languages": ["German", "English"],
+				"displayLanguageSelector": false,
+				"compression": "lzma"
+			}
+		}
+	}
+}

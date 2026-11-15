@@ -1,0 +1,95 @@
+<DID:4QK2AB26760|VDR:WEISS|PLX:S|PLZ:1110|LCD:AT|ZU1:XI|/>
+Lieferschein &
+Rechnung
+Moebelhaus Online Shop
+Tel: 050123/154-100
+E-Mail: shop@moebelhaus-beispiel.at
+UID-Nr. / Steuernummer:
+ATU13585627 / 165/2137
+MAX MUSTERMANN
+MUSTERGASSE 12/1/30
+1110 WIEN
+Auftragsnummer
+4QK2AB
+*4QK2AB*
+Lieferschein & Rechnung
+Rechnungsdatum: 16.07.2026, Rechnungsnummer: XI1234567
+Teillieferung
+Einzelpreis
+Gesamtpreis
+Nachlass
+Mwst-%
+Gesamtwert
+Pos
+Anzahl
+Artikelbezeichnung
+mit Mwst
+mit Mwst
+mit Mwst
+mit Mwst
+1
+1,00
+04960008/02
+199,00
+199,00
+19,90
+20,00
+179,10
+ARMLEHNSTUHL
+GIANT
+TYP:Y3111,BEZ:LODGE 165
+ANTHRAZIT,GESTE:METALL SCHWARZ
+B/H/T:67X86X68 CM
+B/H/T in cm ca. 67/86/68
+3
+1,00
+90010005/11
+0,00
+0,00
+20,00
+0,00
+DIENSTLEISTUNG
+ZUSTELLUNG ONLINESHOP
+PER POSTVERSAND
+ohne Angabe
+Netto
+MwSt-Satz-%
+MwSt-Betrag
+Brutto
+Rechnung
+XI1234567
+149,25
+20,00
+29,85
+EUR 179,10
+zu zahlender
+149,25
+29,85
+179,10
+Betrag
+E-Mail: max.mustermann@example.at
+Es bediente Sie: Ihr Online Team
+Tel: +436641234567
+E-Mail: shop@moebelhaus-beispiel.at
+Auftragsdatum: 15.07.2026
+Druckdatum: 16.07.2026
+Kundendienst:
+BestellNr: 1002607543256
+Ihr Online Team
+Tel: +43 (0) 50123-154100
+E-Mail: shop@moebelhaus-beispiel.at
+Moebelhaus Beispiel KG, Musterstraße 39, 4600 Wels
+FN 123456 d / LG-Wels, UID-NR: ATU13585627
+Tel.: 050123/154-100, E-Mail: shop@moebelhaus-beispiel.at<DID:4QK2AB26760|VDR:WEISS|PLX:S|/>
+Lieferschein &
+Rechnung
+Lieferschein & Rechnung - MUSTERMANN MAX - 4QK2AB
+Seite 2
+ZAHLUNGSINFORMATIONEN:
+Zahlung per Kreditkarte (MASTER): 208.65 EUR
+Eigentumsvorbehalt bis zur vollständigen Bezahlung des Gesamtkaufpreises!
+Wenn nicht anders angegeben gilt Lieferdatum=Rechnungsdatum.
+Holz ist ein Naturprodukt
+Jedes Holz zeigt der Holzart entsprechende Natur- und Wuchsbildmerkmale.
+Farbabweichungen zu den Musterkollektionen und den Ausstellungsstücken sind holzabhängige Eigenschaften
+und somit kein Reklamationsgrund.

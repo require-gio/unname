@@ -1,0 +1,455 @@
+{
+  "schema": 1,
+  "revision": "2026-11-07",
+  "sources": {
+    "huggingface": {
+      "hosts": [
+        "huggingface.co",
+        "*.huggingface.co",
+        "*.hf.co"
+      ]
+    },
+    "github": {
+      "hosts": [
+        "github.com",
+        "objects.githubusercontent.com",
+        "release-assets.githubusercontent.com",
+        "raw.githubusercontent.com"
+      ]
+    }
+  },
+  "components": [
+    {
+      "id": "ner",
+      "kind": "ner",
+      "origin": "urchade/gliner_multi_pii-v1@f334163a5d1dcdbacf365c4527538e3da3ecfb18 · ONNX, Einbettungen int8",
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "path": "model.int8.onnx",
+          "size": 581345446,
+          "sha256": "559ae3e5c5303b008796a4543b315a66812c9458f4c8196bc91de291c2db716e",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/model.int8.onnx",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--model.int8.onnx"
+          }
+        },
+        {
+          "path": "gliner_config.json",
+          "size": 2844,
+          "sha256": "76820f91efe9707c302bf98fdf83c246e5aee3d7e7428deef0b6039a317671f1",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/gliner_config.json",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--gliner_config.json"
+          }
+        },
+        {
+          "path": "tokenizer.json",
+          "size": 16034823,
+          "sha256": "55a4404060e3e78b1d96de44c532bc87bc06e5808be2606d0160975d6a7b59a7",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/tokenizer.json",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--tokenizer.json"
+          }
+        },
+        {
+          "path": "tokenizer_config.json",
+          "size": 2992,
+          "sha256": "f20ff41a606741430f2372047916770d0394afa65b0e46d93c046f4ef3c5a236",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/tokenizer_config.json",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--tokenizer_config.json"
+          }
+        }
+      ]
+    },
+    {
+      "id": "de",
+      "kind": "language",
+      "origin": "explosion/spacy-models de_core_news_sm 3.8.0",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "de_core_news_sm-3.8.0-py3-none-any.whl",
+          "size": 14639490,
+          "sha256": "fec69fec52b1780f2d269d5af7582a5e28028738bd3190532459aeb473bfa3e7",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/de/de_core_news_sm-3.8.0-py3-none-any.whl",
+            "github": "https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl"
+          },
+          "unpack": {
+            "prefix": "de_core_news_sm/de_core_news_sm-3.8.0/",
+            "files": [
+              {
+                "path": "LICENSE",
+                "size": 1056,
+                "sha256": "3933c176979b68bc6d0bcc902c7d6c130f1d127f476f17ba5cdba8d99cfd0012"
+              },
+              {
+                "path": "LICENSES_SOURCES",
+                "size": 13470,
+                "sha256": "0c3ab78745569d848b7c83a486183bce42b9643561084d6d6f67eb0229c79869"
+              },
+              {
+                "path": "README.md",
+                "size": 31174,
+                "sha256": "913e7904f4efe8179680352bdaa7419c6a0095794f6ae704df5b08908339af60"
+              },
+              {
+                "path": "accuracy.json",
+                "size": 5900,
+                "sha256": "49900302b424ef5e379daa9ab9bb4df35c39944b95adfe081a5a381a31157bcd"
+              },
+              {
+                "path": "attribute_ruler/patterns",
+                "size": 123,
+                "sha256": "6241300d1efc3b0263997a4a429ce4692f85a7c71470394c6b07371186ea93ba"
+              },
+              {
+                "path": "config.cfg",
+                "size": 6640,
+                "sha256": "8bdb6155b676c1777337256a965f29fbc25560223abc50be68410482db942268"
+              },
+              {
+                "path": "lemmatizer/cfg",
+                "size": 12487,
+                "sha256": "5b147c534e61b7286fb4b04a5a6e7b35eadebaabeca85c43aaadba9774f1156e"
+              },
+              {
+                "path": "lemmatizer/model",
+                "size": 509110,
+                "sha256": "2ca40807eb5ca2d20166077e9acde3eb9def17b2e57e07c6e6d114929acd250a"
+              },
+              {
+                "path": "lemmatizer/trees",
+                "size": 278487,
+                "sha256": "627ffb537321d682ad47cf33d60dd49a976544c1b2192b77f44da1fc092ddd85"
+              },
+              {
+                "path": "meta.json",
+                "size": 48543,
+                "sha256": "587b66aef89c9c9d4ec61fdd63d53d31339b8dab98117e45782bd487a2518640"
+              },
+              {
+                "path": "morphologizer/cfg",
+                "size": 106135,
+                "sha256": "3dd694d5d091031ba16b1510bb55e5cd4fd2e891966248561dd8a6211fd22885"
+              },
+              {
+                "path": "morphologizer/model",
+                "size": 260790,
+                "sha256": "432c7f1c2980ce75c578a99a90c058ab196bcb88436bf792f5be7407df6bb4ed"
+              },
+              {
+                "path": "ner/cfg",
+                "size": 221,
+                "sha256": "a7172edadafba9f472e9ac0f2660eec04b6405e471be9e20267b79c67288d22d"
+              },
+              {
+                "path": "ner/model",
+                "size": 6140040,
+                "sha256": "25c462893f544c4690dc19463aef77381ecf78df959eedd3af5c7480117f64f5"
+              },
+              {
+                "path": "ner/moves",
+                "size": 275,
+                "sha256": "c4a69879c86b2d718f21b539dd7ff2f1dd57e5c65a3b2948d51c8430d37e612b"
+              },
+              {
+                "path": "parser/cfg",
+                "size": 222,
+                "sha256": "e2a240ef01f95e58f5dd4c9d6e90d61f597b8d998966570d3009dd81e8879780"
+              },
+              {
+                "path": "parser/model",
+                "size": 327972,
+                "sha256": "6bb24405742d073c8b71523f2dce6127434a454645cba6c4f3b252d7c8292cdf"
+              },
+              {
+                "path": "parser/moves",
+                "size": 1629,
+                "sha256": "84d098f96ebf27b149128b91157fe7bc1ead7e53ded1a790f2b3000d30705cbd"
+              },
+              {
+                "path": "senter/cfg",
+                "size": 23,
+                "sha256": "2a4db4a729b6469da1f87d71cc7cd3ed2a73360cc85326821e850836c4671103"
+              },
+              {
+                "path": "senter/model",
+                "size": 197089,
+                "sha256": "a1c5138feea68984754e9f8302bb51b488376e9db32344bfcc692e7df3c43aba"
+              },
+              {
+                "path": "tagger/cfg",
+                "size": 748,
+                "sha256": "05ab51eb95028199eed91e04b849cc993248ba30e174fb45c1b1e11585576f32"
+              },
+              {
+                "path": "tagger/model",
+                "size": 21769,
+                "sha256": "51c05ea7514186ee69f01f915b19943af6317b2c28ce3e223a0015932c48b4e3"
+              },
+              {
+                "path": "tok2vec/cfg",
+                "size": 4,
+                "sha256": "f8a5a26e3056eb6fb06deeb3dbccfd88ae74900200c98c70b5966bbb7ec9d4de"
+              },
+              {
+                "path": "tok2vec/model",
+                "size": 6269370,
+                "sha256": "0c138e5020ce6377b3d7a3ed48134ab59d02ef1b91f2273be21cb80efef91b60"
+              },
+              {
+                "path": "tokenizer",
+                "size": 49278,
+                "sha256": "de9ff2caf5338582c90987fe9e6c5f06855639e7565433030950092240636a1c"
+              },
+              {
+                "path": "vocab/key2row",
+                "size": 1,
+                "sha256": "76be8b528d0075f7aae98d6fa57a6d3c83ae480a8469e668d7b0af968995ac71"
+              },
+              {
+                "path": "vocab/lookups.bin",
+                "size": 42,
+                "sha256": "15c33cca0a6b138fa982c8c2fcffa7341c85e49add5c898fec405db6e16cd36c"
+              },
+              {
+                "path": "vocab/strings.json",
+                "size": 7851425,
+                "sha256": "6923e635d6e9a35099bf19e9ea13c19bd459588a53e9769ebcfe8af2bc38ee51"
+              },
+              {
+                "path": "vocab/vectors",
+                "size": 128,
+                "sha256": "14772b683e726436d5948ad3fff2b43d036ef2ebbe3458aafed6004e05a40706"
+              },
+              {
+                "path": "vocab/vectors.cfg",
+                "size": 22,
+                "sha256": "ff4359091952c8cd16f1f0482f5770fb82d1707368d5cca3c46aa501f552e3c5"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "en",
+      "kind": "language",
+      "origin": "explosion/spacy-models en_core_web_sm 3.8.0",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "en_core_web_sm-3.8.0-py3-none-any.whl",
+          "size": 12806118,
+          "sha256": "1932429db727d4bff3deed6b34cfc05df17794f4a52eeb26cf8928f7c1a0fb85",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/en/en_core_web_sm-3.8.0-py3-none-any.whl",
+            "github": "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+          },
+          "unpack": {
+            "prefix": "en_core_web_sm/en_core_web_sm-3.8.0/",
+            "files": [
+              {
+                "path": "LICENSE",
+                "size": 1056,
+                "sha256": "3933c176979b68bc6d0bcc902c7d6c130f1d127f476f17ba5cdba8d99cfd0012"
+              },
+              {
+                "path": "LICENSES_SOURCES",
+                "size": 2347,
+                "sha256": "20d9dfacd215112251f15341edd1a47b1f98bf393a212f10f194ffdc7ee98a90"
+              },
+              {
+                "path": "README.md",
+                "size": 2587,
+                "sha256": "91b0ed1742ea0803034b4d769c4536e88d9d4da7808d833f2a804b6c54aae220"
+              },
+              {
+                "path": "accuracy.json",
+                "size": 6341,
+                "sha256": "e7572d7f2f3c18e9921471f9d0b3424f8cf7f1a909ae484fa10b780a13f4c676"
+              },
+              {
+                "path": "attribute_ruler/patterns",
+                "size": 14735,
+                "sha256": "f8b97f7ebef9b8536bba5f0fc1e73af6183563e96e2325bcbb021b8c6dbc6683"
+              },
+              {
+                "path": "config.cfg",
+                "size": 5527,
+                "sha256": "65c545ca2da5bd4b87b22d4917318605360b37dee6ed6b18516a036f87319f79"
+              },
+              {
+                "path": "lemmatizer/lookups/lookups.bin",
+                "size": 972893,
+                "sha256": "eb64f40c0f8396d1762730c0ddf4dad2a52d138f5a389f71a1a1d088173b7737"
+              },
+              {
+                "path": "meta.json",
+                "size": 10106,
+                "sha256": "7456349002fa8cf31111051bd37fdbea67a1b7f7a0a60ce235466f98a6758125"
+              },
+              {
+                "path": "ner/cfg",
+                "size": 221,
+                "sha256": "a7172edadafba9f472e9ac0f2660eec04b6405e471be9e20267b79c67288d22d"
+              },
+              {
+                "path": "ner/model",
+                "size": 6154601,
+                "sha256": "cd93e9ca9126c69f1d10a1039ef67c3d9ec1223b44d079856705970f0f19ff4e"
+              },
+              {
+                "path": "ner/moves",
+                "size": 1064,
+                "sha256": "d82b13473ebd33e0396004dd22f00c71fe3c1251742bf1f7c4554f23fd3b0af4"
+              },
+              {
+                "path": "parser/cfg",
+                "size": 222,
+                "sha256": "e2a240ef01f95e58f5dd4c9d6e90d61f597b8d998966570d3009dd81e8879780"
+              },
+              {
+                "path": "parser/model",
+                "size": 319909,
+                "sha256": "e0098910535a863d430082ece57455d5fa071cd4ca3a0054e80582076c752b1e"
+              },
+              {
+                "path": "parser/moves",
+                "size": 1571,
+                "sha256": "ec41318c32eb7f9e4d8f050b2e8466ee67954d2d3455c1aec73abf46c82dd67f"
+              },
+              {
+                "path": "senter/cfg",
+                "size": 23,
+                "sha256": "2a4db4a729b6469da1f87d71cc7cd3ed2a73360cc85326821e850836c4671103"
+              },
+              {
+                "path": "senter/model",
+                "size": 197089,
+                "sha256": "b69e7174a0b6307739adec3c8053ac45fdbad7171c4d3d8bfcd9713ecbc01f8c"
+              },
+              {
+                "path": "tagger/cfg",
+                "size": 615,
+                "sha256": "d484c3d9391f37bf9c727aa2eb4c477a24cb103020f95e52dc37842818b50118"
+              },
+              {
+                "path": "tagger/model",
+                "size": 19829,
+                "sha256": "1ec3d93f38cebe172f2b5c89d84be72856ce42c8f1a64f1699f1d98a771f36b7"
+              },
+              {
+                "path": "tok2vec/cfg",
+                "size": 4,
+                "sha256": "f8a5a26e3056eb6fb06deeb3dbccfd88ae74900200c98c70b5966bbb7ec9d4de"
+              },
+              {
+                "path": "tok2vec/model",
+                "size": 6269370,
+                "sha256": "e84fc06eb319c94d28e460fc334e292120b01f18baa5dc8b50c977459820a090"
+              },
+              {
+                "path": "tokenizer",
+                "size": 77066,
+                "sha256": "b014e8bba4958b120af2d0c1c63eabb7c00379f2bacaf10df7c5325efd2ea467"
+              },
+              {
+                "path": "vocab/key2row",
+                "size": 1,
+                "sha256": "76be8b528d0075f7aae98d6fa57a6d3c83ae480a8469e668d7b0af968995ac71"
+              },
+              {
+                "path": "vocab/lookups.bin",
+                "size": 70040,
+                "sha256": "fce9c883c56165f29573cc938c2a1c9d417ac61bd8f56b671dd5f7996de70682"
+              },
+              {
+                "path": "vocab/strings.json",
+                "size": 1103983,
+                "sha256": "b1966d1f07a05b68576df07f43f40203b4e11124ad82cc839e8312ad8d7fdae7"
+              },
+              {
+                "path": "vocab/vectors",
+                "size": 128,
+                "sha256": "14772b683e726436d5948ad3fff2b43d036ef2ebbe3458aafed6004e05a40706"
+              },
+              {
+                "path": "vocab/vectors.cfg",
+                "size": 22,
+                "sha256": "ff4359091952c8cd16f1f0482f5770fb82d1707368d5cca3c46aa501f552e3c5"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ocr",
+      "kind": "ocr",
+      "origin": "tesseract-ocr/tessdata_best@e12c65a915945e4c28e237a9b52bc4a8f39a0cec",
+      "license": "Apache-2.0",
+      "platforms": [
+        "windows"
+      ],
+      "files": [
+        {
+          "path": "deu.traineddata",
+          "size": 8628461,
+          "sha256": "8407331d6aa0229dc927685c01a7938fc5a641d1a9524f74838cdac599f0d06e",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ocr/deu.traineddata",
+            "github": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/e12c65a915945e4c28e237a9b52bc4a8f39a0cec/deu.traineddata"
+          }
+        },
+        {
+          "path": "eng.traineddata",
+          "size": 15400601,
+          "sha256": "8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ocr/eng.traineddata",
+            "github": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/e12c65a915945e4c28e237a9b52bc4a8f39a0cec/eng.traineddata"
+          }
+        }
+      ]
+    },
+    {
+      "id": "classifier",
+      "kind": "classifier",
+      "origin": "zweitmeinung-20261025 · feinjustiert aus intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3 · ONNX int8",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "model.int8.onnx",
+          "size": 118243861,
+          "sha256": "f04d63fb8e8d5a107f1430aec6b4518e91715144279df3d49ddac6e06a27d28c",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/model.int8.onnx",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--model.int8.onnx"
+          }
+        },
+        {
+          "path": "tokenizer.json",
+          "size": 17082988,
+          "sha256": "5b58593a7e63f3c8b69801a92415fc0813dd287a3ba2f767cdf33106806fca11",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/tokenizer.json",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--tokenizer.json"
+          }
+        },
+        {
+          "path": "zweitmeinung.json",
+          "size": 493,
+          "sha256": "9b7e9e01c72c99bf696cec2ff592ef4500f83dc8ef7be2f0b8116772f24e4a9d",
+          "urls": {
+            "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/zweitmeinung.json",
+            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--zweitmeinung.json"
+          }
+        }
+      ]
+    }
+  ]
+}

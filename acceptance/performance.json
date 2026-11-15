@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "measured_at": "2026-10-26T08:26:24+00:00",
+  "tool": "scripts/performance.py",
+  "version": "0.1.0",
+  "device": {
+    "system": "Darwin",
+    "machine": "arm64",
+    "processor": "arm",
+    "logical_cores": 10,
+    "memory_gib": 64.0,
+    "detection": "gliner",
+    "device": "mps",
+    "models": {
+      "ner": "ready",
+      "de": "ready",
+      "en": "ready",
+      "ocr": "missing",
+      "classifier": "ready"
+    }
+  },
+  "warmup_s": 0.6,
+  "cases": {
+    "pdf_50_pages": {
+      "places": 1050,
+      "detection_s": 16.62,
+      "apply_s": 0.06,
+      "save_s": 4.25,
+      "rendered_pages": 50
+    },
+    "nine_files": {
+      "detection_s": 1.43,
+      "apply_all_s": 0.02,
+      "save_s": 0.2,
+      "saved": 9
+    },
+    "thousand_codes": {
+      "places": 1000,
+      "names": 1000,
+      "decisions": 500,
+      "codes_in_result": 500,
+      "detection_s": 12.26,
+      "apply_s": 0.05,
+      "save_s": 0.06
+    }
+  }
+}

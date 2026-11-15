@@ -1,0 +1,61 @@
+"""Local document extraction."""
+
+from .extractor import (
+    DocumentExtractor,
+    EmptyDocumentError,
+    EncryptedDocumentError,
+    ExtractionError,
+    UnsupportedDocumentError,
+    extract_bytes,
+    extract_document,
+    structured_payload,
+)
+from .models import (
+    BoundingBox,
+    CoordinateSpace,
+    DocumentFormat,
+    ExtractedDocument,
+    ExtractionMethod,
+    OcrMode,
+    SegmentKind,
+    StructuredPayload,
+    TextSegment,
+)
+from .ocr import (
+    LimitedOcrBackend,
+    OcrBackend,
+    OcrEngine,
+    OcrUnavailableError,
+    OcrWord,
+    TesseractOcrBackend,
+    default_ocr_backend,
+    ocr_engine_of,
+)
+
+__all__ = [
+    "BoundingBox",
+    "CoordinateSpace",
+    "DocumentExtractor",
+    "DocumentFormat",
+    "EmptyDocumentError",
+    "EncryptedDocumentError",
+    "ExtractedDocument",
+    "ExtractionError",
+    "ExtractionMethod",
+    "LimitedOcrBackend",
+    "OcrBackend",
+    "OcrEngine",
+    "OcrMode",
+    "OcrUnavailableError",
+    "OcrWord",
+    "SegmentKind",
+    "StructuredPayload",
+    "TesseractOcrBackend",
+    "TextSegment",
+    "UnsupportedDocumentError",
+    "default_ocr_backend",
+    "ocr_engine_of",
+    "extract_bytes",
+    "extract_document",
+    "structured_payload",
+]

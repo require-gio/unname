@@ -1,0 +1,98 @@
+id: de-at-rechnung-v3
+title: Rechnung und Beleg (DE/AT)
+version: 3.0.0
+languages: [de, en]
+
+input:
+  allow: [pdf, docx, xlsx, csv, png, jpg]
+  max_file_mb: 50
+
+master_data:
+  enabled: true
+  persons_file: master-data/personen.csv
+  orgs_file: master-data/firmen.csv
+  min_length: 3
+  refresh: daily
+
+pipeline:
+  ocr: auto
+  ocr_languages: [deu, eng]
+  structured_data: presidio_structured
+
+execution:
+  mode: balanced
+  nlp_engine: gliner
+  spacy_fallback: de_core_news_lg
+  gpu: auto
+  cpu_workers: auto
+
+entities:
+  built_in:
+    - IBAN_CODE
+    - EMAIL_ADDRESS
+    - PHONE_NUMBER
+    - PERSON
+    - ORG
+    - LOCATION
+    - DE_TAX_ID
+    - DE_TAX_NUMBER
+    - DE_HANDELSREGISTER
+  custom:
+    - AT_UID
+    - AT_FIRMENBUCH
+    - DE_VAT_ID
+    - BIC
+    - CUSTOMER_NUMBER
+
+phone_regions: [DE, AT]
+
+thresholds:
+  default:
+    auto_accept: 0.92
+    needs_review: 0.55
+  DE_PLZ:
+    enabled: false
+  PERSON:
+    needs_review: 0.35
+
+suspect_check:
+  enabled: true
+  pattern: capitalized_bigram
+  stopwords_file: stopwords/de_sentence_start.txt
+
+protection:
+  level: 2
+  level_locked: false
+  overrides:
+    keep_plain: [LOCATION]
+    force_handle: [CUSTOMER_NUMBER]
+
+mode:
+  default: token_deterministic
+  user_selectable: true
+  allowed: [token_deterministic, placeholder, remove]
+  confirm_irreversible: true
+
+residual_risk_check:
+  enabled: true
+  warn_at_classes: 2
+
+policies:
+  IBAN_CODE: remove
+  DE_TAX_ID: remove
+  PERSON: inherit
+  ORG: inherit
+  EMAIL_ADDRESS: placeholder
+
+review:
+  required_entities: [IBAN_CODE, DE_TAX_ID, PERSON]
+  block_export_on_unreviewed: true
+
+vault:
+  reversible: false
+  persist_mapping: false
+
+export:
+  preserve_original: true
+  write_audit_log: minimized
+  pdf_render_check: true

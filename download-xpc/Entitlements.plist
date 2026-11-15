@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Own sandbox: no access to files of the app or the user. The bytes
+	     go through a pipe that the shell sends along. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Outgoing HTTPS to the hosts from models.lock.json; the service checks
+	     the address and every redirect itself. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

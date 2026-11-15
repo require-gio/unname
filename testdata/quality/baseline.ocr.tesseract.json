@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "baselines": {
+    "tesseract/5.5.2/hardware": {
+      "corpus_version": 1,
+      "measured_at": "2026-11-01T16:24:35+00:00",
+      "host": {
+        "machine": "arm64",
+        "system": "Darwin",
+        "chip": "Apple M1 Max",
+        "memory_gib": 64,
+        "os": "27.2"
+      },
+      "language_correction": false,
+      "metrics": {
+        "pii_word_recall": 0.7233,
+        "word_recall": 0.7158,
+        "cer": 0.2595,
+        "pii_box_coverage": 0.2726,
+        "overreach": 13,
+        "readback_rate": 0.8611,
+        "seconds_per_page_median": 1.255
+      }
+    }
+  }
+}

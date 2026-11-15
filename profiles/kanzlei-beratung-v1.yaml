@@ -1,0 +1,98 @@
+id: kanzlei-beratung-v1
+title: Kanzlei und Beratung (DE/AT)
+version: 1.0.0
+languages: [de, en]
+
+input:
+  allow: [pdf, docx, txt]
+  max_file_mb: 50
+
+master_data:
+  enabled: true
+  persons_file: master-data/personen.csv
+  orgs_file: master-data/firmen.csv
+  min_length: 3
+  refresh: daily
+
+pipeline:
+  ocr: auto
+  ocr_languages: [deu, eng]
+  structured_data: direct
+
+execution:
+  mode: thorough
+  nlp_engine: gliner
+  spacy_fallback: de_core_news_lg
+  gpu: auto
+  cpu_workers: auto
+
+entities:
+  built_in:
+    - PERSON
+    - ORG
+    - LOCATION
+    - EMAIL_ADDRESS
+    - PHONE_NUMBER
+    - IBAN_CODE
+    - DE_TAX_ID
+    - DE_TAX_NUMBER
+  custom:
+    - AT_UID
+    - AT_FIRMENBUCH
+    - DE_VAT_ID
+    - BIC
+    - CUSTOMER_NUMBER
+    - CASE_NUMBER
+
+phone_regions: [DE, AT]
+
+thresholds:
+  default:
+    auto_accept: 0.90
+    needs_review: 0.50
+  PERSON:
+    needs_review: 0.35
+  CASE_NUMBER:
+    needs_review: 0.45
+
+suspect_check:
+  enabled: true
+  pattern: capitalized_bigram
+  stopwords_file: stopwords/de_sentence_start.txt
+
+protection:
+  level: 2
+  level_locked: false
+  overrides:
+    keep_plain: []
+    force_handle: [CASE_NUMBER, CUSTOMER_NUMBER]
+
+mode:
+  default: token_deterministic
+  user_selectable: true
+  allowed: [token_deterministic, surrogate, placeholder, remove]
+  confirm_irreversible: true
+
+residual_risk_check:
+  enabled: true
+  warn_at_classes: 2
+
+policies:
+  PERSON: inherit
+  ORG: inherit
+  LOCATION: inherit
+  CASE_NUMBER: token_deterministic
+  CUSTOMER_NUMBER: token_deterministic
+
+review:
+  required_entities: [PERSON, IBAN_CODE, DE_TAX_ID, CASE_NUMBER]
+  block_export_on_unreviewed: true
+
+vault:
+  reversible: true
+  persist_mapping: true
+
+export:
+  preserve_original: true
+  write_audit_log: minimized
+  pdf_render_check: true

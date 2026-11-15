@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Begrenzter Dateizugriff: nur App-Container und Systemdialog-Freigaben. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+
+	<!-- Kein network.server (Phase Z3): Hülle und geerbter Sidecar sprechen
+	     über einen Unix-Domain-Socket (0600) im Container, es lauscht kein
+	     Port. network.client bleibt, weil WKWebView unter der Sandbox ohne
+	     dieses Recht nicht einmal die Oberfläche aus dem eigenen Schema lädt
+	     (Z0-Probe, 01.11.2026). Der Modell-Download läuft über den
+	     Download-Dienst in Contents/XPCServices (Z4), jede Datei geprüft gegen
+	     die SHA-256 im signierten models.lock.json. Der Sidecar bleibt offline
+	     (HF_HUB_OFFLINE=1). -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

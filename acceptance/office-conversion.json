@@ -1,0 +1,48 @@
+{
+  "measured_at": "2026-11-14T16:19:12+00:00",
+  "machine": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "python": "3.12.14"
+  },
+  "engine": {
+    "name": "office2pdf",
+    "version": "0.10.0"
+  },
+  "runs": 3,
+  "threshold_ms": 2000,
+  "conversions": [
+    {
+      "document": "brief.docx",
+      "docx_bytes": 38334,
+      "pdf_bytes": 32140,
+      "median_ms": 312,
+      "max_ms": 312,
+      "above_threshold": false
+    },
+    {
+      "document": "generated, 10 pages",
+      "docx_bytes": 37536,
+      "pdf_bytes": 39533,
+      "median_ms": 260,
+      "max_ms": 266,
+      "above_threshold": false
+    },
+    {
+      "document": "generated, 50 pages",
+      "docx_bytes": 39393,
+      "pdf_bytes": 105620,
+      "median_ms": 440,
+      "max_ms": 478,
+      "above_threshold": false
+    },
+    {
+      "document": "generated, 150 pages",
+      "docx_bytes": 43754,
+      "pdf_bytes": 271608,
+      "median_ms": 898,
+      "max_ms": 911,
+      "above_threshold": false
+    }
+  ],
+  "cache_needed": false
+}

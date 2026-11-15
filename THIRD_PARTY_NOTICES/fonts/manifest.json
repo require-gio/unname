@@ -1,0 +1,86 @@
+{
+	"schemaVersion": 1,
+	"fonts": [
+		{
+			"family": "Instrument Sans Variable",
+			"package": "@fontsource-variable/instrument-sans",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Instrument-Sans-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource-variable/instrument-sans/files",
+			"bundleNamePattern": "^instrument-sans-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Instrument Serif",
+			"package": "@fontsource/instrument-serif",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Instrument-Serif-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/instrument-serif/files",
+			"bundleNamePattern": "^instrument-serif-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Newsreader Variable",
+			"package": "@fontsource-variable/newsreader",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Newsreader-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource-variable/newsreader/files",
+			"bundleNamePattern": "^newsreader-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "JetBrains Mono Variable",
+			"package": "@fontsource-variable/jetbrains-mono",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "JetBrains-Mono-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource-variable/jetbrains-mono/files",
+			"bundleNamePattern": "^jetbrains-mono-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Carlito",
+			"package": "@fontsource/carlito",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Carlito-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/carlito/files",
+			"bundleNamePattern": "^carlito-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Caladea",
+			"package": "@fontsource/caladea",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Caladea-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/caladea/files",
+			"bundleNamePattern": "^caladea-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Arimo",
+			"package": "@fontsource/arimo",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Arimo-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/arimo/files",
+			"bundleNamePattern": "^arimo-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Tinos",
+			"package": "@fontsource/tinos",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Tinos-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/tinos/files",
+			"bundleNamePattern": "^tinos-.*\\.(?:woff2?|ttf|otf)$"
+		},
+		{
+			"family": "Cousine",
+			"package": "@fontsource/cousine",
+			"packageVersion": "5.3.0",
+			"licenseId": "OFL-1.1",
+			"licenseFile": "Cousine-OFL-1.1.txt",
+			"sourceDirectory": "app/node_modules/@fontsource/cousine/files",
+			"bundleNamePattern": "^cousine-.*\\.(?:woff2?|ttf|otf)$"
+		}
+	]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "required_classification": "real_pseudonymized",
+  "required_runner_engine": "profile",
+  "required_profiles": [
+    "de-at-rechnung-v3",
+    "kanzlei-beratung-v1",
+    "llm-upload-v1"
+  ],
+  "minimum_documents_per_profile": 200,
+  "maximum_recall_drop": 0.005,
+  "require_baseline": true,
+  "conditions": {
+    "with_master_data": {
+      "minimum_recall": 0.95
+    },
+    "without_master_data": {
+      "minimum_recall": 0.85
+    }
+  }
+}

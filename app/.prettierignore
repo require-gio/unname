@@ -1,0 +1,18 @@
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Miscellaneous
+/static/
+/build/
+/src-tauri/target/
+/src-tauri/gen/
+
+# Erzeugt von scripts/models/modelle.py (Hashes und Größen der Modelle).
+/src-tauri/models.lock.json
+
+# Erzeugt von scripts/layout-corpus.py --smoke (echter Sidecar-Code).
+/tests/smoke/fixtures/

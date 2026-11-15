@@ -1,0 +1,222 @@
+{
+  "created_at": "2026-10-24T06:05:56+00:00",
+  "purpose": "Code format after an LLM round trip",
+  "models": [
+    "qwen3:4b-instruct-2507-q4_K_M",
+    "gpt-oss:20b",
+    "gemma4:26b-nvfp4",
+    "qwen3.8:27b-mlx"
+  ],
+  "repeats": 2,
+  "temperature": 0.7,
+  "seed": 2026,
+  "tasks": {
+    "rephrase": "Bitte formuliere diese E-Mail freundlicher und etwas kürzer:",
+    "answer": "Schreibe eine kurze Antwort auf diese Nachricht. Bestätige den Termin und nenne Ansprechpartnerin und Telefonnummer noch einmal.",
+    "translate": "Übersetze ins Englische:",
+    "table": "Erstelle aus diesen Notizen eine Markdown-Tabelle mit den Spalten Name, Firma und Kundennummer:",
+    "summarize": "Fasse diese Nachricht in zwei Sätzen zusammen:"
+  },
+  "formats": {
+    "double_angle": "<<{typ}_{check}>>",
+    "square": "[{typ}_{check}]",
+    "curly": "{{{{{typ}_{check}}}}}",
+    "bare": "{typ}_{check}"
+  },
+  "per_model": {
+    "qwen3:4b-instruct-2507-q4_K_M": {
+      "double_angle": {
+        "sent": 50,
+        "exact": 48,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 1
+      },
+      "square": {
+        "sent": 50,
+        "exact": 32,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 2
+      },
+      "curly": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 5
+      },
+      "bare": {
+        "sent": 50,
+        "exact": 45,
+        "found": 45,
+        "core": 45,
+        "lost": 5,
+        "corrupted": 4
+      }
+    },
+    "gpt-oss:20b": {
+      "double_angle": {
+        "sent": 50,
+        "exact": 46,
+        "found": 46,
+        "core": 46,
+        "lost": 4,
+        "corrupted": 0
+      },
+      "square": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 0
+      },
+      "curly": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 0
+      },
+      "bare": {
+        "sent": 50,
+        "exact": 48,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 0
+      }
+    },
+    "gemma4:26b-nvfp4": {
+      "double_angle": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 0
+      },
+      "square": {
+        "sent": 50,
+        "exact": 32,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 0
+      },
+      "curly": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 0
+      },
+      "bare": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 3
+      }
+    },
+    "qwen3.8:27b-mlx": {
+      "double_angle": {
+        "sent": 50,
+        "exact": 47,
+        "found": 47,
+        "core": 47,
+        "lost": 3,
+        "corrupted": 0
+      },
+      "square": {
+        "sent": 50,
+        "exact": 48,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 0
+      },
+      "curly": {
+        "sent": 50,
+        "exact": 48,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 0
+      },
+      "bare": {
+        "sent": 50,
+        "exact": 48,
+        "found": 48,
+        "core": 48,
+        "lost": 2,
+        "corrupted": 0
+      }
+    }
+  },
+  "total": {
+    "double_angle": {
+      "sent": 200,
+      "exact": 188,
+      "found": 188,
+      "core": 188,
+      "lost": 12,
+      "corrupted": 1
+    },
+    "square": {
+      "sent": 200,
+      "exact": 159,
+      "found": 190,
+      "core": 190,
+      "lost": 10,
+      "corrupted": 2
+    },
+    "curly": {
+      "sent": 200,
+      "exact": 189,
+      "found": 189,
+      "core": 189,
+      "lost": 11,
+      "corrupted": 5
+    },
+    "bare": {
+      "sent": 200,
+      "exact": 188,
+      "found": 188,
+      "core": 188,
+      "lost": 12,
+      "corrupted": 7
+    }
+  },
+  "corrupted_examples": {
+    "double_angle": [
+      "ORGANIZATION_bb049a079"
+    ],
+    "curly": [
+      "ORGANIZATION_751b48c3",
+      "ORGANIZATION_95f19a50",
+      "ORGANIZATION_a60741f6",
+      "ORGANIZATION_f79edc80",
+      "PERSON_dde3a360"
+    ],
+    "bare": [
+      "LOCATION_94a4d69c",
+      "ORGANIZATION_0c83e780",
+      "ORGANIZATION_bf5f82e2",
+      "PERSON_397a7023",
+      "PERSON_b79ecb"
+    ],
+    "square": [
+      "PERSON_6f99a9f1",
+      "PERSON_82e266123"
+    ]
+  },
+  "runtime_seconds": 1171.0
+}

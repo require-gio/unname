@@ -1,0 +1,93 @@
+[project]
+name = "presidio-sidecar"
+version = "0.1.0"
+description = "Lokaler PII-Sidecar: FastAPI + Presidio, gebunden an 127.0.0.1"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "presidio-analyzer>=2.2.363",
+    # Use a custom ONNX runner for name detection (GLiNER) and second opinion,
+    # avoiding gliner, PyTorch and transformers dependencies.
+    "onnxruntime>=1.28",
+    "tokenizers>=0.22",
+    "numpy>=2",
+    # spaCy language models are not on PyPI. The official Explosion release
+    # provides a working fallback in a fresh dev environment; app bundling
+    # will follow later.
+    "de-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/de_core_news_lg-3.8.0/de_core_news_lg-3.8.0-py3-none-any.whl",
+    "presidio-anonymizer>=2.2.363",
+    "presidio-structured>=0.0.8",
+    "presidio-image-redactor>=0.0.60",
+    "pymupdf>=1.24",
+    "python-docx>=1.1",
+    "openpyxl>=3.1",
+    # Directly depend on both packages instead of relying on transitive
+    # dependencies from presidio-image-redactor.
+    "pillow>=10",
+    "pytesseract>=0.3.13",
+    # Import these packages directly; do not rely on transitive
+    # dependencies from Presidio.
+    "cryptography>=43",
+    "phonenumbers>=8.13",
+    "pycountry>=24.6",
+    "python-multipart>=0.0.18",
+    "pydantic>=2.10",
+    "pyyaml>=6.0",
+    "regex>=2024.11",
+    "tldextract>=5.1",
+    "faker>=40.5.1,<41",
+]
+
+[project.scripts]
+presidio-sidecar = "presidio_sidecar.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.28",
+    "pyinstaller>=6.11,<7",
+    "ruff>=0.8",
+    # Language models (Phase J): the app loads them via the shell; in dev
+    # and tests they come from the official release.
+    "de-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl",
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+]
+# Required only for model scripts (ONNX export in `scripts/models/gliner-onnx.py`,
+# second‑opinion training) and the comparison test against gliner
+# (`tests/test_gliner_onnx.py`). Sidecar and package have run without PyTorch
+# since Phase Y1. Install with
+# `uv sync --project sidecar --group modellbau`.
+modellbau = [
+    "gliner==0.2.28",
+    "torch>=2.2",
+    "transformers>=4.51",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/presidio_sidecar"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "vision: gegen den echten Vision-Helfer (nur macOS, `swift build -c release --package-path vision-ocr`)",
+    "gliner: Vergleich des ONNX-Laeufers mit gliner 0.2.28 (`--group modellbau`, Modell unter sidecar/models/gliner-onnx)",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

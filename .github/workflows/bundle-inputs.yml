@@ -1,0 +1,138 @@
+name: Bundle-Eingaben bauen (portables Tesseract)
+
+# Users do not install Tesseract themselves; it is included in the signed package.
+# This workflow builds it from source (scripts/tesseract-portable.py, vcpkg at a fixed commit)
+# and stores it as a GLiNER snapshot `bundle-inputs-<asset>` – the artifact that
+# package-smoke.yml loads via BUNDLE_INPUTS_RUN_ID.
+#
+# macOS uses Apple Vision for OCR; Tesseract is built only for Windows, the macOS artifact
+# contains only the GLiNER snapshot.
+#
+# Afterwards: verify the trust entries from the summary, copy them into
+# sidecar/packaging/bundle-inputs.lock.json (C-2) and set the repository variable
+# BUNDLE_INPUTS_RUN_ID.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bundle-inputs
+  cancel-in-progress: false
+
+env:
+  GLINER_REVISION: f334163a5d1dcdbacf365c4527538e3da3ecfb18
+  TESSDATA_REVISION: e12c65a915945e4c28e237a9b52bc4a8f39a0cec
+
+jobs:
+  tesseract:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64
+            runner: macos-14
+            target: aarch64-apple-darwin
+            asset: macos-arm64
+            tesseract: false
+          - name: Windows x64
+            runner: windows-2025
+            target: x86_64-pc-windows-msvc
+            asset: windows-x64
+            tesseract: true
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Build Tesseract from source and test in isolation
+        if: matrix.tesseract
+        run: >-
+          uv run --no-project --with pillow==12.3.0
+          python scripts/tesseract-portable.py
+          --target "${{ matrix.target }}"
+          --out .bundle-inputs
+          --work "${{ runner.temp }}/tesseract-bau"
+
+      # The smoke test in package-smoke.yml builds the package with models and expects
+      # the snapshot in the same artifact.
+      - name: Load GLiNER snapshot at fixed revision
+        run: |
+          uv run --no-project --with huggingface-hub==1.26.0 python - <<'PY'
+          import shutil
+          from pathlib import Path
+          from huggingface_hub import snapshot_download
+
+          target = Path(".bundle-inputs/gliner")
+          snapshot_download(
+              "urchade/gliner_multi_pii-v1",
+              revision="${{ env.GLINER_REVISION }}",
+              local_dir=target,
+              ignore_patterns=["*.onnx", "*.msgpack", "*.h5"],
+          )
+          # Download metadata with timestamps must not be committed.
+          shutil.rmtree(target / ".cache", ignore_errors=True)
+          PY
+
+      - name: Compute trust entry
+        run: |
+          tesseract=()
+          if [ "${{ matrix.tesseract }}" = "true" ]; then
+            tesseract=(
+              --tesseract-root .bundle-inputs/tesseract
+              --tessdata-dir .bundle-inputs/tesseract/tessdata
+              --tessdata-revision "$TESSDATA_REVISION"
+            )
+          fi
+          python scripts/prepare-sidecar-assets.py \
+            --target "${{ matrix.target }}" \
+            --with-models \
+            "${tesseract[@]}" \
+            --gliner-snapshot .bundle-inputs/gliner \
+            --gliner-revision "$GLINER_REVISION" \
+            --trust-asset-id "${{ matrix.asset }}" \
+            --print-input-trust > "${{ runner.temp }}/trust-${{ matrix.asset }}.json"
+          {
+            echo "### Trust-Eintrag ${{ matrix.asset }}"
+            echo
+            echo "Für \`sidecar/packaging/bundle-inputs.lock.json\` → \`assets\`, Run-ID \`${{ github.run_id }}\`:"
+            echo
+            echo '```json'
+            cat "${{ runner.temp }}/trust-${{ matrix.asset }}.json"
+            echo '```'
+            echo
+            if [ "${{ matrix.tesseract }}" = "true" ]; then
+              echo '```json'
+              cat .bundle-inputs/tesseract/BUILD-INFO.json
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bundle-Eingaben ablegen
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-inputs-${{ matrix.asset }}
+          path: .bundle-inputs
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Trust-Eintrag ablegen
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-trust-${{ matrix.asset }}
+          path: ${{ runner.temp }}/trust-${{ matrix.asset }}.json
+          if-no-files-found: error
+          retention-days: 90

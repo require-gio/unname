@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Node / SvelteKit
+# ---------------------------------------------------------------------------
+node_modules/
+.svelte-kit/
+build/
+dist/
+.vite/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------------------
+# Python / Sidecar
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+sidecar/bundle-assets/
+sidecar/.pyinstaller/
+app/src-tauri/binaries/*
+!app/src-tauri/binaries/.gitkeep
+
+# ---------------------------------------------------------------------------
+# Rust / Tauri
+# ---------------------------------------------------------------------------
+app/src-tauri/target/
+office-engine/target*/
+app/src-tauri/gen/
+**/*.rs.bk
+
+# ---------------------------------------------------------------------------
+# Modelle und Modelldaten (werden beim Bundling geholt, nicht versioniert)
+# ---------------------------------------------------------------------------
+# Anchored: the frontend has source folders called models/ (Tailwind skips ignored paths).
+/sidecar/models/
+/scripts/models/
+*.onnx
+*.safetensors
+*.bin
+*.pt
+*.pth
+tessdata/
+
+# ---------------------------------------------------------------------------
+# Personenbezogene Daten - gehoeren NIEMALS ins Repository
+# ---------------------------------------------------------------------------
+master-data/*
+!master-data/.gitkeep
+!master-data/*.example.csv
+!master-data/README.md
+
+# Token-Tresor, Secrets, Auditlog
+*.secret
+secret.key
+vault.sqlite*
+audit.sqlite*
+
+# Job-Daten und Exporte
+jobs/
+exports/
+diagnose/
+
+# ---------------------------------------------------------------------------
+# Betriebssystem / Werkzeuge
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Portables Tesseract und GLiNER-Snapshot (scripts/tesseract-portable.py)
+/.bundle-inputs/
+
+# Vision-Helfer (macOS)
+vision-ocr/.build/
+vision-ocr/.swiftpm/
+download-xpc/.build/
+download-xpc/.swiftpm/
+
+# Upload-Ordner der Modellspiegel (scripts/models/modelle.py spiegel)
+modelle-upload/

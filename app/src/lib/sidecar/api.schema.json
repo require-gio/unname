@@ -1,0 +1,1994 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "UnnameApiV2",
+	"description": "Typen der Sidecar-API v2 – erzeugt, nicht von Hand bearbeiten.",
+	"type": "object",
+	"properties": {
+		"CatalogResponse": { "$ref": "#/$defs/CatalogResponse" },
+		"CreateEntryRequest": { "$ref": "#/$defs/CreateEntryRequest" },
+		"PatchEntryRequest": { "$ref": "#/$defs/PatchEntryRequest" },
+		"EntryListResponse": { "$ref": "#/$defs/EntryListResponse" },
+		"Entry": { "$ref": "#/$defs/Entry" },
+		"SubmitFilesResponse": { "$ref": "#/$defs/SubmitFilesResponse" },
+		"EntryView": { "$ref": "#/$defs/EntryView" },
+		"RetryFileResponse": { "$ref": "#/$defs/RetryFileResponse" },
+		"RedetectStatusResponse": { "$ref": "#/$defs/RedetectStatusResponse" },
+		"RedetectRequest": { "$ref": "#/$defs/RedetectRequest" },
+		"RedetectResponse": { "$ref": "#/$defs/RedetectResponse" },
+		"StorageResponse": { "$ref": "#/$defs/StorageResponse" },
+		"ProgressResponse": { "$ref": "#/$defs/ProgressResponse" },
+		"OccurrencesRequest": { "$ref": "#/$defs/OccurrencesRequest" },
+		"OccurrencesResponse": { "$ref": "#/$defs/OccurrencesResponse" },
+		"FindingsResponse": { "$ref": "#/$defs/FindingsResponse" },
+		"LayoutPagedResponse": { "$ref": "#/$defs/LayoutPagedResponse" },
+		"LayoutResponse": { "$ref": "#/$defs/LayoutResponse" },
+		"LayoutSheetRowsResponse": { "$ref": "#/$defs/LayoutSheetRowsResponse" },
+		"ApplyRequest": { "$ref": "#/$defs/ApplyRequest" },
+		"ApplyResponse": { "$ref": "#/$defs/ApplyResponse" },
+		"TextMaskRequest": { "$ref": "#/$defs/TextMaskRequest" },
+		"TextMaskResponse": { "$ref": "#/$defs/TextMaskResponse" },
+		"TextCommitRequest": { "$ref": "#/$defs/TextCommitRequest" },
+		"TextCommitResponse": { "$ref": "#/$defs/TextCommitResponse" },
+		"SettingsResponse": { "$ref": "#/$defs/SettingsResponse" },
+		"MaskingSpec": { "$ref": "#/$defs/MaskingSpec" },
+		"SaveEntryRequest": { "$ref": "#/$defs/SaveEntryRequest" },
+		"SaveEntryResponse": { "$ref": "#/$defs/SaveEntryResponse" },
+		"OutputsRequest": { "$ref": "#/$defs/OutputsRequest" },
+		"EntryReportResponse": { "$ref": "#/$defs/EntryReportResponse" },
+		"ReplaceFileResponse": { "$ref": "#/$defs/ReplaceFileResponse" },
+		"RestoreTextRequest": { "$ref": "#/$defs/RestoreTextRequest" },
+		"RestoreTextResponse": { "$ref": "#/$defs/RestoreTextResponse" },
+		"RestoreFileResponse": { "$ref": "#/$defs/RestoreFileResponse" },
+		"VaultStatusResponse": { "$ref": "#/$defs/VaultStatusResponse" },
+		"VaultConfirmRequest": { "$ref": "#/$defs/VaultConfirmRequest" },
+		"VaultBackupRequest": { "$ref": "#/$defs/VaultBackupRequest" },
+		"VaultImportRequest": { "$ref": "#/$defs/VaultImportRequest" },
+		"ListsResponse": { "$ref": "#/$defs/ListsResponse" },
+		"TermsRequest": { "$ref": "#/$defs/TermsRequest" },
+		"TermsResponse": { "$ref": "#/$defs/TermsResponse" },
+		"PatternsRequest": { "$ref": "#/$defs/PatternsRequest" },
+		"PatternsResponse": { "$ref": "#/$defs/PatternsResponse" },
+		"PatternTestRequest": { "$ref": "#/$defs/PatternTestRequest" },
+		"PatternTestResponse": { "$ref": "#/$defs/PatternTestResponse" },
+		"TemplatesResponse": { "$ref": "#/$defs/TemplatesResponse" },
+		"SaveTemplateRequest": { "$ref": "#/$defs/SaveTemplateRequest" },
+		"TemplateExportRequest": { "$ref": "#/$defs/TemplateExportRequest" },
+		"TemplateExportResponse": { "$ref": "#/$defs/TemplateExportResponse" },
+		"TemplateImportRequest": { "$ref": "#/$defs/TemplateImportRequest" },
+		"TemplateApplyResponse": { "$ref": "#/$defs/TemplateApplyResponse" },
+		"ModelsResponse": { "$ref": "#/$defs/ModelsResponse" }
+	},
+	"required": [
+		"ApplyRequest",
+		"ApplyResponse",
+		"CatalogResponse",
+		"CreateEntryRequest",
+		"Entry",
+		"EntryListResponse",
+		"EntryReportResponse",
+		"EntryView",
+		"FindingsResponse",
+		"LayoutPagedResponse",
+		"LayoutResponse",
+		"LayoutSheetRowsResponse",
+		"ListsResponse",
+		"MaskingSpec",
+		"ModelsResponse",
+		"OccurrencesRequest",
+		"OccurrencesResponse",
+		"OutputsRequest",
+		"PatchEntryRequest",
+		"PatternTestRequest",
+		"PatternTestResponse",
+		"PatternsRequest",
+		"PatternsResponse",
+		"ProgressResponse",
+		"RedetectRequest",
+		"RedetectResponse",
+		"RedetectStatusResponse",
+		"ReplaceFileResponse",
+		"RestoreFileResponse",
+		"RestoreTextRequest",
+		"RestoreTextResponse",
+		"RetryFileResponse",
+		"SaveEntryRequest",
+		"SaveEntryResponse",
+		"SaveTemplateRequest",
+		"SettingsResponse",
+		"StorageResponse",
+		"SubmitFilesResponse",
+		"TemplateApplyResponse",
+		"TemplateExportRequest",
+		"TemplateExportResponse",
+		"TemplateImportRequest",
+		"TemplatesResponse",
+		"TermsRequest",
+		"TermsResponse",
+		"TextCommitRequest",
+		"TextCommitResponse",
+		"TextMaskRequest",
+		"TextMaskResponse",
+		"VaultBackupRequest",
+		"VaultConfirmRequest",
+		"VaultImportRequest",
+		"VaultStatusResponse"
+	],
+	"additionalProperties": false,
+	"$defs": {
+		"AppliedFindingOut": {
+			"properties": {
+				"finding_id": { "type": "string" },
+				"kind": { "enum": ["confirmed", "suspicious"], "type": "string" },
+				"entity_type": { "type": "string" },
+				"category": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"source": { "type": "string" },
+				"mode": { "type": "string" },
+				"reversibility": { "enum": ["none", "vault", "key"], "type": "string" },
+				"original_start": { "type": "integer" },
+				"original_end": { "type": "integer" },
+				"output_start": { "type": "integer" },
+				"output_end": { "type": "integer" }
+			},
+			"required": [
+				"finding_id",
+				"kind",
+				"entity_type",
+				"category",
+				"source",
+				"mode",
+				"reversibility",
+				"original_start",
+				"original_end",
+				"output_start",
+				"output_end"
+			],
+			"type": "object",
+			"title": "AppliedFindingOut"
+		},
+		"ApplyRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"review": { "$ref": "#/$defs/ReviewIn" }
+			},
+			"required": ["masking"],
+			"type": "object",
+			"title": "ApplyRequest"
+		},
+		"ApplyResponse": {
+			"properties": {
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"text": { "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"labels": { "$ref": "#/$defs/LabelFacts" },
+				"applied_findings": { "items": { "$ref": "#/$defs/AppliedFindingOut" }, "type": "array" },
+				"applied_by_category": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"residual_risk": { "$ref": "#/$defs/ResidualRiskOut" },
+				"facts": { "additionalProperties": true, "type": "object" },
+				"report": { "additionalProperties": true, "type": "object" },
+				"job_id": { "type": "string" },
+				"entry_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"placements": { "items": { "$ref": "#/$defs/PlacementOut" }, "type": "array" }
+			},
+			"required": [
+				"text",
+				"masking",
+				"labels",
+				"applied_findings",
+				"applied_by_category",
+				"residual_risk",
+				"facts",
+				"report",
+				"job_id",
+				"entry_id"
+			],
+			"type": "object",
+			"title": "ApplyResponse"
+		},
+		"ApplyResult": {
+			"properties": {
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"text": { "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"labels": { "$ref": "#/$defs/LabelFacts" },
+				"applied_findings": { "items": { "$ref": "#/$defs/AppliedFindingOut" }, "type": "array" },
+				"applied_by_category": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"residual_risk": { "$ref": "#/$defs/ResidualRiskOut" },
+				"facts": { "additionalProperties": true, "type": "object" },
+				"report": { "additionalProperties": true, "type": "object" }
+			},
+			"required": [
+				"text",
+				"masking",
+				"labels",
+				"applied_findings",
+				"applied_by_category",
+				"residual_risk",
+				"facts",
+				"report"
+			],
+			"type": "object",
+			"title": "ApplyResult"
+		},
+		"CatalogDefaults": {
+			"properties": {
+				"method": { "enum": ["reversible", "irreversible"], "type": "string" },
+				"style": {
+					"enum": ["codes", "surrogates", "placeholder", "mask", "remove"],
+					"type": "string"
+				},
+				"categories": { "items": { "type": "string" }, "type": "array" }
+			},
+			"required": ["method", "style", "categories"],
+			"type": "object",
+			"title": "CatalogDefaults"
+		},
+		"CatalogResponse": {
+			"properties": {
+				"categories": { "items": { "$ref": "#/$defs/CategoryOut" }, "type": "array" },
+				"styles": {
+					"additionalProperties": { "items": { "type": "string" }, "type": "array" },
+					"type": "object"
+				},
+				"style_modes": { "additionalProperties": { "type": "string" }, "type": "object" },
+				"placeholders": {
+					"additionalProperties": {
+						"additionalProperties": { "type": "string" },
+						"type": "object"
+					},
+					"type": "object"
+				},
+				"defaults": { "$ref": "#/$defs/CatalogDefaults" },
+				"languages": { "items": { "type": "string" }, "type": "array" }
+			},
+			"required": ["categories", "styles", "style_modes", "placeholders", "defaults", "languages"],
+			"type": "object",
+			"title": "CatalogResponse"
+		},
+		"CategoryOut": {
+			"properties": {
+				"id": { "type": "string" },
+				"labels": { "additionalProperties": { "type": "string" }, "type": "object" },
+				"entity_types": { "items": { "type": "string" }, "type": "array" },
+				"level": { "type": "integer" },
+				"default": { "type": "boolean" },
+				"locked": { "type": "boolean" },
+				"circumstances": { "type": "boolean" }
+			},
+			"required": ["id", "labels", "entity_types", "level", "default", "locked", "circumstances"],
+			"type": "object",
+			"title": "CategoryOut"
+		},
+		"ConfiguredNames": {
+			"description": "Master data from configuration (nightly export) – display only.",
+			"properties": {
+				"count": { "type": "integer" },
+				"updated_at": { "anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }] }
+			},
+			"required": ["count", "updated_at"],
+			"type": "object",
+			"title": "ConfiguredNames"
+		},
+		"CreateEntryRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"kind": { "default": "documents", "enum": ["documents", "text"], "type": "string" },
+				"masking": {
+					"anyOf": [{ "$ref": "#/$defs/MaskingSpec" }, { "type": "null" }],
+					"default": null
+				},
+				"title": {
+					"anyOf": [{ "maxLength": 200, "minLength": 1, "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "CreateEntryRequest"
+		},
+		"DecisionState": {
+			"additionalProperties": false,
+			"properties": {
+				"finding_id": { "type": "string" },
+				"action": { "enum": ["accept", "reject"], "type": "string" },
+				"by": { "default": "user", "enum": ["user", "ai-suggestion"], "type": "string" }
+			},
+			"required": ["finding_id", "action"],
+			"type": "object",
+			"title": "DecisionState"
+		},
+		"DocumentLanguageSettings": {
+			"additionalProperties": false,
+			"description": "Document languages and countries.\n\n``languages``: languages to check documents in; the first is the default\nfor sections without a detectable language. ``per_paragraph``:\ndetect language per paragraph instead of once per document.\n``countries``: numeric IDs and IDs of countries to recognize –\nindependent of language. ``placeholders_in_document_language``:\nplaceholders and invented names in the paragraph's language instead of the app's.",
+			"properties": {
+				"languages": {
+					"default": ["de", "en"],
+					"items": { "enum": ["de", "en"], "type": "string" },
+					"minItems": 1,
+					"type": "array"
+				},
+				"per_paragraph": { "default": true, "type": "boolean" },
+				"countries": {
+					"default": ["DE", "AT"],
+					"items": { "enum": ["DE", "AT"], "type": "string" },
+					"minItems": 1,
+					"type": "array"
+				},
+				"placeholders_in_document_language": { "default": true, "type": "boolean" }
+			},
+			"type": "object",
+			"title": "DocumentLanguageSettings"
+		},
+		"Entry": {
+			"additionalProperties": false,
+			"properties": {
+				"id": { "type": "string" },
+				"display_ref": {
+					"anyOf": [
+						{ "pattern": "^[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{6,16}$", "type": "string" },
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"title": { "maxLength": 200, "type": "string" },
+				"title_custom": { "default": false, "type": "boolean" },
+				"kind": { "enum": ["documents", "text"], "type": "string" },
+				"status": {
+					"default": "processing",
+					"enum": ["processing", "review", "saved", "copied", "failed"],
+					"type": "string"
+				},
+				"created_at": { "format": "date-time", "type": "string" },
+				"updated_at": { "format": "date-time", "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"files": { "default": [], "items": { "$ref": "#/$defs/EntryFile" }, "type": "array" },
+				"review": { "additionalProperties": { "$ref": "#/$defs/FileReview" }, "type": "object" },
+				"saved_at": {
+					"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"output_dir": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"irreversible_confirmed": { "default": false, "type": "boolean" },
+				"irreversible_confirmed_for": {
+					"anyOf": [{ "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"restores": { "default": 0, "minimum": 0, "type": "integer" },
+				"restored_at": {
+					"anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"draft_revision": { "default": 0, "minimum": 0, "type": "integer" },
+				"saved_revision": {
+					"anyOf": [{ "minimum": 0, "type": "integer" }, { "type": "null" }],
+					"default": null
+				},
+				"exports": {
+					"default": [],
+					"items": { "$ref": "#/$defs/EntryExport" },
+					"maxItems": 25,
+					"type": "array"
+				}
+			},
+			"required": ["id", "title", "kind", "created_at", "updated_at", "masking"],
+			"type": "object",
+			"title": "Entry"
+		},
+		"EntryExport": {
+			"additionalProperties": false,
+			"description": "A storage in the export history.\n\nTime, masking (method, style, categories), target folder, filenames,\nlabels, and review data – never a value. The last storage is additionally\nstored as before in ``Entry.saved_at``, ``output_dir`` and\n``EntryFile.output``.",
+			"properties": {
+				"id": { "type": "string" },
+				"saved_at": { "format": "date-time", "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"directory": { "type": "string" },
+				"revision": { "default": 0, "minimum": 0, "type": "integer" },
+				"files": { "default": [], "items": { "$ref": "#/$defs/ExportedFile" }, "type": "array" }
+			},
+			"required": ["id", "saved_at", "masking", "directory"],
+			"type": "object",
+			"title": "EntryExport"
+		},
+		"EntryFile": {
+			"additionalProperties": false,
+			"properties": {
+				"id": { "type": "string" },
+				"name": { "type": "string" },
+				"format": { "type": "string" },
+				"size_bytes": { "minimum": 0, "type": "integer" },
+				"pages": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "default": null },
+				"ocr_used": { "default": false, "type": "boolean" },
+				"status": {
+					"default": "queued",
+					"enum": [
+						"queued",
+						"processing",
+						"review",
+						"failed",
+						"cancelled",
+						"expired",
+						"unavailable"
+					],
+					"type": "string"
+				},
+				"error_code": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"counts": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"label": {
+					"anyOf": [
+						{ "enum": ["reversible", "irreversible", "anonymous"], "type": "string" },
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"output_path": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"source_sha256": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"source_changed": { "default": false, "type": "boolean" },
+				"extraction_changed": { "default": false, "type": "boolean" },
+				"output": {
+					"anyOf": [{ "$ref": "#/$defs/FileOutput" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": ["id", "name", "format", "size_bytes"],
+			"type": "object",
+			"title": "EntryFile"
+		},
+		"EntryListResponse": {
+			"properties": {
+				"entries": { "items": { "$ref": "#/$defs/Entry" }, "type": "array" },
+				"count": { "type": "integer" }
+			},
+			"required": ["entries", "count"],
+			"type": "object",
+			"title": "EntryListResponse"
+		},
+		"EntryReportResponse": {
+			"description": "Report of a saved entry: counters and review data, never the content.\n\nThe wording matches the UI surface (``export/pruefbericht.ts``); only factual data is\nprovided here.",
+			"properties": {
+				"entry_id": { "type": "string" },
+				"export_id": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"title": { "type": "string" },
+				"created_at": { "format": "date-time", "type": "string" },
+				"saved_at": { "anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }] },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"protection_level": { "type": "integer" },
+				"app_version": { "type": "string" },
+				"profile_version": { "type": "string" },
+				"files": { "items": { "$ref": "#/$defs/ReportFile" }, "type": "array" },
+				"totals": { "$ref": "#/$defs/FileOutput" }
+			},
+			"required": [
+				"entry_id",
+				"title",
+				"created_at",
+				"saved_at",
+				"masking",
+				"protection_level",
+				"app_version",
+				"profile_version",
+				"files",
+				"totals"
+			],
+			"type": "object",
+			"title": "EntryReportResponse"
+		},
+		"EntryView": {
+			"additionalProperties": false,
+			"description": "View state per entry; offsets count UTF-16 code units (spec §2).",
+			"properties": {
+				"active_file_id": {
+					"anyOf": [{ "maxLength": 64, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"representation": {
+					"default": "page",
+					"enum": ["page", "faithful", "flow", "grid", "text"],
+					"type": "string"
+				},
+				"page": { "default": 1, "minimum": 1, "type": "integer" },
+				"anchor": {
+					"anyOf": [{ "minimum": 0, "type": "integer" }, { "type": "null" }],
+					"default": null
+				},
+				"focused_question_id": {
+					"anyOf": [{ "maxLength": 256, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"preview": {
+					"default": "result",
+					"enum": ["result", "original", "side_by_side"],
+					"type": "string"
+				}
+			},
+			"type": "object",
+			"title": "EntryView"
+		},
+		"ExportedFile": {
+			"additionalProperties": false,
+			"description": "A file from a storage in the export history – like ``FileOutput``, but content-free.",
+			"properties": {
+				"file_id": { "type": "string" },
+				"name": { "type": "string" },
+				"format": { "type": "string" },
+				"path": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"output": { "$ref": "#/$defs/FileOutput" }
+			},
+			"required": ["file_id", "name", "format", "output"],
+			"type": "object",
+			"title": "ExportedFile"
+		},
+		"FileOutput": {
+			"additionalProperties": false,
+			"description": "Data stored when saving a file – counters and check info only.\n\nBasis for the “Saved” view and the check report (spec §5). No value,\nreplacement, or text excerpt.",
+			"properties": {
+				"status": { "enum": ["saved", "unchanged"], "type": "string" },
+				"name": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"format": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"sha256": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"size_bytes": { "default": 0, "minimum": 0, "type": "integer" },
+				"from_scan": { "default": false, "type": "boolean" },
+				"readback_failed": { "default": false, "type": "boolean" },
+				"scan_text_layer": { "default": false, "type": "boolean" },
+				"label": {
+					"anyOf": [
+						{ "enum": ["reversible", "irreversible", "anonymous"], "type": "string" },
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"contains_surrogates": { "default": false, "type": "boolean" },
+				"protection_level": { "default": 1, "maximum": 3, "minimum": 1, "type": "integer" },
+				"masked": { "default": 0, "minimum": 0, "type": "integer" },
+				"masked_by_category": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"masked_by_entity": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"decided_by_user": { "default": 0, "minimum": 0, "type": "integer" },
+				"decided_by_ai": { "default": 0, "minimum": 0, "type": "integer" },
+				"masked_without_decision": { "default": 0, "minimum": 0, "type": "integer" },
+				"kept_here": { "default": 0, "minimum": 0, "type": "integer" },
+				"added_by_hand": { "default": 0, "minimum": 0, "type": "integer" },
+				"adjusted": { "default": 0, "minimum": 0, "type": "integer" },
+				"residual_risk": {
+					"default": "not_run",
+					"enum": ["clear", "warning", "not_run", "failed"],
+					"type": "string"
+				},
+				"residual_classes": { "default": [], "items": { "type": "string" }, "type": "array" },
+				"anonymous_blockers": { "default": [], "items": { "type": "string" }, "type": "array" },
+				"rendered_pages": { "default": 0, "minimum": 0, "type": "integer" },
+				"text_extraction_checked": { "default": false, "type": "boolean" },
+				"verified_targets": { "default": 0, "minimum": 0, "type": "integer" },
+				"audit_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "default": null }
+			},
+			"required": ["status"],
+			"type": "object",
+			"title": "FileOutput"
+		},
+		"FileProgress": {
+			"properties": {
+				"id": { "type": "string" },
+				"name": { "type": "string" },
+				"status": {
+					"enum": [
+						"queued",
+						"processing",
+						"review",
+						"failed",
+						"cancelled",
+						"expired",
+						"unavailable"
+					],
+					"type": "string"
+				},
+				"phase": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"progress": { "type": "integer" },
+				"counts": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"questions": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"error_code": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+			},
+			"required": [
+				"id",
+				"name",
+				"status",
+				"phase",
+				"progress",
+				"counts",
+				"questions",
+				"error_code"
+			],
+			"type": "object",
+			"title": "FileProgress"
+		},
+		"FileReview": {
+			"additionalProperties": false,
+			"properties": {
+				"decisions": {
+					"default": [],
+					"items": { "$ref": "#/$defs/DecisionState" },
+					"type": "array"
+				},
+				"manual": { "default": [], "items": { "$ref": "#/$defs/ManualState" }, "type": "array" }
+			},
+			"type": "object",
+			"title": "FileReview"
+		},
+		"FindingAssessment": {
+			"description": "Assessment by the local AI regarding a question (second opinion).",
+			"properties": {
+				"label": {
+					"enum": ["person", "organization_or_product", "location", "term"],
+					"type": "string"
+				},
+				"confidence": { "type": "number" },
+				"protect": { "type": "number" },
+				"suggestion": {
+					"anyOf": [{ "enum": ["accept", "reject"], "type": "string" }, { "type": "null" }]
+				},
+				"decided": { "type": "boolean" },
+				"model": { "type": "string" }
+			},
+			"required": ["label", "confidence", "protect", "suggestion", "decided", "model"],
+			"type": "object",
+			"title": "FindingAssessment"
+		},
+		"FindingContext": {
+			"properties": {
+				"before": { "type": "string" },
+				"match": { "type": "string" },
+				"after": { "type": "string" }
+			},
+			"required": ["before", "match", "after"],
+			"type": "object",
+			"title": "FindingContext"
+		},
+		"FindingOut": {
+			"properties": {
+				"id": { "type": "string" },
+				"kind": { "enum": ["confirmed", "suspicious"], "type": "string" },
+				"type": { "type": "string" },
+				"category": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"score": { "type": "number" },
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"text": { "type": "string" },
+				"context": { "$ref": "#/$defs/FindingContext" },
+				"source": { "type": "string" },
+				"detector": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"review_required": { "type": "boolean" },
+				"auto_accepted": { "type": "boolean" },
+				"question": { "anyOf": [{ "$ref": "#/$defs/FindingQuestion" }, { "type": "null" }] },
+				"assessment": {
+					"anyOf": [{ "$ref": "#/$defs/FindingAssessment" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": [
+				"id",
+				"kind",
+				"type",
+				"category",
+				"score",
+				"start",
+				"end",
+				"text",
+				"context",
+				"source",
+				"detector",
+				"review_required",
+				"auto_accepted",
+				"question"
+			],
+			"type": "object",
+			"title": "FindingOut"
+		},
+		"FindingQuestion": {
+			"properties": {
+				"kind": { "enum": ["suspicion", "uncertain"], "type": "string" },
+				"n": { "type": "integer" }
+			},
+			"required": ["kind", "n"],
+			"type": "object",
+			"title": "FindingQuestion"
+		},
+		"FindingsCounts": {
+			"properties": {
+				"confirmed": { "type": "integer" },
+				"suspicious": { "type": "integer" },
+				"total": { "type": "integer" },
+				"by_entity": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"by_category": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"questions": { "type": "integer" }
+			},
+			"required": ["confirmed", "suspicious", "total", "by_entity", "by_category", "questions"],
+			"type": "object",
+			"title": "FindingsCounts"
+		},
+		"FindingsResponse": {
+			"properties": {
+				"job_id": { "type": "string" },
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"text": { "type": "string" },
+				"confirmed": { "items": { "$ref": "#/$defs/FindingOut" }, "type": "array" },
+				"suspicious": { "items": { "$ref": "#/$defs/FindingOut" }, "type": "array" },
+				"findings": { "items": { "$ref": "#/$defs/FindingOut" }, "type": "array" },
+				"blocks": { "items": { "$ref": "#/$defs/TextBlock" }, "type": "array" },
+				"counts": { "$ref": "#/$defs/FindingsCounts" }
+			},
+			"required": ["job_id", "text", "confirmed", "suspicious", "findings", "blocks", "counts"],
+			"type": "object",
+			"title": "FindingsResponse"
+		},
+		"GeneralSettings": {
+			"additionalProperties": false,
+			"properties": {
+				"language": { "default": "de", "enum": ["de", "en"], "type": "string" },
+				"theme": { "default": "system", "enum": ["system", "light", "dark"], "type": "string" }
+			},
+			"type": "object",
+			"title": "GeneralSettings"
+		},
+		"HistorySettings": {
+			"additionalProperties": false,
+			"properties": {
+				"retention_days": {
+					"anyOf": [{ "enum": [7, 30, 90], "type": "integer" }, { "type": "null" }],
+					"default": 30
+				}
+			},
+			"type": "object",
+			"title": "HistorySettings"
+		},
+		"LabelFacts": {
+			"properties": {
+				"label": { "enum": ["reversible", "irreversible", "anonymous"], "type": "string" },
+				"contains_surrogates": { "type": "boolean" },
+				"anonymous_blockers": {
+					"items": {
+						"enum": [
+							"not_requested",
+							"modes",
+							"kept_here",
+							"plaintext",
+							"residual_risk",
+							"nothing_masked"
+						],
+						"type": "string"
+					},
+					"type": "array"
+				},
+				"protection_level": { "type": "integer" },
+				"kept_here_count": { "type": "integer" },
+				"masked_without_decision": { "type": "integer" }
+			},
+			"required": [
+				"label",
+				"contains_surrogates",
+				"anonymous_blockers",
+				"protection_level",
+				"kept_here_count",
+				"masked_without_decision"
+			],
+			"type": "object",
+			"title": "LabelFacts"
+		},
+		"LayoutBorders": {
+			"properties": {
+				"top": {
+					"anyOf": [
+						{
+							"maxItems": 2,
+							"minItems": 2,
+							"type": "array",
+							"items": [{ "type": "string" }, { "type": "string" }]
+						},
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"right": {
+					"anyOf": [
+						{
+							"maxItems": 2,
+							"minItems": 2,
+							"type": "array",
+							"items": [{ "type": "string" }, { "type": "string" }]
+						},
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"bottom": {
+					"anyOf": [
+						{
+							"maxItems": 2,
+							"minItems": 2,
+							"type": "array",
+							"items": [{ "type": "string" }, { "type": "string" }]
+						},
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"left": {
+					"anyOf": [
+						{
+							"maxItems": 2,
+							"minItems": 2,
+							"type": "array",
+							"items": [{ "type": "string" }, { "type": "string" }]
+						},
+						{ "type": "null" }
+					],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "LayoutBorders"
+		},
+		"LayoutCellStyle": {
+			"description": "A cell style of the table model; missing fields mean default values.",
+			"properties": {
+				"bold": { "default": false, "type": "boolean" },
+				"italic": { "default": false, "type": "boolean" },
+				"underline": { "default": false, "type": "boolean" },
+				"size": { "anyOf": [{ "type": "number" }, { "type": "null" }], "default": null },
+				"font": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"color": {
+					"anyOf": [{ "pattern": "^#[0-9A-F]{6}$", "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"fill": {
+					"anyOf": [{ "pattern": "^#[0-9A-F]{6}$", "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"align": {
+					"default": "left",
+					"enum": ["left", "center", "right", "justify"],
+					"type": "string"
+				},
+				"valign": { "default": "bottom", "enum": ["top", "middle", "bottom"], "type": "string" },
+				"wrap": { "default": false, "type": "boolean" },
+				"border": {
+					"anyOf": [{ "$ref": "#/$defs/LayoutBorders" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "LayoutCellStyle"
+		},
+		"LayoutHidden": {
+			"properties": {
+				"page": { "type": "integer" },
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"reason": { "enum": ["white", "tiny", "invisible", "outside"], "type": "string" }
+			},
+			"required": ["page", "start", "end", "reason"],
+			"type": "object",
+			"title": "LayoutHidden"
+		},
+		"LayoutPage": {
+			"properties": {
+				"index": { "type": "integer" },
+				"width": { "type": "number" },
+				"height": { "type": "number" },
+				"unit": { "enum": ["pt", "px"], "type": "string" },
+				"source": { "enum": ["text", "ocr"], "type": "string" },
+				"scales": { "items": { "type": "number" }, "type": "array" }
+			},
+			"required": ["index", "width", "height", "unit", "source", "scales"],
+			"type": "object",
+			"title": "LayoutPage"
+		},
+		"LayoutPagedEngine": {
+			"description": "Office engine that generated the pages.",
+			"properties": { "name": { "type": "string" }, "version": { "type": "string" } },
+			"required": ["name", "version"],
+			"type": "object",
+			"title": "LayoutPagedEngine"
+		},
+		"LayoutPagedResponse": {
+			"description": "Page-faithful Word view: pages from the PDF of the Office engine.\n\n``original`` is the cleaned copy, ``result`` is the DOCX that would\nwrite the save for the apply state ``revision``. The words\ncarry ranges in the **source text** – in the result, replacement text lies\nover the range of its position.",
+			"properties": {
+				"job_id": { "type": "string" },
+				"side": { "enum": ["original", "result"], "type": "string" },
+				"revision": { "minimum": 0, "type": "integer" },
+				"engine": { "$ref": "#/$defs/LayoutPagedEngine" },
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"pages": { "items": { "$ref": "#/$defs/LayoutPage" }, "type": "array" },
+				"words": {
+					"items": {
+						"maxItems": 8,
+						"minItems": 8,
+						"type": "array",
+						"items": [
+							{ "type": "integer" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "integer" }
+						]
+					},
+					"type": "array"
+				},
+				"unplaced": {
+					"items": {
+						"maxItems": 2,
+						"minItems": 2,
+						"type": "array",
+						"items": [{ "type": "integer" }, { "type": "integer" }]
+					},
+					"type": "array"
+				}
+			},
+			"required": ["job_id", "side", "revision", "engine"],
+			"type": "object",
+			"title": "LayoutPagedResponse"
+		},
+		"LayoutResponse": {
+			"properties": {
+				"job_id": { "type": "string" },
+				"kind": { "enum": ["pages", "flow", "grid", "text"], "type": "string" },
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"pages": { "items": { "$ref": "#/$defs/LayoutPage" }, "type": "array" },
+				"words": {
+					"items": {
+						"maxItems": 8,
+						"minItems": 8,
+						"type": "array",
+						"items": [
+							{ "type": "integer" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "integer" }
+						]
+					},
+					"type": "array"
+				},
+				"hidden": { "items": { "$ref": "#/$defs/LayoutHidden" }, "type": "array" },
+				"format": {
+					"anyOf": [{ "enum": ["docx", "xlsx", "csv"], "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"document": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"units": { "items": { "$ref": "#/$defs/LayoutUnit" }, "type": "array" },
+				"sheets": { "items": { "$ref": "#/$defs/LayoutSheet" }, "type": "array" },
+				"styles": { "items": { "$ref": "#/$defs/LayoutCellStyle" }, "type": "array" },
+				"paged": { "default": false, "type": "boolean" }
+			},
+			"required": ["job_id", "kind"],
+			"type": "object",
+			"title": "LayoutResponse"
+		},
+		"LayoutSheet": {
+			"description": "A sheet in the grid: dimensions and features; cells are handled separately.",
+			"properties": {
+				"index": { "minimum": 0, "type": "integer" },
+				"name": { "type": "string" },
+				"name_range": {
+					"anyOf": [
+						{
+							"maxItems": 2,
+							"minItems": 2,
+							"type": "array",
+							"items": [{ "type": "integer" }, { "type": "integer" }]
+						},
+						{ "type": "null" }
+					],
+					"default": null
+				},
+				"hidden": { "default": false, "type": "boolean" },
+				"conditional": { "default": false, "type": "boolean" },
+				"rows": { "minimum": 0, "type": "integer" },
+				"cols": { "minimum": 0, "type": "integer" },
+				"frozen": {
+					"default": [0, 0],
+					"maxItems": 2,
+					"minItems": 2,
+					"type": "array",
+					"items": [{ "type": "integer" }, { "type": "integer" }]
+				},
+				"col_widths": { "items": { "type": "integer" }, "type": "array" },
+				"default_row_height": { "default": 20, "type": "integer" },
+				"row_heights": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"hidden_rows": { "items": { "type": "integer" }, "type": "array" },
+				"hidden_cols": { "items": { "type": "integer" }, "type": "array" },
+				"merges": {
+					"items": {
+						"maxItems": 4,
+						"minItems": 4,
+						"type": "array",
+						"items": [
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "integer" }
+						]
+					},
+					"type": "array"
+				},
+				"cells": { "type": "string" }
+			},
+			"required": ["index", "name", "rows", "cols", "cells"],
+			"type": "object",
+			"title": "LayoutSheet"
+		},
+		"LayoutSheetRowsResponse": {
+			"description": "Cells of a sheet for a row range (``GET /jobs/{id}/layout/sheets/{i}``).",
+			"properties": {
+				"job_id": { "type": "string" },
+				"sheet": { "type": "integer" },
+				"first": { "type": "integer" },
+				"last": { "type": "integer" },
+				"cells": {
+					"items": {
+						"maxItems": 6,
+						"minItems": 6,
+						"type": "array",
+						"items": [
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "string" },
+							{ "type": "integer" },
+							{ "type": "integer" },
+							{ "type": "integer" }
+						]
+					},
+					"type": "array"
+				}
+			},
+			"required": ["job_id", "sheet", "first", "last"],
+			"type": "object",
+			"title": "LayoutSheetRowsResponse"
+		},
+		"LayoutUnit": {
+			"description": "A text unit (paragraph) in the flow of a Word document.",
+			"properties": {
+				"anchor": { "type": "string" },
+				"start": { "minimum": 0, "type": "integer" },
+				"end": { "minimum": 0, "type": "integer" }
+			},
+			"required": ["anchor", "start", "end"],
+			"type": "object",
+			"title": "LayoutUnit"
+		},
+		"ListsResponse": {
+			"properties": {
+				"lists": { "items": { "$ref": "#/$defs/NameListOut" }, "type": "array" },
+				"configured": { "anyOf": [{ "$ref": "#/$defs/ConfiguredNames" }, { "type": "null" }] },
+				"created": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null }
+			},
+			"required": ["lists", "configured"],
+			"type": "object",
+			"title": "ListsResponse"
+		},
+		"ManualFindingIn": {
+			"additionalProperties": false,
+			"properties": {
+				"entity_type": { "maxLength": 64, "minLength": 1, "type": "string" },
+				"start": { "minimum": 0, "type": "integer" },
+				"end": { "exclusiveMinimum": 0, "type": "integer" },
+				"corrects_finding_id": {
+					"anyOf": [{ "maxLength": 64, "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": ["entity_type", "start", "end"],
+			"type": "object",
+			"title": "ManualFindingIn"
+		},
+		"ManualState": {
+			"additionalProperties": false,
+			"properties": {
+				"entity_type": { "type": "string" },
+				"start": { "minimum": 0, "type": "integer" },
+				"end": { "exclusiveMinimum": 0, "type": "integer" },
+				"corrects_finding_id": {
+					"anyOf": [{ "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": ["entity_type", "start", "end"],
+			"type": "object",
+			"title": "ManualState"
+		},
+		"MaskingDefaults": {
+			"additionalProperties": false,
+			"description": "Default masking for new entries.\n\nWithout ``anonymize``: derived and never stored.",
+			"properties": {
+				"method": {
+					"default": "reversible",
+					"enum": ["reversible", "irreversible"],
+					"type": "string"
+				},
+				"style": {
+					"default": "codes",
+					"enum": ["codes", "surrogates", "placeholder", "mask", "remove"],
+					"type": "string"
+				},
+				"categories": { "items": { "type": "string" }, "type": "array" }
+			},
+			"type": "object",
+			"title": "MaskingDefaults"
+		},
+		"MaskingSpec": {
+			"additionalProperties": false,
+			"description": "The masking spec – identical in frontend and sidecar.",
+			"properties": {
+				"method": { "enum": ["reversible", "irreversible"], "type": "string" },
+				"style": {
+					"enum": ["codes", "surrogates", "placeholder", "mask", "remove"],
+					"type": "string"
+				},
+				"categories": {
+					"description": "Kategorie-IDs aus GET /catalog; gesperrte sind immer dabei.",
+					"items": { "type": "string" },
+					"type": "array"
+				},
+				"anonymize": {
+					"default": false,
+					"description": "Abgeleitet: irreversibel und alle Kategorien. Wird geprueft, nie geraten.",
+					"type": "boolean"
+				}
+			},
+			"required": ["method", "style", "categories"],
+			"type": "object",
+			"title": "MaskingSpec"
+		},
+		"ModelComponent": {
+			"properties": {
+				"id": { "enum": ["ner", "de", "en", "ocr", "classifier"], "type": "string" },
+				"state": { "enum": ["ready", "missing"], "type": "string" },
+				"source": { "enum": ["download", "bundle", "local", "system"], "type": "string" },
+				"size_bytes": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"languages": { "items": { "type": "string" }, "type": "array" }
+			},
+			"required": ["id", "state", "source", "size_bytes", "languages"],
+			"type": "object",
+			"title": "ModelComponent"
+		},
+		"ModelsResponse": {
+			"properties": {
+				"components": { "items": { "$ref": "#/$defs/ModelComponent" }, "type": "array" },
+				"total_bytes": { "type": "integer" },
+				"setup_required": { "type": "boolean" }
+			},
+			"required": ["components", "total_bytes", "setup_required"],
+			"type": "object",
+			"title": "ModelsResponse"
+		},
+		"NameListOut": {
+			"properties": {
+				"id": { "type": "string" },
+				"kind": { "enum": ["persons", "organizations"], "type": "string" },
+				"source_name": { "type": "string" },
+				"count": { "type": "integer" },
+				"imported_at": { "format": "date-time", "type": "string" },
+				"updated_at": { "format": "date-time", "type": "string" },
+				"stale": { "type": "boolean" }
+			},
+			"required": ["id", "kind", "source_name", "count", "imported_at", "updated_at", "stale"],
+			"type": "object",
+			"title": "NameListOut"
+		},
+		"NamesTermsSettings": {
+			"additionalProperties": false,
+			"properties": {
+				"template": {
+					"anyOf": [{ "maxLength": 120, "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "NamesTermsSettings"
+		},
+		"Occurrence": {
+			"properties": {
+				"file_id": { "type": "string" },
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"covered": { "type": "boolean" }
+			},
+			"required": ["file_id", "start", "end", "covered"],
+			"type": "object",
+			"title": "Occurrence"
+		},
+		"OccurrencesRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "maxLength": 500, "minLength": 2, "type": "string" },
+				"ignore_case": { "default": false, "type": "boolean" }
+			},
+			"required": ["text"],
+			"type": "object",
+			"title": "OccurrencesRequest"
+		},
+		"OccurrencesResponse": {
+			"properties": {
+				"entry_id": { "type": "string" },
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"matches": { "items": { "$ref": "#/$defs/Occurrence" }, "type": "array" },
+				"count": { "type": "integer" },
+				"file_count": { "type": "integer" }
+			},
+			"required": ["entry_id", "matches", "count", "file_count"],
+			"type": "object",
+			"title": "OccurrencesResponse"
+		},
+		"OutputsRequest": {
+			"additionalProperties": false,
+			"description": "The shell reports where it has published. Only now does “saved” apply.",
+			"properties": {
+				"directory": { "maxLength": 4096, "minLength": 1, "type": "string" },
+				"files": { "items": { "$ref": "#/$defs/PublishedFile" }, "maxItems": 200, "type": "array" }
+			},
+			"required": ["directory", "files"],
+			"type": "object",
+			"title": "OutputsRequest"
+		},
+		"PatchEntryRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"title": {
+					"anyOf": [{ "maxLength": 200, "minLength": 1, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"masking": {
+					"anyOf": [{ "$ref": "#/$defs/MaskingSpec" }, { "type": "null" }],
+					"default": null
+				},
+				"status": {
+					"anyOf": [
+						{ "enum": ["processing", "review", "saved", "copied", "failed"], "type": "string" },
+						{ "type": "null" }
+					],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "PatchEntryRequest"
+		},
+		"Pattern": {
+			"additionalProperties": false,
+			"properties": {
+				"id": { "type": "string" },
+				"name": { "maxLength": 80, "minLength": 1, "type": "string" },
+				"regex": { "maxLength": 500, "minLength": 1, "type": "string" },
+				"entity_type": {
+					"default": "CUSTOMER_NUMBER",
+					"enum": ["PERSON", "ORGANIZATION", "LOCATION", "CUSTOMER_NUMBER", "CASE_NUMBER", "OTHER"],
+					"type": "string"
+				},
+				"enabled": { "default": true, "type": "boolean" }
+			},
+			"required": ["id", "name", "regex"],
+			"type": "object",
+			"title": "Pattern"
+		},
+		"PatternIn": {
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"anyOf": [{ "maxLength": 64, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"name": { "maxLength": 80, "minLength": 1, "type": "string" },
+				"regex": { "maxLength": 500, "minLength": 1, "type": "string" },
+				"entity_type": {
+					"default": "CUSTOMER_NUMBER",
+					"enum": ["PERSON", "ORGANIZATION", "LOCATION", "CUSTOMER_NUMBER", "CASE_NUMBER", "OTHER"],
+					"type": "string"
+				},
+				"enabled": { "default": true, "type": "boolean" }
+			},
+			"required": ["name", "regex"],
+			"type": "object",
+			"title": "PatternIn"
+		},
+		"PatternTestHit": {
+			"properties": {
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"entity_type": {
+					"enum": ["PERSON", "ORGANIZATION", "LOCATION", "CUSTOMER_NUMBER", "CASE_NUMBER", "OTHER"],
+					"type": "string"
+				},
+				"source": { "enum": ["pattern", "term", "list"], "type": "string" },
+				"label": { "type": "string" }
+			},
+			"required": ["start", "end", "entity_type", "source", "label"],
+			"type": "object",
+			"title": "PatternTestHit"
+		},
+		"PatternTestRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "maxLength": 4000, "minLength": 1, "type": "string" },
+				"patterns": {
+					"anyOf": [
+						{ "items": { "$ref": "#/$defs/PatternIn" }, "type": "array" },
+						{ "type": "null" }
+					],
+					"default": null
+				}
+			},
+			"required": ["text"],
+			"type": "object",
+			"title": "PatternTestRequest"
+		},
+		"PatternTestResponse": {
+			"properties": {
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"hits": { "items": { "$ref": "#/$defs/PatternTestHit" }, "type": "array" },
+				"count": { "type": "integer" }
+			},
+			"required": ["hits", "count"],
+			"type": "object",
+			"title": "PatternTestResponse"
+		},
+		"PatternsRequest": {
+			"additionalProperties": false,
+			"properties": { "patterns": { "items": { "$ref": "#/$defs/PatternIn" }, "type": "array" } },
+			"type": "object",
+			"title": "PatternsRequest"
+		},
+		"PatternsResponse": {
+			"properties": { "patterns": { "items": { "$ref": "#/$defs/Pattern" }, "type": "array" } },
+			"required": ["patterns"],
+			"type": "object",
+			"title": "PatternsResponse"
+		},
+		"PlacementOut": {
+			"description": "How the export draws a placement.",
+			"properties": {
+				"finding_id": { "type": "string" },
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"page": { "type": "integer" },
+				"cover": {
+					"items": {
+						"maxItems": 4,
+						"minItems": 4,
+						"type": "array",
+						"items": [
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" },
+							{ "type": "number" }
+						]
+					},
+					"type": "array"
+				},
+				"fill": { "enum": ["white", "black"], "type": "string" },
+				"text": { "anyOf": [{ "$ref": "#/$defs/PlacementText" }, { "type": "null" }] }
+			},
+			"required": ["finding_id", "start", "end", "page", "cover", "fill", "text"],
+			"type": "object",
+			"title": "PlacementOut"
+		},
+		"PlacementText": {
+			"description": "Replacement text as the export sets it – anchors in the display space.",
+			"properties": {
+				"value": { "type": "string" },
+				"x": { "type": "number" },
+				"baseline": { "type": "number" },
+				"size": { "type": "number" },
+				"font": { "enum": ["sans", "serif", "mono"], "type": "string" },
+				"bold": { "type": "boolean" },
+				"color": { "type": "string" },
+				"width": { "type": "number" },
+				"rotate": { "type": "integer" }
+			},
+			"required": ["value", "x", "baseline", "size", "font", "bold", "color", "width", "rotate"],
+			"type": "object",
+			"title": "PlacementText"
+		},
+		"ProgressResponse": {
+			"properties": {
+				"entry_id": { "type": "string" },
+				"status": {
+					"enum": ["processing", "review", "saved", "copied", "failed"],
+					"type": "string"
+				},
+				"files": { "items": { "$ref": "#/$defs/FileProgress" }, "type": "array" },
+				"totals": { "additionalProperties": { "type": "integer" }, "type": "object" },
+				"done": { "type": "integer" },
+				"total": { "type": "integer" },
+				"ready": { "type": "boolean" }
+			},
+			"required": ["entry_id", "status", "files", "totals", "done", "total", "ready"],
+			"type": "object",
+			"title": "ProgressResponse"
+		},
+		"PublishedFile": {
+			"additionalProperties": false,
+			"properties": {
+				"file_id": { "maxLength": 128, "minLength": 1, "type": "string" },
+				"path": { "maxLength": 4096, "minLength": 1, "type": "string" }
+			},
+			"required": ["file_id", "path"],
+			"type": "object",
+			"title": "PublishedFile"
+		},
+		"RedetectFile": {
+			"properties": {
+				"file_id": { "type": "string" },
+				"changes": { "items": { "type": "string" }, "type": "array" },
+				"reextract": { "type": "boolean" }
+			},
+			"required": ["file_id", "changes", "reextract"],
+			"type": "object",
+			"title": "RedetectFile"
+		},
+		"RedetectRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"file_ids": {
+					"anyOf": [
+						{ "items": { "type": "string" }, "maxItems": 200, "type": "array" },
+						{ "type": "null" }
+					],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "RedetectRequest"
+		},
+		"RedetectResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"files": { "items": { "$ref": "#/$defs/RedetectFile" }, "type": "array" }
+			},
+			"required": ["entry", "files"],
+			"type": "object",
+			"title": "RedetectResponse"
+		},
+		"RedetectStatusResponse": {
+			"properties": {
+				"entry_id": { "type": "string" },
+				"files": { "items": { "$ref": "#/$defs/RedetectFile" }, "type": "array" }
+			},
+			"required": ["entry_id", "files"],
+			"type": "object",
+			"title": "RedetectStatusResponse"
+		},
+		"RejectedFile": {
+			"properties": {
+				"name": { "type": "string" },
+				"code": { "type": "string" },
+				"message": { "type": "string" }
+			},
+			"required": ["name", "code", "message"],
+			"type": "object",
+			"title": "RejectedFile"
+		},
+		"ReplaceFileResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"file": { "$ref": "#/$defs/EntryFile" },
+				"changed": { "type": "boolean" }
+			},
+			"required": ["entry", "file", "changed"],
+			"type": "object",
+			"title": "ReplaceFileResponse"
+		},
+		"ReportFile": {
+			"properties": {
+				"id": { "type": "string" },
+				"name": { "type": "string" },
+				"format": { "type": "string" },
+				"pages": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"ocr_used": { "type": "boolean" },
+				"source_changed": { "type": "boolean" },
+				"output": { "anyOf": [{ "$ref": "#/$defs/FileOutput" }, { "type": "null" }] }
+			},
+			"required": ["id", "name", "format", "pages", "ocr_used", "source_changed", "output"],
+			"type": "object",
+			"title": "ReportFile"
+		},
+		"ResidualRiskOut": {
+			"properties": {
+				"status": { "enum": ["clear", "warning", "not_run", "failed"], "type": "string" },
+				"heuristic": { "type": "boolean" },
+				"threshold": { "type": "integer" },
+				"classes": { "items": { "type": "string" }, "type": "array" },
+				"counts": { "additionalProperties": { "type": "integer" }, "type": "object" }
+			},
+			"required": ["status", "heuristic", "threshold", "classes", "counts"],
+			"type": "object",
+			"title": "ResidualRiskOut"
+		},
+		"RestoreCounts": {
+			"properties": {
+				"restored": { "type": "integer" },
+				"here": { "type": "integer" },
+				"other": { "type": "integer" },
+				"earlier": { "type": "integer" },
+				"unknown": { "type": "integer" },
+				"unknown_unique": { "type": "integer" },
+				"tolerant": { "type": "integer" }
+			},
+			"required": ["restored", "here", "other", "earlier", "unknown", "unknown_unique", "tolerant"],
+			"type": "object",
+			"title": "RestoreCounts"
+		},
+		"RestoreFileResponse": {
+			"properties": {
+				"source": { "$ref": "#/$defs/RestoreSource" },
+				"output": { "anyOf": [{ "$ref": "#/$defs/RestoredFileOut" }, { "type": "null" }] },
+				"preview": { "$ref": "#/$defs/RestorePreview" },
+				"counts": { "$ref": "#/$defs/RestoreCounts" },
+				"origins": { "items": { "$ref": "#/$defs/RestoreOrigin" }, "type": "array" },
+				"unreplaced": { "type": "integer" }
+			},
+			"required": ["source", "output", "preview", "counts", "origins", "unreplaced"],
+			"type": "object",
+			"title": "RestoreFileResponse"
+		},
+		"RestoreOrigin": {
+			"properties": {
+				"entry_id": { "type": "string" },
+				"title": { "type": "string" },
+				"count": { "type": "integer" }
+			},
+			"required": ["entry_id", "title", "count"],
+			"type": "object",
+			"title": "RestoreOrigin"
+		},
+		"RestorePreview": {
+			"properties": {
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"text": { "type": "string" },
+				"spans": { "items": { "$ref": "#/$defs/RestoredSpan" }, "type": "array" },
+				"truncated": { "type": "boolean" }
+			},
+			"required": ["text", "spans", "truncated"],
+			"type": "object",
+			"title": "RestorePreview"
+		},
+		"RestoreSource": {
+			"properties": {
+				"name": { "type": "string" },
+				"format": { "enum": ["docx", "xlsx", "md", "txt", "csv"], "type": "string" },
+				"size_bytes": { "type": "integer" }
+			},
+			"required": ["name", "format", "size_bytes"],
+			"type": "object",
+			"title": "RestoreSource"
+		},
+		"RestoreTextRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "minLength": 1, "type": "string" },
+				"entry_id": {
+					"anyOf": [{ "maxLength": 128, "minLength": 1, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"surrogates": { "default": false, "type": "boolean" },
+				"record": { "default": false, "type": "boolean" }
+			},
+			"required": ["text"],
+			"type": "object",
+			"title": "RestoreTextRequest"
+		},
+		"RestoreTextResponse": {
+			"properties": {
+				"offset_encoding": { "const": "utf-16", "default": "utf-16", "type": "string" },
+				"text": { "type": "string" },
+				"spans": { "items": { "$ref": "#/$defs/RestoredSpan" }, "type": "array" },
+				"counts": { "$ref": "#/$defs/RestoreCounts" },
+				"origins": { "items": { "$ref": "#/$defs/RestoreOrigin" }, "type": "array" },
+				"recorded": { "type": "boolean" }
+			},
+			"required": ["text", "spans", "counts", "origins", "recorded"],
+			"type": "object",
+			"title": "RestoreTextResponse"
+		},
+		"RestoredFileOut": {
+			"properties": {
+				"id": { "type": "string" },
+				"name": { "type": "string" },
+				"format": { "enum": ["docx", "xlsx", "md", "txt", "csv"], "type": "string" },
+				"sha256": { "type": "string" },
+				"size_bytes": { "type": "integer" }
+			},
+			"required": ["id", "name", "format", "sha256", "size_bytes"],
+			"type": "object",
+			"title": "RestoredFileOut"
+		},
+		"RestoredSpan": {
+			"properties": {
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"status": { "enum": ["restored", "unknown"], "type": "string" },
+				"kind": { "enum": ["code", "surrogate"], "type": "string" },
+				"entity_type": { "type": "string" },
+				"tolerant": { "type": "boolean" },
+				"origin": {
+					"anyOf": [{ "enum": ["here", "entry", "earlier"], "type": "string" }, { "type": "null" }]
+				},
+				"entry_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+			},
+			"required": [
+				"start",
+				"end",
+				"status",
+				"kind",
+				"entity_type",
+				"tolerant",
+				"origin",
+				"entry_id"
+			],
+			"type": "object",
+			"title": "RestoredSpan"
+		},
+		"RetryFileResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"file": { "$ref": "#/$defs/EntryFile" }
+			},
+			"required": ["entry", "file"],
+			"type": "object",
+			"title": "RetryFileResponse"
+		},
+		"ReviewDecisionIn": {
+			"additionalProperties": false,
+			"properties": {
+				"finding_id": { "maxLength": 64, "minLength": 1, "type": "string" },
+				"action": { "enum": ["accept", "reject"], "type": "string" },
+				"by": { "default": "user", "enum": ["user", "ai-suggestion"], "type": "string" }
+			},
+			"required": ["finding_id", "action"],
+			"type": "object",
+			"title": "ReviewDecisionIn"
+		},
+		"ReviewIn": {
+			"additionalProperties": false,
+			"properties": {
+				"decisions": { "items": { "$ref": "#/$defs/ReviewDecisionIn" }, "type": "array" },
+				"manual": { "items": { "$ref": "#/$defs/ManualFindingIn" }, "type": "array" },
+				"unresolved": { "default": "mask", "enum": ["mask", "keep"], "type": "string" }
+			},
+			"type": "object",
+			"title": "ReviewIn"
+		},
+		"SaveEntryRequest": {
+			"additionalProperties": false,
+			"description": "“Save all n files”: the final state shown by the UI.\n\nOpen questions are always masked regardless of ``review.unresolved``.\nIf a file is missing in ``files``, its last recorded review state applies.",
+			"properties": {
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"files": { "items": { "$ref": "#/$defs/SaveFileIn" }, "maxItems": 200, "type": "array" },
+				"confirm_irreversible": { "default": false, "type": "boolean" }
+			},
+			"required": ["masking"],
+			"type": "object",
+			"title": "SaveEntryRequest"
+		},
+		"SaveEntryResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"staging_directory": { "type": "string" },
+				"staged": { "items": { "$ref": "#/$defs/StagedFile" }, "type": "array" },
+				"unchanged": { "items": { "type": "string" }, "type": "array" },
+				"committed_mappings": { "type": "integer" }
+			},
+			"required": ["entry", "staging_directory", "staged", "unchanged", "committed_mappings"],
+			"type": "object",
+			"title": "SaveEntryResponse"
+		},
+		"SaveFileIn": {
+			"additionalProperties": false,
+			"properties": {
+				"file_id": { "maxLength": 128, "minLength": 1, "type": "string" },
+				"review": { "$ref": "#/$defs/ReviewIn" }
+			},
+			"required": ["file_id"],
+			"type": "object",
+			"title": "SaveFileIn"
+		},
+		"SaveTemplateRequest": {
+			"additionalProperties": false,
+			"properties": { "title": { "maxLength": 120, "minLength": 1, "type": "string" } },
+			"required": ["title"],
+			"type": "object",
+			"title": "SaveTemplateRequest"
+		},
+		"SecondOpinionSettings": {
+			"additionalProperties": false,
+			"description": "Second opinion (local classifier).\n\nActive only if the model is installed (``/models``: ``classifier``).",
+			"properties": {
+				"enabled": { "default": true, "type": "boolean" },
+				"policy": {
+					"default": "protect",
+					"enum": ["protect", "protect_and_keep", "suggest"],
+					"type": "string"
+				},
+				"keep_threshold": { "default": 0.95, "maximum": 1, "minimum": 0.5, "type": "number" }
+			},
+			"type": "object",
+			"title": "SecondOpinionSettings"
+		},
+		"SettingsResponse": {
+			"additionalProperties": false,
+			"properties": {
+				"schema_version": { "const": 3, "default": 3, "type": "integer" },
+				"general": { "$ref": "#/$defs/GeneralSettings" },
+				"masking": { "$ref": "#/$defs/MaskingDefaults" },
+				"document_languages": { "$ref": "#/$defs/DocumentLanguageSettings" },
+				"second_opinion": { "$ref": "#/$defs/SecondOpinionSettings" },
+				"names_terms": { "$ref": "#/$defs/NamesTermsSettings" },
+				"history": { "$ref": "#/$defs/HistorySettings" },
+				"vault": { "$ref": "#/$defs/VaultSettings" },
+				"technical": { "$ref": "#/$defs/TechnicalSettings" }
+			},
+			"type": "object",
+			"title": "SettingsResponse"
+		},
+		"StagedFile": {
+			"properties": {
+				"file_id": { "type": "string" },
+				"name": { "type": "string" },
+				"path": { "type": "string" },
+				"sha256": { "type": "string" },
+				"size_bytes": { "type": "integer" }
+			},
+			"required": ["file_id", "name", "path", "sha256", "size_bytes"],
+			"type": "object",
+			"title": "StagedFile"
+		},
+		"StorageEntry": {
+			"properties": {
+				"entry_id": { "type": "string" },
+				"bytes": { "type": "integer" },
+				"delete_at": { "anyOf": [{ "format": "date-time", "type": "string" }, { "type": "null" }] }
+			},
+			"required": ["entry_id", "bytes", "delete_at"],
+			"type": "object",
+			"title": "StorageEntry"
+		},
+		"StorageResponse": {
+			"properties": {
+				"total_bytes": { "type": "integer" },
+				"free_bytes": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"low_space_bytes": { "type": "integer" },
+				"retention_days": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"entries": { "items": { "$ref": "#/$defs/StorageEntry" }, "type": "array" }
+			},
+			"required": ["total_bytes", "free_bytes", "low_space_bytes", "retention_days", "entries"],
+			"type": "object",
+			"title": "StorageResponse"
+		},
+		"SubmitFilesResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"accepted": { "items": { "$ref": "#/$defs/EntryFile" }, "type": "array" },
+				"rejected": { "items": { "$ref": "#/$defs/RejectedFile" }, "type": "array" }
+			},
+			"required": ["entry", "accepted", "rejected"],
+			"type": "object",
+			"title": "SubmitFilesResponse"
+		},
+		"TechnicalSettings": {
+			"additionalProperties": false,
+			"properties": { "developer_mode": { "default": false, "type": "boolean" } },
+			"type": "object",
+			"title": "TechnicalSettings"
+		},
+		"TemplateApplyResponse": {
+			"properties": {
+				"templates": { "$ref": "#/$defs/TemplatesResponse" },
+				"terms": { "items": { "$ref": "#/$defs/Term" }, "type": "array" },
+				"patterns": { "items": { "$ref": "#/$defs/Pattern" }, "type": "array" },
+				"settings": { "$ref": "#/$defs/SettingsResponse" }
+			},
+			"required": ["templates", "terms", "patterns", "settings"],
+			"type": "object",
+			"title": "TemplateApplyResponse"
+		},
+		"TemplateExportRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"anyOf": [{ "maxLength": 64, "type": "string" }, { "type": "null" }],
+					"default": null
+				},
+				"title": {
+					"anyOf": [{ "maxLength": 120, "minLength": 1, "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"type": "object",
+			"title": "TemplateExportRequest"
+		},
+		"TemplateExportResponse": {
+			"properties": { "name": { "type": "string" }, "content": { "type": "string" } },
+			"required": ["name", "content"],
+			"type": "object",
+			"title": "TemplateExportResponse"
+		},
+		"TemplateImportRequest": {
+			"additionalProperties": false,
+			"properties": { "content": { "minLength": 1, "type": "string" } },
+			"required": ["content"],
+			"type": "object",
+			"title": "TemplateImportRequest"
+		},
+		"TemplateOut": {
+			"properties": {
+				"id": { "type": "string" },
+				"title": { "type": "string" },
+				"example": { "type": "boolean" },
+				"terms": { "type": "integer" },
+				"patterns": { "type": "integer" },
+				"masking": { "anyOf": [{ "$ref": "#/$defs/MaskingDefaults" }, { "type": "null" }] }
+			},
+			"required": ["id", "title", "example", "terms", "patterns", "masking"],
+			"type": "object",
+			"title": "TemplateOut"
+		},
+		"TemplatesResponse": {
+			"properties": {
+				"templates": { "items": { "$ref": "#/$defs/TemplateOut" }, "type": "array" },
+				"active": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+			},
+			"required": ["templates", "active"],
+			"type": "object",
+			"title": "TemplatesResponse"
+		},
+		"Term": {
+			"additionalProperties": false,
+			"properties": {
+				"id": { "type": "string" },
+				"text": { "maxLength": 200, "minLength": 3, "type": "string" },
+				"entity_type": {
+					"enum": ["PERSON", "ORGANIZATION", "LOCATION", "CUSTOMER_NUMBER", "CASE_NUMBER", "OTHER"],
+					"type": "string"
+				}
+			},
+			"required": ["id", "text", "entity_type"],
+			"type": "object",
+			"title": "Term"
+		},
+		"TermIn": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "maxLength": 200, "minLength": 1, "type": "string" },
+				"entity_type": {
+					"enum": ["PERSON", "ORGANIZATION", "LOCATION", "CUSTOMER_NUMBER", "CASE_NUMBER", "OTHER"],
+					"type": "string"
+				}
+			},
+			"required": ["text", "entity_type"],
+			"type": "object",
+			"title": "TermIn"
+		},
+		"TermsRequest": {
+			"additionalProperties": false,
+			"properties": { "terms": { "items": { "$ref": "#/$defs/TermIn" }, "type": "array" } },
+			"type": "object",
+			"title": "TermsRequest"
+		},
+		"TermsResponse": {
+			"properties": { "terms": { "items": { "$ref": "#/$defs/Term" }, "type": "array" } },
+			"required": ["terms"],
+			"type": "object",
+			"title": "TermsResponse"
+		},
+		"TextBlock": {
+			"properties": {
+				"index": { "type": "integer" },
+				"start": { "type": "integer" },
+				"end": { "type": "integer" },
+				"kind": { "const": "paragraph", "default": "paragraph", "type": "string" },
+				"page": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+				"language": {
+					"anyOf": [{ "enum": ["de", "en"], "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": ["index", "start", "end", "page"],
+			"type": "object",
+			"title": "TextBlock"
+		},
+		"TextCommitRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "minLength": 1, "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"review": { "$ref": "#/$defs/ReviewIn" },
+				"title": {
+					"anyOf": [{ "maxLength": 200, "minLength": 1, "type": "string" }, { "type": "null" }],
+					"default": null
+				}
+			},
+			"required": ["text", "masking"],
+			"type": "object",
+			"title": "TextCommitRequest"
+		},
+		"TextCommitResponse": {
+			"properties": {
+				"entry": { "$ref": "#/$defs/Entry" },
+				"result": { "$ref": "#/$defs/ApplyResult" },
+				"committed_mappings": { "type": "integer" }
+			},
+			"required": ["entry", "result", "committed_mappings"],
+			"type": "object",
+			"title": "TextCommitResponse"
+		},
+		"TextMaskRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"text": { "minLength": 1, "type": "string" },
+				"masking": { "$ref": "#/$defs/MaskingSpec" },
+				"review": { "$ref": "#/$defs/ReviewIn" }
+			},
+			"required": ["text", "masking"],
+			"type": "object",
+			"title": "TextMaskRequest"
+		},
+		"TextMaskResponse": {
+			"properties": {
+				"findings": { "items": { "$ref": "#/$defs/FindingOut" }, "type": "array" },
+				"counts": { "$ref": "#/$defs/FindingsCounts" },
+				"result": { "$ref": "#/$defs/ApplyResult" }
+			},
+			"required": ["findings", "counts", "result"],
+			"type": "object",
+			"title": "TextMaskResponse"
+		},
+		"VaultBackupRequest": {
+			"additionalProperties": false,
+			"properties": { "password": { "maxLength": 1024, "minLength": 1, "type": "string" } },
+			"required": ["password"],
+			"type": "object",
+			"title": "VaultBackupRequest"
+		},
+		"VaultConfirmRequest": {
+			"additionalProperties": false,
+			"properties": { "confirm": { "default": false, "type": "boolean" } },
+			"type": "object",
+			"title": "VaultConfirmRequest"
+		},
+		"VaultImportRequest": {
+			"additionalProperties": false,
+			"properties": {
+				"password": { "maxLength": 1024, "minLength": 1, "type": "string" },
+				"backup": { "minLength": 1, "type": "string" },
+				"confirm": { "default": false, "type": "boolean" }
+			},
+			"required": ["password", "backup"],
+			"type": "object",
+			"title": "VaultImportRequest"
+		},
+		"VaultSettings": {
+			"additionalProperties": false,
+			"properties": {
+				"unused_retention_months": {
+					"anyOf": [{ "enum": [6, 12], "type": "integer" }, { "type": "null" }],
+					"default": 12
+				}
+			},
+			"type": "object",
+			"title": "VaultSettings"
+		},
+		"VaultStatusResponse": {
+			"properties": {
+				"state": { "enum": ["ready", "unavailable"], "type": "string" },
+				"key_fingerprint": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+				"warning": { "type": "string" },
+				"created_at": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null },
+				"mapping_count": { "type": "integer" },
+				"entry_count": { "default": 0, "type": "integer" },
+				"mapping_persisted": { "default": false, "type": "boolean" }
+			},
+			"required": ["state", "key_fingerprint", "warning", "mapping_count"],
+			"type": "object",
+			"title": "VaultStatusResponse"
+		}
+	}
+}

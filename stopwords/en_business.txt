@@ -1,0 +1,69 @@
+# Englische Geschäftsbegriffe, die NER häufig als Eigennamen fehlklassifiziert
+# (Sprachpaket en, Phase J).
+Invoice
+Order
+Purchase Order
+Delivery
+Shipment
+Customer
+Client
+Supplier
+Vendor
+Contract
+Agreement
+Party
+Parties
+Section
+Clause
+Schedule
+Annex
+Exhibit
+Payment
+Amount
+Total
+Subtotal
+Date
+Place
+Page
+Item
+Quantity
+Credit Note
+Reminder
+# Abteilungs- und Servicebegriffe („Customer Service Team").
+Online
+Shop
+Team
+Service
+Support
+Hotline
+Department
+Sales
+Shipping
+# Jobs and IT – CVs and job ads („AI Software Architect", „Azure Data Factory").
+AI
+IT
+Software
+Hardware
+Data
+Cloud
+DevOps
+Frontend
+Backend
+Full-Stack
+Fullstack
+Full
+Stack
+Engineer
+Engineering
+Developer
+Development
+Architect
+Architecture
+Consultant
+Science
+Scientist
+Systems
+Business
+Components
+Agents
+Skills

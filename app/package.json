@@ -1,0 +1,88 @@
+{
+	"name": "app",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"engines": {
+		"node": ">=22.17"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"build:guarded": "vite build && npm run check:assets",
+		"check:assets": "node ../scripts/check-no-external-assets.mjs build",
+		"gen:api": "node ../scripts/api-types.mjs",
+		"check:api": "node ../scripts/api-types.mjs --check",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:unit": "vitest",
+		"test": "npm run test:unit -- --run",
+		"test:smoke": "npm run build:guarded && playwright test --config playwright.config.ts",
+		"test:smoke:update": "npm run build:guarded && playwright test --config playwright.config.ts --update-snapshots",
+		"lint": "prettier --check . && eslint . && node ../scripts/check-design-tokens.mjs",
+		"format": "prettier --write .",
+		"tauri": "tauri",
+		"tauri:dev": "tauri dev",
+		"tauri:build": "tauri build"
+	},
+	"devDependencies": {
+		"@axe-core/playwright": "4.13.0",
+		"@eslint/js": "^10.0.1",
+		"@floating-ui/dom": "^1.8.0",
+		"@fontsource-variable/instrument-sans": "^5.3.0",
+		"@fontsource-variable/jetbrains-mono": "^5.3.0",
+		"@fontsource-variable/newsreader": "^5.3.0",
+		"@fontsource/arimo": "^5.3.0",
+		"@fontsource/caladea": "^5.3.0",
+		"@fontsource/carlito": "^5.3.0",
+		"@fontsource/cousine": "^5.3.0",
+		"@fontsource/instrument-serif": "^5.3.0",
+		"@fontsource/tinos": "^5.3.0",
+		"@lucide/svelte": "^1.28.0",
+		"@playwright/test": "1.62.1",
+		"@sveltejs/adapter-static": "^4.0.0",
+		"@sveltejs/kit": "^3.1.0",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"@tailwindcss/vite": "^4.3.0",
+		"@tauri-apps/cli": "^2.11.4",
+		"@types/node": "^24",
+		"bits-ui": "^2.18.1",
+		"clsx": "^2.1.1",
+		"eslint": "^10.4.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.19.0",
+		"globals": "^17.6.0",
+		"jsdom": "30.1.2",
+		"json-schema-to-typescript": "16.0.0",
+		"mode-watcher": "^1.1.0",
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^4.1.0",
+		"prettier-plugin-tailwindcss": "^0.8.0",
+		"svelte": "^5.57.1",
+		"svelte-check": "^4.7.5",
+		"svelte-sonner": "^1.1.1",
+		"tailwind-merge": "^3.6.0",
+		"tailwind-variants": "^3.3.0",
+		"tailwindcss": "^4.3.0",
+		"tw-animate-css": "^1.4.0",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.60.1",
+		"vite": "^8.0.16",
+		"vitest": "^4.1.8"
+	},
+	"dependencies": {
+		"@tauri-apps/api": "^2.11.1",
+		"docx-preview": "0.4.1"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.ts",
+		"#lib/*": "./src/lib/*"
+	},
+	"overrides": {
+		"runed": {
+			"@sveltejs/kit": "$@sveltejs/kit"
+		}
+	}
+}

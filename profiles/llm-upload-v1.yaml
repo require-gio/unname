@@ -1,0 +1,104 @@
+id: llm-upload-v1
+title: LLM-Upload
+version: 1.0.0
+languages: [de, en]
+
+input:
+  allow: [txt, md, json, csv]
+  max_file_mb: 10
+
+master_data:
+  enabled: false
+  min_length: 3
+  refresh: manual
+
+pipeline:
+  ocr: never
+  ocr_languages: []
+  structured_data: presidio_structured
+
+execution:
+  mode: thorough
+  nlp_engine: gliner
+  spacy_fallback: de_core_news_lg
+  gpu: auto
+  cpu_workers: auto
+
+entities:
+  built_in:
+    - PERSON
+    - ORG
+    - LOCATION
+    - EMAIL_ADDRESS
+    - PHONE_NUMBER
+    - IBAN_CODE
+    - CREDIT_CARD
+    - CRYPTO
+    - IP_ADDRESS
+    - DE_TAX_ID
+    - DE_TAX_NUMBER
+  custom:
+    - AT_UID
+    - DE_VAT_ID
+    - BIC
+    - CUSTOMER_NUMBER
+    - API_KEY
+    - SECRET
+
+phone_regions: [DE, AT]
+
+thresholds:
+  default:
+    auto_accept: 0.90
+    needs_review: 0.45
+  PERSON:
+    needs_review: 0.35
+  API_KEY:
+    auto_accept: 0.85
+    needs_review: 0.40
+  SECRET:
+    auto_accept: 0.85
+    needs_review: 0.40
+
+suspect_check:
+  enabled: true
+  pattern: capitalized_bigram
+  stopwords_file: stopwords/de_sentence_start.txt
+
+protection:
+  level: 3
+  level_locked: true
+  overrides:
+    keep_plain: []
+    force_handle: [API_KEY, SECRET]
+
+mode:
+  default: token_deterministic
+  user_selectable: true
+  allowed: [token_deterministic, surrogate]
+  confirm_irreversible: true
+
+residual_risk_check:
+  enabled: true
+  warn_at_classes: 2
+
+policies:
+  PERSON: inherit
+  ORG: inherit
+  LOCATION: inherit
+  EMAIL_ADDRESS: inherit
+  API_KEY: inherit
+  SECRET: inherit
+
+review:
+  required_entities: [PERSON, EMAIL_ADDRESS, API_KEY, SECRET]
+  block_export_on_unreviewed: true
+
+vault:
+  reversible: true
+  persist_mapping: true
+
+export:
+  preserve_original: true
+  write_audit_log: minimized
+  pdf_render_check: false

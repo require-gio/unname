@@ -1,0 +1,70 @@
+{
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"bundle": {
+		"targets": ["app", "dmg"],
+		"macOS": {
+			"minimumSystemVersion": "14.0",
+			"hardenedRuntime": true,
+			"entitlements": "Entitlements.plist",
+			"infoPlist": "Info.plist"
+		},
+		"fileAssociations": [
+			{
+				"ext": ["pdf"],
+				"name": "PDF",
+				"contentTypes": ["com.adobe.pdf"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["docx"],
+				"name": "Word",
+				"contentTypes": ["org.openxmlformats.wordprocessingml.document"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["xlsx"],
+				"name": "Excel",
+				"contentTypes": ["org.openxmlformats.spreadsheetml.sheet"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["csv"],
+				"name": "CSV",
+				"contentTypes": ["public.comma-separated-values-text"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["txt"],
+				"name": "Text",
+				"contentTypes": ["public.plain-text"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["md", "markdown"],
+				"name": "Markdown",
+				"contentTypes": ["net.daringfireball.markdown"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["png"],
+				"name": "PNG",
+				"contentTypes": ["public.png"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			},
+			{
+				"ext": ["jpg", "jpeg"],
+				"name": "JPEG",
+				"contentTypes": ["public.jpeg"],
+				"role": "Viewer",
+				"rank": "Alternate"
+			}
+		]
+	}
+}

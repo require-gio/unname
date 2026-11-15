@@ -1,0 +1,224 @@
+/* ---------------------------------------------------------------------------
+ * Tailwind theme from the tokens
+ *
+ * No color values here, only references to `tokens.css`. The default Tailwind palette is disabled (`--color-*: initial`): a class like `bg-red-500` generates no CSS, and `check-design-tokens.mjs` reports it. Colors exist only as tokens.
+ * --------------------------------------------------------------------------- */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+	--color-*: initial;
+
+	/* Fonts — all included, see fonts.css */
+	--font-sans: 'Instrument Sans Variable', 'Segoe UI', system-ui, sans-serif;
+	--font-serif: 'Instrument Serif', Georgia, serif;
+	--font-doc: 'Newsreader Variable', Georgia, serif;
+	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+	/* Placeholder text on the page image: metric like the Base-14 fonts in PDF export – Helvetica, Times, Courier depending on the original font class; the width is adjusted by `textLength` anyway. */
+	--font-replacement: Arimo, Arial, Helvetica, 'Liberation Sans', sans-serif;
+	--font-replacement-serif: Tinos, 'Times New Roman', Times, 'Liberation Serif', serif;
+	--font-replacement-mono: Cousine, 'Courier New', Courier, 'Liberation Mono', monospace;
+
+	/* Font sizes. Own names instead of xs/sm/base, so old views stay unchanged until their replacement. */
+	--text-fine: 11.5px;
+	--text-fine--line-height: 1.35;
+	--text-caption: 12px;
+	--text-caption--line-height: 1.4;
+	--text-meta: 12.5px;
+	--text-meta--line-height: 1.4;
+	--text-label: 13px;
+	--text-label--line-height: 1.45;
+	--text-ui: 13.5px;
+	--text-ui--line-height: 1.45;
+	--text-body: 14px;
+	--text-body--line-height: 1.45;
+	--text-lead: 15px;
+	--text-lead--line-height: 1.5;
+	--text-doc: 16px;
+	--text-doc--line-height: 1.7;
+	--text-title: 18px;
+	--text-title--line-height: 1.3;
+	--text-heading: 22px;
+	--text-heading--line-height: 1.2;
+	--text-display: 44px;
+	--text-display--line-height: 1.02;
+	--text-display-lg: 50px;
+	--text-display-lg--line-height: 1.04;
+
+	/* Radii: Codes · Badges · Buttons · Cards · large Cards */
+	--radius-xs: 4px;
+	--radius-sm: 7px;
+	--radius-md: 10px;
+	--radius-lg: 14px;
+	--radius-xl: 18px;
+
+	/* Control heights: h-control-sm / -md / -lg */
+	--spacing-control-sm: 32px;
+	--spacing-control-md: 40px;
+	--spacing-control-lg: 46px;
+
+	/* Movement in the board “Detection running” — only use with `motion-safe:` */
+	--animate-scan: scan 2.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+	--animate-emerge: emerge 2.8s ease-out infinite;
+	/* The finding is placed on the sheet once detection is finished */
+	--animate-stamp: stamp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+
+	@keyframes scan {
+		0% {
+			top: -12%;
+		}
+		100% {
+			top: 100%;
+		}
+	}
+	@keyframes stamp {
+		0% {
+			opacity: 0;
+			transform: scale(0.55) rotate(-8deg);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1) rotate(0deg);
+		}
+	}
+	@keyframes emerge {
+		0%,
+		20% {
+			opacity: 0;
+			transform: scaleX(0.3);
+		}
+		35%,
+		100% {
+			opacity: 1;
+			transform: scaleX(1);
+		}
+	}
+}
+
+@theme inline {
+	--color-transparent: transparent;
+	--color-current: currentColor;
+
+	--color-bg: var(--bg);
+	--color-side: var(--side);
+	--color-canvas: var(--canvas);
+	--color-surface: var(--surface);
+	--color-surface-2: var(--surface-2);
+	--color-surface-3: var(--surface-3);
+	--color-field: var(--field);
+	--color-chip: var(--chip);
+	--color-chip-strong: var(--chip-strong);
+	--color-overlay: var(--overlay);
+	--color-scrim: var(--scrim);
+	--color-glass: var(--glass);
+
+	--color-ink: var(--ink);
+	--color-ink-2: var(--ink-2);
+	--color-muted: var(--muted);
+	--color-subtle: var(--subtle);
+	--color-faint: var(--faint);
+	--color-on-ink: var(--on-ink);
+	--color-doc-ink: var(--doc-ink);
+	--color-paper: var(--paper);
+	--color-paper-ink: var(--paper-ink);
+
+	--color-line: var(--line);
+	--color-line-soft: var(--line-soft);
+	--color-line-strong: var(--line-strong);
+	--color-line-dash: var(--line-dash);
+
+	--color-accent: var(--accent);
+	--color-on-accent: var(--on-accent);
+	--color-accent-fg: var(--accent-fg);
+	--color-link: var(--link);
+	--color-ring-accent: var(--ring-accent);
+
+	--color-tint-1: var(--tint-1);
+	--color-tint-2: var(--tint-2);
+	--color-tint-3: var(--tint-3);
+	--color-tint-4: var(--tint-4);
+	--color-tint-5: var(--tint-5);
+	--color-tint-ink: var(--tint-ink);
+	--color-tint-ink-strong: var(--tint-ink-strong);
+	--color-tint-line: var(--tint-line);
+	--color-tint-line-soft: var(--tint-line-soft);
+	--color-ai-line: var(--ai-line);
+
+	--color-amber-1: var(--amber-1);
+	--color-amber-2: var(--amber-2);
+	--color-amber-ink: var(--amber-ink);
+	--color-amber-ink-2: var(--amber-ink-2);
+	--color-amber-line: var(--amber-line);
+	--color-amber-strong: var(--amber-strong);
+	--color-on-amber-strong: var(--on-amber-strong);
+	--color-amber-dash: var(--amber-dash);
+
+	--color-green-1: var(--green-1);
+	--color-green-2: var(--green-2);
+	--color-green-ink: var(--green-ink);
+	--color-red-0: var(--red-0);
+	--color-red-1: var(--red-1);
+	--color-red-ink: var(--red-ink);
+	--color-red-line: var(--red-line);
+	--color-red-line-soft: var(--red-line-soft);
+	--color-blue-1: var(--blue-1);
+	--color-blue-2: var(--blue-2);
+	--color-blue-ink: var(--blue-ink);
+
+	--color-bar: var(--bar);
+	--color-bar-ink: var(--bar-ink);
+	--color-bar-muted: var(--bar-muted);
+	--color-bar-accent: var(--bar-accent);
+	--color-bar-on: var(--bar-on);
+	--color-bar-on-ink: var(--bar-on-ink);
+	--color-bar-line: var(--bar-line);
+	--color-bar-raised: var(--bar-raised);
+
+	--color-brand: var(--brand);
+	--color-brand-ink: var(--brand-ink);
+	--color-brand-ring: var(--brand-ring);
+
+	--color-track-off: var(--track-off);
+	--color-skeleton: var(--skeleton);
+	--color-dots: var(--dots);
+}
+
+/* Shadows as separate utilities: values change with mode and are therefore in tokens.css, not in the theme. */
+@utility shadow-1 {
+	box-shadow: var(--shadow-1);
+}
+@utility shadow-raised {
+	box-shadow: var(--shadow-raised);
+}
+@utility shadow-float {
+	box-shadow: var(--shadow-float);
+}
+@utility shadow-card {
+	box-shadow: var(--shadow-card);
+}
+@utility shadow-menu {
+	box-shadow: var(--shadow-menu);
+}
+@utility shadow-pop {
+	box-shadow: var(--shadow-pop);
+}
+@utility shadow-page {
+	box-shadow: var(--shadow-page);
+}
+@utility shadow-bar {
+	box-shadow: var(--shadow-bar);
+}
+@utility shadow-dialog {
+	box-shadow: var(--shadow-dialog);
+}
+@utility shadow-coach {
+	box-shadow: var(--shadow-coach);
+}
+@utility shadow-peek {
+	box-shadow: var(--shadow-peek);
+}
+
+/* The halo around selected cards and the accent border (“0 0 0 4px …”). */
+@utility halo-accent {
+	box-shadow: 0 0 0 4px var(--ring-accent);
+}

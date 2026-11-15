@@ -1,0 +1,72 @@
+/* ---------------------------------------------------------------------------
+ * Grundtypografie, Fokusrahmen, Ziffern, Scrollleisten
+ * --------------------------------------------------------------------------- */
+
+@layer base {
+	* {
+		border-color: var(--line);
+	}
+
+	html {
+		background-color: var(--bg);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+	}
+
+	body {
+		background-color: var(--bg);
+		color: var(--ink);
+		font-family: var(--font-sans);
+		font-size: var(--text-body);
+		line-height: var(--text-body--line-height);
+	}
+
+	/* Inline references. Styled references (buttons, history entries)
+	 * have classes and provide their own color. */
+	a:not([class]) {
+		color: var(--link);
+		text-underline-offset: 2px;
+	}
+	a:not([class]):hover {
+		color: var(--tint-ink-strong);
+	}
+
+	/* A visible focus outline on everything that is operable (spec §9.6). The
+	 * mouse does not show it, the keyboard always does. */
+	:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	/* Table digits: IBANs, tax numbers and confidence values are stacked
+	 * vertically (spec §9.6). */
+	table,
+	[data-tabular] {
+		font-variant-numeric: tabular-nums;
+	}
+
+	::selection {
+		background-color: var(--blue-2);
+		color: var(--doc-ink);
+	}
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--line-dash) transparent;
+	}
+
+	/* Users who selected “reduce motion” in the system get no transitions
+	 * or animations (WCAG 2.3.3). The final state is applied immediately —
+	 * including color changes, otherwise text would briefly be in low contrast. */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		::before,
+		::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+}

@@ -1,0 +1,209 @@
+name: Recall-Quality Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sidecar-core:
+    name: Sidecar – format, lint and full tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      - name: Install dependencies from lockfile
+        working-directory: sidecar
+        run: uv sync --frozen --group dev
+
+      - name: Check Python formatting
+        working-directory: sidecar
+        run: >-
+          uv run --frozen ruff format --check .
+          ../scripts/quality ../scripts/prepare-sidecar-assets.py
+
+      - name: Check Python lint
+        working-directory: sidecar
+        run: >-
+          uv run --frozen ruff check .
+          ../scripts/quality ../scripts/prepare-sidecar-assets.py
+
+      - name: Run full sidecar test suite
+        working-directory: sidecar
+        run: uv run --frozen pytest -q
+
+  rust-core:
+    name: Tauri/Rust – format, clippy and full tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux libraries for Tauri
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+
+      - name: Check Rust formatting
+        working-directory: app/src-tauri
+        run: cargo fmt --check
+
+      - name: Run Rust lint without warnings
+        working-directory: app/src-tauri
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Run full Rust test suite
+        working-directory: app/src-tauri
+        run: cargo test --locked
+
+  synthetic-live-gate:
+    name: Three start profiles – with/without master data
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      - name: Test measurement suite
+        run: python -m unittest discover -s scripts/quality/tests -v
+
+      - name: Validate versioned corpus and integrity
+        run: >-
+          python -m scripts.quality.gate validate
+          --catalog testdata/quality/synthetic-v1/catalog.json
+          --minimum-documents 200
+
+      - name: Install sidecar dependencies reproducibly
+        run: uv sync --project sidecar --frozen --group dev
+
+      - name: Generate live predictions with and without master data
+        run: >-
+          uv run --project sidecar --frozen python -m scripts.quality.run_sidecar
+          --catalog testdata/quality/synthetic-v1/catalog.json
+          --profiles profiles
+          --engine model-free
+          --output "${{ runner.temp }}/quality-predictions"
+
+      - name: Precision, Recall, FP and FN measurement; block recall regression
+        run: >-
+          python -m scripts.quality.gate evaluate
+          --catalog testdata/quality/synthetic-v1/catalog.json
+          --predictions "${{ runner.temp }}/quality-predictions"
+          --config testdata/quality/gates/synthetic.json
+          --baseline testdata/quality/baseline.synthetic.json
+          --output "${{ runner.temp }}/quality-report.json"
+
+      - name: Upload plain measurement report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report-synthetic
+          path: ${{ runner.temp }}/quality-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # OCR with Apple Vision. The
+  # runners are VMs, likely without Neural Engine, and each run starts
+  # cold (≈ 50 s compilation). Therefore we use a dedicated baseline ``ci-vm``
+  # with tolerance; the baseline from real hardware (acceptance/ocr-mac.json) is authoritative.
+  ocr-gate-macos:
+    name: OCR Gate – Apple Vision
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      - name: Build and test Vision helper
+        run: |
+          xcodebuild -version
+          swift build -c release --package-path vision-ocr
+          VISION_OCR_INTEGRATION=1 swift test --package-path vision-ocr
+
+      # The OFL fonts for the corpus are provided by the app's Fontsource packages.
+      - name: Install fonts for the corpus
+        run: npm ci --prefix app --ignore-scripts
+
+      - name: Install sidecar dependencies
+        run: uv sync --project sidecar --frozen --group dev
+
+      - name: Run real detection in sidecar (pytest -m vision)
+        working-directory: sidecar
+        run: uv run --frozen pytest -q -m vision tests/test_ocr_vision.py
+
+      - name: Measure corpus
+        run: >-
+          uv run --project sidecar --frozen python -m scripts.quality.ocr_gate run
+          --engine apple-vision --profile ci-vm
+          --output "${{ runner.temp }}/ocr-report.json"
+
+      - name: Block regression against own baseline
+        run: >-
+          uv run --project sidecar --frozen python -m scripts.quality.ocr_gate check
+          --report "${{ runner.temp }}/ocr-report.json" --allow-missing-baseline
+
+      - name: Upload plain OCR report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ocr-report-macos
+          path: ${{ runner.temp }}/ocr-report.json
+          if-no-files-found: ignore
+          retention-days: 30

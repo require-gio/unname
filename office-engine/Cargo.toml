@@ -1,0 +1,27 @@
+[package]
+name = "unname-office-engine"
+version = "0.1.0"
+description = "unname – DOCX to PDF for the page-faithful review view"
+license = "MIT"
+edition = "2021"
+rust-version = "1.92"
+publish = false
+
+# A crate of its own, not a member of the Tauri workspace: the engine is
+# optional and only lands in the package once the page-faithful spike approves
+# it. Exactly one engine per build, chosen through a feature; versions are
+# pinned.
+[features]
+default = ["office2pdf"]
+office2pdf = ["dep:office2pdf"]
+docxide = ["dep:docxide-pdf"]
+
+[dependencies]
+office2pdf = { version = "=0.10.0", default-features = false, optional = true }
+docxide-pdf = { version = "=0.20.1", default-features = false, optional = true }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

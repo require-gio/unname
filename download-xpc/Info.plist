@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Info.plist of the XPC service org.unname.desktop.download.
+  CFBundleIdentifier is also the name under which the shell addresses the
+  service with xpc_connection_create. build-download-xpc.mjs sets the versions.
+-->
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>de</string>
+	<key>CFBundleExecutable</key>
+	<string>unname-download</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.unname.desktop.download</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>unname-download</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>XPCService</key>
+	<dict>
+		<key>ServiceType</key>
+		<string>Application</string>
+	</dict>
+</dict>
+</plist>

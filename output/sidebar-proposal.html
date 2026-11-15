@@ -1,0 +1,272 @@
+<div id="unname-history-proposal" lang="de" aria-label="Vorschlag für die Navigation und den Verlauf von unname">
+  <style>
+    #unname-history-proposal {
+      --u-bg: light-dark(#ffffff, #1b1c21);
+      --u-side: light-dark(#f5f5f8, #15161a);
+      --u-text: light-dark(#242530, #e9e9f0);
+      --u-muted: light-dark(#636777, #a2a6b5);
+      --u-line: light-dark(#e1e2e9, #31333d);
+      --u-hover: light-dark(#ededf3, #262831);
+      --u-accent: light-dark(#5948d4, #a69aff);
+      --u-active: light-dark(#eeebff, #2a2547);
+      --u-warning: light-dark(#865610, #edc37d);
+      --u-warning-bg: light-dark(#fff3dc, #362c1e);
+      --u-error: light-dark(#ad343b, #f0a0a7);
+      --u-error-bg: light-dark(#fdecee, #3b252a);
+      --u-row-padding: 17px;
+      color: var(--u-text);
+      font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      width: 100%;
+    }
+    #unname-history-proposal * { box-sizing: border-box; }
+    #unname-history-proposal [hidden] { display: none !important; }
+    #unname-history-proposal button, #unname-history-proposal input, #unname-history-proposal select { font: inherit; }
+    #unname-history-proposal button { color: inherit; cursor: var(--cursor-interaction, pointer); }
+    #unname-history-proposal button:focus-visible, #unname-history-proposal input:focus-visible, #unname-history-proposal select:focus-visible { outline: 2px solid var(--u-accent); outline-offset: 3px; }
+    #unname-history-proposal .u-window { display: grid; grid-template-columns: 226px minmax(0, 1fr); min-height: 690px; overflow: hidden; border: 1px solid var(--u-line); border-radius: 12px; background: var(--u-bg); }
+    #unname-history-proposal .u-sidebar { display: flex; flex-direction: column; gap: 24px; padding: 24px 12px 18px; background: var(--u-side); border-right: 1px solid var(--u-line); }
+    #unname-history-proposal .u-brand { display: flex; align-items: center; gap: 10px; padding: 0 10px; font-size: 25px; font-weight: 650; letter-spacing: -.8px; }
+    #unname-history-proposal .u-mark { display: grid; place-items: center; width: 31px; height: 31px; border: 1px solid var(--u-accent); border-radius: 9px; color: var(--u-accent); font-size: 22px; }
+    #unname-history-proposal .u-new { display: flex; align-items: center; gap: 10px; background: var(--u-bg); border: 1px solid var(--u-line); border-radius: 7px; padding: 10px 12px; text-align: left; font-weight: 550; }
+    #unname-history-proposal .u-new:hover { border-color: var(--u-accent); }
+    #unname-history-proposal .u-nav { display: grid; gap: 4px; }
+    #unname-history-proposal .u-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 6px; background: transparent; text-align: left; }
+    #unname-history-proposal .u-nav button:hover, #unname-history-proposal .u-recent button:hover { background: var(--u-hover); }
+    #unname-history-proposal .u-nav button[aria-current="page"] { background: var(--u-active); color: var(--u-accent); font-weight: 550; }
+    #unname-history-proposal .u-count { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; }
+    #unname-history-proposal .u-section-label { padding: 0 12px; margin: 0 0 8px; color: var(--u-muted); font-size: 11px; font-weight: 550; letter-spacing: .07em; text-transform: uppercase; }
+    #unname-history-proposal .u-recent { display: grid; gap: 4px; }
+    #unname-history-proposal .u-recent button { display: grid; gap: 4px; text-align: left; border: 0; border-radius: 6px; background: transparent; padding: 9px 12px; min-width: 0; }
+    #unname-history-proposal .u-recent-title { font-size: 13px; }
+    #unname-history-proposal .u-recent-meta { color: var(--u-muted); font-size: 11px; }
+    #unname-history-proposal .u-side-bottom { margin-top: auto; padding: 20px 12px 0; border-top: 1px solid var(--u-line); color: var(--u-muted); font-size: 12px; }
+    #unname-history-proposal .u-side-bottom span { display: flex; gap: 9px; align-items: center; }
+    #unname-history-proposal .u-main { padding: 30px 28px 24px; min-width: 0; }
+    #unname-history-proposal .u-heading { margin-bottom: 24px; padding-right: 62px; }
+    #unname-history-proposal h2 { margin: 0 0 5px; font-size: 24px; font-weight: 600; letter-spacing: -.5px; }
+    #unname-history-proposal .u-subtitle { color: var(--u-muted); margin: 0; font-size: 13px; }
+    #unname-history-proposal .u-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+    #unname-history-proposal .u-search { display: flex; flex: 1 1 210px; align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid var(--u-line); border-radius: 7px; color: var(--u-muted); min-width: 0; }
+    #unname-history-proposal .u-search input { width: 100%; min-width: 0; background: transparent; border: 0; color: var(--u-text); outline-offset: 5px; }
+    #unname-history-proposal .u-search input::placeholder { color: var(--u-muted); }
+    #unname-history-proposal select { max-width: 100%; border: 1px solid var(--u-line); border-radius: 7px; padding: 9px 10px; background: var(--u-bg); color: var(--u-text); font-size: 12px; }
+    #unname-history-proposal table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+    #unname-history-proposal th { padding: 0 8px 10px; color: var(--u-muted); font-size: 11px; font-weight: 500; border-bottom: 1px solid var(--u-line); }
+    #unname-history-proposal td { padding: var(--u-row-padding) 8px; border-bottom: 1px solid var(--u-line); vertical-align: middle; font-size: 12px; overflow-wrap: anywhere; }
+    #unname-history-proposal th:first-child, #unname-history-proposal td:first-child { padding-left: 0; }
+    #unname-history-proposal th:last-child, #unname-history-proposal td:last-child { padding-right: 0; }
+    #unname-history-proposal th:nth-child(1) { width: 34%; }
+    #unname-history-proposal th:nth-child(2) { width: 23%; }
+    #unname-history-proposal th:nth-child(3) { width: 21%; }
+    #unname-history-proposal th:nth-child(4) { width: 22%; }
+    #unname-history-proposal .u-item { display: flex; gap: 10px; align-items: center; }
+    #unname-history-proposal .u-file-icon { display: flex; align-items: center; justify-content: center; width: 32px; height: 38px; flex-shrink: 0; background: var(--u-side); color: var(--u-muted); border: 1px solid var(--u-line); border-radius: 5px; }
+    #unname-history-proposal .u-title-button { display: block; text-align: left; border: 0; padding: 0; background: transparent; font-size: 14px; font-weight: 550; overflow-wrap: anywhere; }
+    #unname-history-proposal .u-title-button:hover { color: var(--u-accent); text-decoration: underline; text-underline-offset: 3px; }
+    #unname-history-proposal .u-secondary { display: block; color: var(--u-muted); margin-top: 3px; font-size: 11px; }
+    #unname-history-proposal .u-ref { letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+    #unname-history-proposal .u-status { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: 11px; padding: 4px 7px; border-radius: 5px; color: var(--u-muted); background: var(--u-side); }
+    #unname-history-proposal .u-status[data-tone="review"] { color: var(--u-warning); background: var(--u-warning-bg); }
+    #unname-history-proposal .u-status[data-tone="failed"] { color: var(--u-error); background: var(--u-error-bg); }
+    #unname-history-proposal .u-footer { display: flex; align-items: center; gap: 8px; color: var(--u-muted); font-size: 11px; margin-top: 18px; }
+    #unname-history-proposal .u-empty { padding: 35px 0; color: var(--u-muted); }
+    #unname-history-proposal .u-back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 24px; padding: 0; border: 0; color: var(--u-accent); background: transparent; }
+    #unname-history-proposal .u-detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 25px; flex-wrap: wrap; }
+    #unname-history-proposal .u-detail-header h2 { margin-bottom: 5px; }
+    #unname-history-proposal dl { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: 16px 20px; margin: 0 0 32px; border-top: 1px solid var(--u-line); padding-top: 22px; }
+    #unname-history-proposal dt { color: var(--u-muted); }
+    #unname-history-proposal dd { margin: 0; overflow-wrap: anywhere; }
+    #unname-history-proposal .u-rename { display: grid; gap: 8px; padding-top: 22px; border-top: 1px solid var(--u-line); }
+    #unname-history-proposal .u-rename-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    #unname-history-proposal .u-rename input { flex: 1 1 180px; min-width: 0; padding: 9px 11px; background: var(--u-bg); color: var(--u-text); border: 1px solid var(--u-line); border-radius: 6px; }
+    #unname-history-proposal .u-save { border: 1px solid var(--u-line); border-radius: 6px; padding: 9px 12px; background: var(--u-hover); }
+    #unname-history-proposal .u-start { display: grid; place-items: center; padding: 60px 20px; border: 1px dashed var(--u-line); border-radius: 10px; gap: 12px; text-align: center; }
+    #unname-history-proposal .u-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    #unname-history-proposal svg { flex-shrink: 0; width: 16px; height: 16px; }
+    @media (max-width: 850px) {
+      #unname-history-proposal .u-window { grid-template-columns: 194px minmax(0, 1fr); }
+      #unname-history-proposal .u-main { padding: 26px 18px; }
+      #unname-history-proposal .u-file-icon { display: none; }
+    }
+    @media (max-width: 640px) {
+      #unname-history-proposal .u-window { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+      #unname-history-proposal .u-sidebar { padding: 18px 14px; gap: 14px; border-right: 0; border-bottom: 1px solid var(--u-line); }
+      #unname-history-proposal .u-brand { font-size: 22px; }
+      #unname-history-proposal .u-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; }
+      #unname-history-proposal .u-nav button { flex-direction: column; gap: 3px; padding: 8px 2px; font-size: 11px; }
+      #unname-history-proposal .u-nav button svg { display: none; }
+      #unname-history-proposal .u-count { margin: 0; }
+      #unname-history-proposal .u-recent-section, #unname-history-proposal .u-side-bottom { display: none; }
+      #unname-history-proposal .u-main { padding: 22px 16px; }
+      #unname-history-proposal .u-heading { padding-right: 0; }
+      #unname-history-proposal thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+      #unname-history-proposal tbody, #unname-history-proposal table { display: block; }
+      #unname-history-proposal tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--u-line); }
+      #unname-history-proposal td { display: block; padding: 0 !important; border: 0; }
+      #unname-history-proposal td:nth-child(1) { grid-column: 1; grid-row: 1; }
+      #unname-history-proposal td:nth-child(4) { grid-column: 2; grid-row: 1; text-align: right; }
+      #unname-history-proposal td:nth-child(3) { text-align: right; }
+      #unname-history-proposal input { font-size: 16px; }
+    }
+    @media (pointer: coarse) {
+      #unname-history-proposal button, #unname-history-proposal input, #unname-history-proposal select { min-height: 44px; }
+    }
+  </style>
+  <div class="u-window">
+    <aside class="u-sidebar" aria-label="Hauptnavigation">
+      <div class="u-brand"><span class="u-mark" aria-hidden="true">u</span> unname</div>
+      <button type="button" class="u-new" data-new><i data-lucide="plus" aria-hidden="true"></i>Neu</button>
+      <nav class="u-nav" aria-label="Einträge">
+        <button type="button" data-scope="open"><i data-lucide="inbox" aria-hidden="true"></i>Offen<span class="u-count" data-count="open">4</span></button>
+        <button type="button" data-scope="done"><i data-lucide="circle-check" aria-hidden="true"></i>Abgeschlossen<span class="u-count" data-count="done">4</span></button>
+        <button type="button" data-scope="all" aria-current="page"><i data-lucide="layers" aria-hidden="true"></i>Alle Einträge<span class="u-count" data-count="all">8</span></button>
+      </nav>
+      <section class="u-recent-section" aria-label="Zuletzt erstellt">
+        <h3 class="u-section-label">Zuletzt erstellt</h3>
+        <div class="u-recent" data-recent></div>
+      </section>
+      <div class="u-side-bottom"><span><i data-lucide="hard-drive" aria-hidden="true"></i>Lokal auf diesem Gerät</span></div>
+    </aside>
+    <main class="u-main">
+      <section data-list>
+        <div class="u-heading"><h2 data-heading>Alle Einträge</h2><p class="u-subtitle" data-subtitle>8 Einträge</p></div>
+        <div class="u-toolbar">
+          <label class="u-search"><i data-lucide="search" aria-hidden="true"></i><span class="u-sr">Nach Titel, Referenz, Datum oder Format suchen</span><input type="search" data-search placeholder="Titel, Referenz, Datum …" autocomplete="off"></label>
+          <select data-sort aria-label="Sortierung"><option value="new">Neueste zuerst</option><option value="old">Älteste zuerst</option></select>
+        </div>
+        <table aria-label="Verlauf"><thead><tr><th scope="col">Eintrag</th><th scope="col">Umfang</th><th scope="col">Erstellt</th><th scope="col">Stand</th></tr></thead><tbody data-rows></tbody></table>
+        <p class="u-empty" data-empty hidden>Keine passenden Einträge.</p>
+        <div class="u-footer"><i data-lucide="list-filter" aria-hidden="true"></i><span data-result-count aria-live="polite">8 Einträge</span></div>
+      </section>
+      <section data-detail hidden aria-label="Eintragsdetails">
+        <button type="button" class="u-back" data-back><i data-lucide="arrow-left" aria-hidden="true"></i><span data-back-label>Alle Einträge</span></button>
+        <div data-detail-content></div>
+        <div class="u-rename" data-rename>
+          <label for="unname-proposal-name">Eigener Titel</label>
+          <div class="u-rename-row"><input id="unname-proposal-name" data-name maxlength="80" required autocomplete="off"><button type="button" class="u-save" data-save-name>Umbenennen</button></div>
+          <span class="u-secondary">Zum Beispiel „Projekt A · November“</span>
+          <span class="u-sr" data-renamed aria-live="polite"></span>
+        </div>
+      </section>
+      <section data-start hidden aria-label="Neuer Eintrag">
+        <div class="u-heading"><h2>Neu</h2></div>
+        <div class="u-start"><i data-lucide="files" aria-hidden="true"></i><strong>Dokumente oder Text bearbeiten</strong><span class="u-subtitle">Bestehender Einstieg in einen neuen Eintrag</span><button type="button" class="u-save" data-return>Zum Verlauf</button></div>
+      </section>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('unname-history-proposal');
+      const entries = [
+        { id: 'K7M2', title: 'Dokument', format: 'PDF-Scan', pages: '2 Seiten', day: 'Heute', date: '14.11.2026', time: '14:32', status: 'Gespeichert', tone: 'done', method: 'Irreversibel maskiert', icon: 'scan-line' },
+        { id: 'N4P8', title: 'Dokument', format: 'PDF-Scan', pages: '8 Seiten', day: 'Heute', date: '14.11.2026', time: '10:18', status: 'Gespeichert', tone: 'done', method: 'Irreversibel maskiert', icon: 'scan-line' },
+        { id: 'R6W3', title: 'Dokument', format: 'DOCX', pages: '3 Seiten', day: 'Gestern', date: '13.11.2026', time: '16:05', status: 'Gespeichert', tone: 'done', method: 'Reversibel maskiert', icon: 'file-text' },
+        { id: 'V9H5', title: 'Dokument', format: 'PDF', pages: '12 Seiten', day: '12.11.', date: '12.11.2026', time: '11:42', status: 'Geändert', tone: 'review', method: 'Reversibel maskiert (letzte Speicherung)', icon: 'file-text' },
+        { id: 'D3F7', title: 'Dokument', format: 'PDF', pages: '4 Seiten', day: '12.11.', date: '12.11.2026', time: '09:21', status: 'Zu prüfen', tone: 'review', method: 'Noch nicht gespeichert', icon: 'file-text' },
+        { id: 'C8T2', title: 'Vertrag', format: 'DOCX', pages: '6 Seiten', day: '11.11.', date: '11.11.2026', time: '15:10', status: 'Zu prüfen', tone: 'review', method: 'Noch nicht gespeichert', icon: 'file-text' },
+        { id: 'L2B9', title: 'Lieferschein', format: 'PDF', pages: '1 Seite', day: '11.11.', date: '11.11.2026', time: '10:08', status: 'Fehler', tone: 'failed', method: 'Noch nicht gespeichert', icon: 'file-warning' },
+        { id: 'P5X4', title: 'E-Mail-Entwurf', format: 'Text', pages: 'Kopierter Text', day: '10.11.', date: '10.11.2026', time: '13:44', status: 'Kopiert', tone: 'done', method: 'Reversibel maskiert', icon: 'text' }
+      ];
+      const names = { all: 'Alle Einträge', open: 'Offen', done: 'Abgeschlossen' };
+      const state = { scope: 'all', query: '', sort: 'new', selected: null, compact: false, recent: true };
+      const find = selector => root.querySelector(selector);
+      const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const icons = () => { if (globalThis.lucide) globalThis.lucide.createIcons({ attrs: { width: 16, height: 16 } }); };
+      function remember() {
+        if (window.openai?.setWidgetState) window.openai.setWidgetState({
+          modelContent: { proposal: 'Navigation with a full history view', view: state.scope, compact: state.compact },
+          privateContent: { scope: state.scope, query: state.query, sort: state.sort, selected: state.selected, compact: state.compact, recent: state.recent, titles: Object.fromEntries(entries.map(entry => [entry.id, entry.title])) }
+        }).catch(() => {});
+      }
+      function renderRecent() {
+        find('[data-recent]').innerHTML = entries.slice(0, 3).map(entry => `<button type="button" data-entry="${entry.id}"><span class="u-recent-title">${escape(entry.title)} · ${entry.time}</span><span class="u-recent-meta">${entry.day} · ${entry.format} · #${entry.id}</span></button>`).join('');
+      }
+      function renderList() {
+        const query = state.query.trim().toLocaleLowerCase('de');
+        let filtered = entries.filter(entry => (state.scope === 'all' || (state.scope === 'done' ? entry.tone === 'done' : entry.tone !== 'done')) && `${entry.title} ${entry.id} ${entry.date} ${entry.day} ${entry.time} ${entry.format}`.toLocaleLowerCase('de').includes(query));
+        if (state.sort === 'old') filtered = filtered.slice().reverse();
+        find('[data-heading]').textContent = names[state.scope];
+        const total = entries.filter(entry => state.scope === 'all' || (state.scope === 'done' ? entry.tone === 'done' : entry.tone !== 'done')).length;
+        find('[data-subtitle]').textContent = `${total} Einträge`;
+        find('[data-result-count]').textContent = query ? `${filtered.length} von ${total} Einträgen` : `${total} Einträge`;
+        root.querySelectorAll('[data-scope]').forEach(button => {
+          if (button.dataset.scope === state.scope) button.setAttribute('aria-current', 'page');
+          else button.removeAttribute('aria-current');
+        });
+        find('[data-rows]').innerHTML = filtered.map(entry => `<tr><td><div class="u-item"><span class="u-file-icon"><i data-lucide="${entry.icon}" aria-hidden="true"></i></span><div><button type="button" class="u-title-button" data-entry="${entry.id}" aria-label="${escape(entry.title)}, Referenz ${entry.id} öffnen">${escape(entry.title)}</button><span class="u-secondary u-ref">#${entry.id}</span></div></div></td><td>${entry.format}<span class="u-secondary">${entry.pages}</span></td><td>${entry.day}<span class="u-secondary">${entry.time}</span></td><td><span class="u-status" data-tone="${entry.tone}">${entry.status === 'Fehler' ? '<i data-lucide="circle-alert" aria-hidden="true"></i>' : ''}${entry.status}</span></td></tr>`).join('');
+        find('[data-empty]').hidden = filtered.length > 0;
+        renderRecent();
+        icons();
+      }
+      function showList() {
+        state.selected = null;
+        find('[data-list]').hidden = false;
+        find('[data-detail]').hidden = true;
+        find('[data-start]').hidden = true;
+        renderList();
+      }
+      function showDetail(id) {
+        const entry = entries.find(item => item.id === id);
+        if (!entry) return;
+        state.selected = id;
+        find('[data-list]').hidden = true;
+        find('[data-start]').hidden = true;
+        find('[data-detail]').hidden = false;
+        find('[data-back-label]').textContent = names[state.scope];
+        find('[data-detail-content]').innerHTML = `<div class="u-detail-header"><div><h2>${escape(entry.title)}</h2><span class="u-secondary u-ref">#${entry.id}</span></div><span class="u-status" data-tone="${entry.tone}">${entry.status}</span></div><dl><dt>Erstellt</dt><dd>${entry.date} · ${entry.time}</dd><dt>Umfang</dt><dd>${entry.format} · ${entry.pages}</dd><dt>Stand</dt><dd>${entry.status === 'Geändert' ? 'Seit dem Speichern geändert' : entry.status}</dd><dt>Maskierung</dt><dd>${entry.method}</dd></dl>`;
+        find('[data-name]').value = entry.title;
+        icons();
+      }
+      root.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button || !root.contains(button)) return;
+        if (button.dataset.scope) { state.scope = button.dataset.scope; showList(); remember(); }
+        if (button.dataset.entry) { showDetail(button.dataset.entry); remember(); find('[data-back]').focus(); }
+        if (button.hasAttribute('data-back') || button.hasAttribute('data-return')) { showList(); remember(); find('[data-search]').focus(); }
+        if (button.hasAttribute('data-new')) {
+          find('[data-list]').hidden = true; find('[data-detail]').hidden = true; find('[data-start]').hidden = false;
+          root.querySelectorAll('[data-scope]').forEach(item => item.removeAttribute('aria-current'));
+        }
+      });
+      find('[data-search]').addEventListener('input', event => { state.query = event.target.value; renderList(); remember(); });
+      find('[data-sort]').addEventListener('change', event => { state.sort = event.target.value; renderList(); remember(); });
+      function renameEntry() {
+        const title = find('[data-name]').value.trim();
+        const entry = entries.find(item => item.id === state.selected);
+        if (!title || !entry) return;
+        entry.title = title; showDetail(entry.id); renderRecent(); remember();
+        find('[data-renamed]').textContent = 'Titel geändert.';
+      }
+      find('[data-save-name]').addEventListener('click', renameEntry);
+      find('[data-name]').addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); renameEntry(); }
+      });
+      function applyDesign() {
+        root.style.setProperty('--u-row-padding', state.compact ? '10px' : '17px');
+        find('.u-recent-section').hidden = !state.recent;
+      }
+      function restore(snapshot) {
+        const saved = snapshot?.privateContent;
+        if (!saved || typeof saved !== 'object') return;
+        if (Object.hasOwn(names, saved.scope)) state.scope = saved.scope;
+        if (typeof saved.query === 'string') state.query = saved.query;
+        if (saved.sort === 'old' || saved.sort === 'new') state.sort = saved.sort;
+        if (typeof saved.compact === 'boolean') state.compact = saved.compact;
+        if (typeof saved.recent === 'boolean') state.recent = saved.recent;
+        for (const entry of entries) if (typeof saved.titles?.[entry.id] === 'string') entry.title = saved.titles[entry.id].slice(0, 80);
+        find('[data-search]').value = state.query;
+        find('[data-sort]').value = state.sort;
+        showList();
+        if (entries.some(entry => entry.id === saved.selected)) showDetail(saved.selected);
+        applyDesign();
+      }
+      renderList(); applyDesign(); restore(window.openai?.widgetState);
+      window.addEventListener('openai:set_globals', event => { if (event.detail?.globals?.widgetState) restore(event.detail.globals.widgetState); });
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({ container: root, onChange: () => { applyDesign(); remember(); } });
+        tweak.addToggle(state, 'compact', { label: 'Compact history rows' });
+        tweak.addToggle(state, 'recent', { label: 'Recent items in sidebar' });
+      }
+    })();
+  </script>
+</div>

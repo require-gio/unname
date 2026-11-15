@@ -1,0 +1,230 @@
+/* ---------------------------------------------------------------------------
+ * Design Tokens — the only place with color values
+ *
+ * Source are the `.app`/`.app.dark` variables from the mockup "unname – UI concept"
+ * (72 per mode), merged into semantic tokens. Components use only these names,
+ * via the utilities from `theme.css` (bg-surface, text-muted, border-line …). Hex
+ * values outside this file cause `scripts/check-design-tokens.mjs` to fail.
+ *
+ * Dark mode only swaps tokens: `.dark` sets `mode-watcher` on <html>. Therefore
+ * components contain no `dark:`.
+ *
+ * Guideline 5: Color indicates what is happening. Indigo (`tint-*`, `accent`)
+ * means "will be masked", amber (`amber-*`) means "needs a decision".
+ * The type of a place is shown as text beside it, never by color alone.
+ *
+ * Contrast: `src/lib/theme/kontrast.spec.ts` calculates each text/surface pair
+ * from `kontrast-paare.ts` in both modes (text 4.5:1, graphics 3:1).
+ * --------------------------------------------------------------------------- */
+
+:root {
+	color-scheme: light;
+
+	/* Surfaces */
+	--bg: #f4f5f7;
+	--side: #eef0f3;
+	--canvas: #e9ecf0;
+	--surface: #ffffff;
+	/* Paper under a page image: stays light in both modes because the image is the original. Annotations on it use tokens that remain strong in dark mode (`accent`, `on-amber-strong`, `bar`). */
+	--paper: #ffffff;
+	/* Blackening in the result: same near-black in both modes — no new color value, the paper stays light. */
+	--paper-ink: var(--bar-on-ink);
+	--surface-2: #fafafb;
+	--surface-3: #f6f6f9;
+	--field: #fcfcfd;
+	--chip: #f1f2f5;
+	--chip-strong: #e3e6eb;
+	--overlay: rgb(233 236 240 / 0.88);
+	--scrim: rgb(17 19 24 / 0.42);
+	--glass: rgb(255 255 255 / 0.86);
+
+	/* Text. `faint` only for graphics and disabled state — text at least `subtle`. */
+	--ink: #111318;
+	--ink-2: #23262e;
+	--muted: #4a5160;
+	--subtle: #5f6674;
+	--faint: #7a8090;
+	--on-ink: #ffffff;
+	--doc-ink: #1a1d23;
+
+	/* Linien */
+	--line: #e3e6eb;
+	--line-soft: #eef0f3;
+	--line-strong: #d5d9e0;
+	--line-dash: #bcc2cc;
+
+	/* Akzent */
+	--accent: #4338ca;
+	--on-accent: #ffffff;
+	--accent-fg: #4338ca;
+	--link: #3730a3;
+	--ring-accent: rgb(67 56 202 / 0.1);
+
+	/* Masked (Indigo) */
+	--tint-1: #f5f5fe;
+	--tint-2: #eeeffe;
+	--tint-3: #e8e9fd;
+	--tint-4: #e3e5fc;
+	--tint-5: #dcddfb;
+	--tint-ink: #312e81;
+	--tint-ink-strong: #1e1b4b;
+	--tint-line: #a5a8f0;
+	--tint-line-soft: #d6d8f8;
+	--ai-line: #6366f1;
+
+	/* Decision (Bernstein) */
+	--amber-1: #fff6e3;
+	--amber-2: #fff2d6;
+	--amber-ink: #5c3300;
+	--amber-ink-2: #8a4b00;
+	--amber-line: #efd39a;
+	--amber-strong: #f2b648;
+	--on-amber-strong: #3d2300;
+	--amber-dash: #d18a1a;
+
+	/* Status and file types (PDF red, DOC blue, image green) */
+	--green-1: #edf7ef;
+	--green-2: #c8ebdd;
+	--green-ink: #1f6b36;
+	--red-0: #fffafa;
+	--red-1: #fdecec;
+	--red-ink: #9f1d1d;
+	--red-line: #e8b4b4;
+	--red-line-soft: #f1cfcf;
+	--blue-1: #e8eefc;
+	--blue-2: #b9d7fd;
+	--blue-ink: #1d3f9f;
+
+	/* Bar — stays dark in both modes */
+	--bar: #16182b;
+	--bar-ink: #ffffff;
+	--bar-muted: #c9cbda;
+	--bar-accent: #b9bcf8;
+	--bar-on: #ffffff;
+	--bar-on-ink: #111318;
+	--bar-line: rgb(255 255 255 / 0.16);
+	--bar-raised: rgb(255 255 255 / 0.1);
+
+	/* Marke (Logo D2 · Verblassen) */
+	--brand: #1f1846;
+	--brand-ink: #f1eeff;
+	--brand-ring: transparent;
+
+	/* Sonstiges */
+	--track-off: #c9ced8;
+	--skeleton: #e6e8ee;
+	--dots: #dcdfe6;
+
+	/* Shadow */
+	--shadow-1: 0 1px 2px rgb(16 24 40 / 0.06);
+	--shadow-raised: 0 1px 3px rgb(16 24 40 / 0.1);
+	--shadow-float: 0 4px 14px rgb(16 24 40 / 0.08);
+	--shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 20px rgb(138 75 0 / 0.05);
+	--shadow-menu: 0 18px 40px rgb(16 24 40 / 0.2);
+	--shadow-pop: 0 24px 56px rgb(16 24 40 / 0.24);
+	--shadow-page: 0 1px 2px rgb(16 24 40 / 0.06), 0 16px 40px rgb(16 24 40 / 0.1);
+	--shadow-bar: 0 14px 34px rgb(16 24 40 / 0.3);
+	--shadow-dialog: 0 2px 6px rgb(16 24 40 / 0.1), 0 40px 100px rgb(16 24 40 / 0.35);
+	--shadow-coach: 0 14px 30px rgb(49 46 129 / 0.3);
+	--shadow-peek: 0 6px 16px rgb(16 24 40 / 0.25);
+}
+
+.dark {
+	color-scheme: dark;
+
+	--bg: #0f1115;
+	--side: #15181e;
+	--canvas: #0b0d11;
+	--surface: #1b1e26;
+	--paper: #ffffff;
+	--paper-ink: var(--bar-on-ink);
+	--surface-2: #171a21;
+	--surface-3: #1e2129;
+	--field: #14171d;
+	--chip: #262a35;
+	--chip-strong: #2e3340;
+	--overlay: rgb(11 13 17 / 0.85);
+	--scrim: rgb(0 0 0 / 0.55);
+	--glass: rgb(27 30 38 / 0.86);
+
+	--ink: #eceef3;
+	--ink-2: #d4d7de;
+	--muted: #a3a9b6;
+	--subtle: #949baa;
+	--faint: #7a8190;
+	--on-ink: #111318;
+	--doc-ink: #e3e5ea;
+
+	--line: #2a2e39;
+	--line-soft: #22262e;
+	--line-strong: #363b48;
+	--line-dash: #474d5b;
+
+	--accent: #5b52e6;
+	--on-accent: #ffffff;
+	--accent-fg: #a9acff;
+	--link: #aeb1ff;
+	--ring-accent: rgb(91 82 230 / 0.22);
+
+	--tint-1: #1b1c32;
+	--tint-2: #222448;
+	--tint-3: #272a5c;
+	--tint-4: #2c2f66;
+	--tint-5: #30336e;
+	--tint-ink: #c9cbff;
+	--tint-ink-strong: #dcddff;
+	--tint-line: #4f53b0;
+	--tint-line-soft: #383b76;
+	--ai-line: #8b8ff5;
+
+	--amber-1: #2b2210;
+	--amber-2: #3a2c10;
+	--amber-ink: #f5c878;
+	--amber-ink-2: #f2b648;
+	--amber-line: #5a4318;
+	--amber-strong: #e3a83f;
+	--on-amber-strong: #2b1800;
+	--amber-dash: #b98232;
+
+	--green-1: #16301e;
+	--green-2: #1c3b2f;
+	--green-ink: #8fd3a5;
+	--red-0: #241616;
+	--red-1: #3a1b1b;
+	--red-ink: #f5a3a3;
+	--red-line: #6b2b2b;
+	--red-line-soft: #4a2222;
+	--blue-1: #1a2440;
+	--blue-2: #1f3558;
+	--blue-ink: #9db7f5;
+
+	--bar: #2a2d42;
+	--bar-ink: #f4f5fa;
+	--bar-muted: #c9cbda;
+	--bar-accent: #b9bcf8;
+	--bar-on: #e9eaf2;
+	--bar-on-ink: #111318;
+	--bar-line: rgb(255 255 255 / 0.16);
+	--bar-raised: rgb(255 255 255 / 0.1);
+
+	/* The tile (#1F1846) barely stands out from the dark sidebar. The shape is carried by the pixels; the ring further outlines the tile. */
+	--brand: #1f1846;
+	--brand-ink: #f1eeff;
+	--brand-ring: #4a4290;
+
+	--track-off: #3e4452;
+	--skeleton: #2c303c;
+	--dots: #252934;
+
+	--shadow-1: 0 1px 2px rgb(0 0 0 / 0.3);
+	--shadow-raised: 0 1px 3px rgb(0 0 0 / 0.35);
+	--shadow-float: 0 4px 14px rgb(0 0 0 / 0.3);
+	--shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 20px rgb(0 0 0 / 0.2);
+	--shadow-menu: 0 18px 40px rgb(0 0 0 / 0.45);
+	--shadow-pop: 0 24px 56px rgb(0 0 0 / 0.5);
+	--shadow-page: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.35);
+	--shadow-bar: 0 14px 34px rgb(0 0 0 / 0.5);
+	--shadow-dialog: 0 2px 6px rgb(0 0 0 / 0.3), 0 40px 100px rgb(0 0 0 / 0.6);
+	--shadow-coach: 0 14px 30px rgb(0 0 0 / 0.45);
+	--shadow-peek: 0 6px 16px rgb(0 0 0 / 0.4);
+}

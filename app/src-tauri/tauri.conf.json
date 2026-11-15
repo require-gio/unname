@@ -1,0 +1,55 @@
+{
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"productName": "unname",
+	"mainBinaryName": "unname",
+	"version": "0.1.0",
+	"identifier": "org.unname.desktop",
+	"build": {
+		"frontendDist": "../build",
+		"devUrl": "http://127.0.0.1:1420",
+		"beforeDevCommand": "npm run dev",
+		"beforeBuildCommand": "npm run build:guarded"
+	},
+	"app": {
+		"windows": [
+			{
+				"title": "unname",
+				"width": 1280,
+				"height": 860,
+				"minWidth": 960,
+				"minHeight": 640,
+				"resizable": true,
+				"fullscreen": false
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' unname-api: http://unname-api.localhost",
+			"assetProtocol": {
+				"enable": false
+			}
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"publisher": "unname contributors",
+		"license": "MIT",
+		"licenseFile": "../../LICENSE",
+		"resources": {
+			"../../THIRD_PARTY_NOTICES": "THIRD_PARTY_NOTICES"
+		},
+		"category": "Business",
+		"shortDescription": "Persönliche Daten aus Dokumenten entfernen – lokal",
+		"longDescription": "Erkennt und maskiert personenbezogene Daten in Dokumenten und Texten. Verarbeitung ausschließlich auf diesem Gerät.",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"android": {
+			"debugApplicationIdSuffix": ".debug"
+		}
+	}
+}

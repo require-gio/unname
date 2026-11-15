@@ -1,0 +1,7 @@
+/* Only imports. Values are in the files under src/lib/styles/ */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './lib/styles/fonts.css';
+@import './lib/styles/tokens.css';
+@import './lib/styles/theme.css';
+@import './lib/styles/base.css';

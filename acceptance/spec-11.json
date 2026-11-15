@@ -1,0 +1,1003 @@
+{
+  "schema_version": 2,
+  "specification": "4.0",
+  "source": "docs/spec.md#11-acceptance-criteria",
+  "replaces": "acceptance/phase-7.2.json (spec 3.0, old UI; in the git history)",
+  "evidence_inventory_on": "2026-10-26",
+  "status_meaning": {
+    "automated": "The criterion is covered by executable repository tests; node scripts/check.mjs runs them.",
+    "external_evidence_required": "Repository tests check the preconditions; the required real-world evidence must be produced and archived outside the repository."
+  },
+  "commands": {
+    "all": "node scripts/check.mjs",
+    "sidecar": "cd sidecar && uv run pytest -q",
+    "frontend_unit": "cd app && npm test",
+    "frontend_smoke": "cd app && npm run test:smoke",
+    "tauri": "cd app/src-tauri && cargo test",
+    "performance": "uv run --project sidecar python scripts/performance.py"
+  },
+  "criteria": [
+    {
+      "id": "A-01",
+      "criterion": "Name lists are demonstrably effective: \"Tischlerei Josef Brandstetter e.U.\" is recognized with the list; without the list the case may fail.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_acceptance_gaps.py",
+          "test": "test_master_data_reference_case_is_confirmed_only_with_registry",
+          "asserts": "A/B run without and with the encrypted registry; only with the list is the company name confirmed as ORGANIZATION from master_data."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_analysis.py",
+          "test": "test_milestone_one_runs_all_four_stages",
+          "asserts": "The four-stage pipeline runs through with stage 0 (name lists)."
+        }
+      ]
+    },
+    {
+      "id": "A-02",
+      "criterion": "The suspicion check is demonstrably effective: an unknown, unusual name appears as a question card \"Looks like a name – but was not recognized\".",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_detection_suspicion.py",
+          "test": "test_reference_case_wachtelhuber_brothers_detected_as_suspicion",
+          "asserts": "\"Gebrüder Wachtelhuber\" is reported as a suspicion."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Milestone E: review three files, switch, keep, add, decide",
+          "asserts": "The question is numbered in the document and shown as a card in the questions panel."
+        }
+      ]
+    },
+    {
+      "id": "A-03",
+      "criterion": "Fail-closed: if processing fails, no partial result is saved; dropping files and saving are blocked, reading stays possible.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_jobs.py",
+          "test": "test_findings_before_completion_not_output",
+          "asserts": "The sidecar returns no findings before the terminal success state."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_jobs.py",
+          "test": "test_restart_removes_ttl_old_job_root_of_hard_stopped_sidecar",
+          "asserts": "After a hard crash no stale job folder remains."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_analyze_api.py",
+          "test": "test_ner_total_failure_returns_no_findings_and_reflects_no_text",
+          "asserts": "A total NER failure ends as a failed file without findings and without document text in responses or diagnostics."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_analyze_api.py",
+          "test": "test_broken_configured_initial_import_locks_health_and_submitting",
+          "asserts": "An unusable name list blocks health and submitting."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Fail-Closed: a glitch during review blocks saving but not viewing",
+          "asserts": "If the shell reports the outage, saving is blocked; the document stays readable, and saving works again after recovery."
+        }
+      ]
+    },
+    {
+      "id": "A-04",
+      "criterion": "All styles work: codes, invented names, placeholders, blackout and remove produce the expected result for the same document; encryption and one-way checksum stay in the sidecar and are tested.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_documents_v2.py",
+          "test": "test_each_ui_style_returns_its_result",
+          "asserts": "Each of the five styles replaces name and IBAN as expected, carries the matching label, and the saved file matches the apply result."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_processing.py",
+          "test": "test_all_seven_modes_provide_operator_and_reversibility_facts",
+          "asserts": "All seven processing modes return the operator and the reversibility facts."
+        }
+      ]
+    },
+    {
+      "id": "A-05",
+      "criterion": "PDF \"remove\": after saving, the removed text can neither be selected nor extracted; the render check is mandatory.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_acceptance_gaps.py",
+          "test": "test_pdf_remove_leaves_no_markable_or_extractable_text",
+          "asserts": "True redaction with no selectable or extractable remainder."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_documents_v2.py",
+          "test": "test_pdf_remove_is_real_redaction_with_render_and_text_check",
+          "asserts": "Through /entries/{id}/save: text, words and raw characters without the name, render and text checks ran, original unchanged."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_save_api.py",
+          "test": "test_pdf_saved_only_after_render_check",
+          "asserts": "A PDF is only provided after the render check has passed."
+        }
+      ]
+    },
+    {
+      "id": "A-06",
+      "criterion": "Categories take effect: the default leaves places and dates in place, \"all categories\" replaces them too; account, ID and access data are always included; \"Keep only here\" and \"Keep all …\" work per occurrence and per entry respectively.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_documents_v2.py",
+          "test": "test_categories_extend_to_location_and_date",
+          "asserts": "Account data only, the default and all categories give the three expected versions."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_masking_spec_always_includes_locked_category",
+          "asserts": "The locked category is always part of the masking spec."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_processing.py",
+          "test": "test_overrides_work_both_ways_and_must_be_disjoint",
+          "asserts": "Overrides work in both directions."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/review/review.spec.ts",
+          "test": "never shows locked categories as whole (E3)",
+          "asserts": "The code menu offers no \"Keep all …\" for locked categories."
+        }
+      ]
+    },
+    {
+      "id": "A-07",
+      "criterion": "The \"Anonymous\" label only with \"Anonymize\", without a plaintext exception and without a residual-risk finding; never otherwise. The protected term appears in no Svelte file.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_anonymize_with_residual_risk_is_not_anonymous",
+          "asserts": "With residual risk it stays \"Irreversible\", without a finding \"Anonymous\", with \"Keep only here\" it is \"Irreversible\" again (blocker kept_here)."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_masking_spec_validates_style_method_and_anonymize",
+          "asserts": "anonymize holds exactly for the irreversible method with all categories."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/sidecar/result-policy.spec.ts",
+          "test": "does not appear as a literal in any Svelte file",
+          "asserts": "No Svelte markup contains the stem of the protected term."
+        }
+      ]
+    },
+    {
+      "id": "A-08",
+      "criterion": "Residual-risk check: a document that still contains a date, an amount and an article number after redaction triggers the notice.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_acceptance_gaps.py",
+          "test": "test_residual_risk_after_redaction_finds_date_amount_and_article_number",
+          "asserts": "The real processor reports three classes and blocks the strongest label."
+        }
+      ]
+    },
+    {
+      "id": "A-09",
+      "criterion": "Round trip: mask text, send the codes through a language model, resolve the answer again – lossless, tolerant of changed spelling and also after a restart.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_documents_v2.py",
+          "test": "test_code_round_trip_survives_llm_change_and_restart",
+          "asserts": "Saved codes are resolved from a changed spelling after a restart of the sidecar."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_restore.py",
+          "test": "test_tolerant_spellings_lead_to_exactly_one_code",
+          "asserts": "Missing brackets, upper/lower case and spaces still lead unambiguously to one code."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_saving_a_scan_keeps_a_pdf_and_round_trips_through_its_text_layer",
+          "asserts": "A saved scan: the text layer survives restoring with changed spelling and missing brackets, every value comes back, no code is unknown. With a real local model: scripts/llm-round-trip.py --scan."
+        }
+      ]
+    },
+    {
+      "id": "A-10",
+      "criterion": "Three manual interventions (keep an occurrence, add, correct a boundary) end up in the result, in the review report and in the audit log.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_review_manual.py",
+          "test": "test_all_three_interventions_end_in_result_and_audit_log",
+          "asserts": "Apply and save through API v2; audit with REJECT, ADJUST_SPAN and ADD_MANUAL."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/review/review.spec.ts",
+          "test": "corrects boundaries as a pair and then restores them",
+          "asserts": "The UI sends a boundary correction as a pair of keep and add."
+        }
+      ]
+    },
+    {
+      "id": "A-11",
+      "criterion": "Negative tests for every custom recognizer: no pattern reaches across word boundaries.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_acceptance_gaps.py",
+          "test": "test_word_boundary_matrix_covers_every_custom_recognizer",
+          "asserts": "The matrix names every custom type."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_acceptance_gaps.py",
+          "test": "test_every_custom_recognizer_respects_both_word_boundaries",
+          "asserts": "No custom recognizer swallows neighboring words."
+        }
+      ]
+    },
+    {
+      "id": "A-12",
+      "criterion": "No outgoing network traffic from the running native app – except during a model download the user started, and then only to the hosts of the source.",
+      "status": "external_evidence_required",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/offline.spec.ts",
+          "test": "starts without external network and matches visual reference",
+          "asserts": "The UI loads only from the local origin and stays stable offline."
+        },
+        {
+          "kind": "ci_gate",
+          "layer": "build",
+          "runner": "node",
+          "file": "scripts/check-no-external-assets.mjs",
+          "test": "Keine externen Laufzeitressourcen",
+          "asserts": "The bundle is checked for external sources."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "shell",
+          "runner": "cargo test",
+          "file": "app/src-tauri/src/models.rs",
+          "test": "only_https_and_only_allowed_hosts",
+          "asserts": "The downloader accepts only HTTPS to the hosts of the source."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "shell",
+          "runner": "cargo test",
+          "file": "app/src-tauri/src/models.rs",
+          "test": "redirect_to_foreign_host_is_rejected",
+          "asserts": "Redirects to foreign hosts abort."
+        }
+      ],
+      "external_check": {
+        "why": "Playwright sees only WebView requests and the Rust test only the downloader. A capture must also cover the sidecar, the shell, DNS and native libraries.",
+        "procedure": "Start an acceptance-grade, signed package with an empty network cache; begin a capture of all non-loopback interfaces before starting (macOS: sudo tcpdump -i any -n \"not host 127.0.0.1 and not host ::1\" -w run.pcapng); drop documents, review, save, restore an AI answer, open settings, quit the app. In a second run, also download a language pack.",
+        "pass_condition": "Run 1: no DNS, TCP, UDP or QUIC traffic from the app's process group except loopback. Run 2: traffic only during the download and only to the hosts of the chosen source.",
+        "artifact": "PCAP/PCAPNG of both runs plus operating system, package hash, time window and capture filter."
+      }
+    },
+    {
+      "id": "A-13",
+      "criterion": "Review works fully with the keyboard; focus order follows the picture, also in the floating bars; contrast 4.5:1 in light and dark; axe (WCAG 2.1 AA) reports nothing on every board.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Review works fully with the keyboard",
+          "asserts": "Tab through the codes, Alt+N, Alt+M, Escape, hold Space."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Focus order: Document, floating toolbar, question panel – menu returns focus",
+          "asserts": "Top, document, bottom bar, questions panel; the masking menu returns focus."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/theme/contrast.spec.ts",
+          "test": "defines every token in both modes without cycles",
+          "asserts": "All text/surface pairs are checked against their minimum ratio in both modes."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/harness.ts",
+          "test": "export async function board",
+          "asserts": "axe-core (loaded offline) with WCAG 2.1 AA rules per board in light and dark, plus the reference image."
+        }
+      ]
+    },
+    {
+      "id": "A-14",
+      "criterion": "Hardware acceptance on 8 GB RAM / 2 cores under Windows 11 x64.",
+      "status": "external_evidence_required",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_workers.py",
+          "test": "test_runtime_matrix_scales_both_pools",
+          "asserts": "The runtime matrix sizes the CPU and OCR pools for small devices."
+        },
+        {
+          "kind": "ci_gate",
+          "layer": "ci",
+          "runner": "github-actions",
+          "file": ".github/workflows/package-smoke.yml",
+          "test": "Check Windows 11 x64 and minimum hardware fail‑closed",
+          "asserts": "The package smoke test checks the minimum hardware fail-closed."
+        }
+      ],
+      "external_check": {
+        "why": "Mocks and CI configuration prove neither memory pressure nor runtime and usability on the limit device.",
+        "procedure": "Run package-smoke on the self-hosted Windows 11 x64 device limited to 2 cores and 8 GB; then repeat the reference flow by hand (first-run setup, review documents with PDF/scan, save, restore) and run scripts/performance.py there.",
+        "pass_condition": "Installation, first-run setup, CPU processing, review, saving and restoring without OOM, hangs or GPU dependency.",
+        "artifact": "Workflow run link with runner metadata, package hash, logs and the device's acceptance/performance.json."
+      }
+    },
+    {
+      "id": "A-15",
+      "criterion": "Mappings only on save: toggling ten times and discarding leaves the translation table unchanged; saving writes exactly the codes that were used.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_toggling_ten_times_then_discarding_leaves_table_unchanged",
+          "asserts": "Ten dry runs, discard, no path around saving: table empty."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_save_api.py",
+          "test": "test_save_writes_mappings_only_now_and_publishes",
+          "asserts": "Only saving commits, with the origin of each code."
+        }
+      ]
+    },
+    {
+      "id": "A-16",
+      "criterion": "When in doubt, mask: an open question is masked on save and counted in the review report as \"masked without a decision\".",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_open_question_is_masked_on_save",
+          "asserts": "Open questions are masked in the result."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_save_api.py",
+          "test": "test_save_takes_ui_state_and_masks_open_questions",
+          "asserts": "\"keep\" from the preview does not apply on save; count masked_without_decision."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_documents_v2.py",
+          "test": "test_pdf_repetition_is_a_question_and_is_masked_in_doubt",
+          "asserts": "An open PDF repetition is masked on save instead of blocking the export."
+        }
+      ]
+    },
+    {
+      "id": "A-17",
+      "criterion": "Restoring text and DOCX with codes from two entries and one unknown code.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_restore.py",
+          "test": "test_answer_with_codes_from_two_entries_and_one_unknown",
+          "asserts": "Count here / other entry / earlier / unknown, nothing saved."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_restore.py",
+          "test": "test_docx_with_codes_from_two_entries_is_restored_losslessly",
+          "asserts": "DOCX with formatting, lossless."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/restore.spec.ts",
+          "test": "Milestone G: AI answer with codes from two entries, unknown code, nothing saved",
+          "asserts": "The UI shows origin and count and saves nothing."
+        }
+      ]
+    },
+    {
+      "id": "A-18",
+      "criterion": "History: titles contain no recognized name; entries disappear when their retention period ends, the translation table stays.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_titles_never_contain_a_name_from_the_filename",
+          "asserts": "Titles from the document kind and file names, without names."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_retention_janitor_deletes_only_expired_entries",
+          "asserts": "The janitor deletes only expired entries."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_api_v2.py",
+          "test": "test_history_stored_encrypted_only_on_disk",
+          "asserts": "The history exists only encrypted."
+        }
+      ]
+    },
+    {
+      "id": "A-19",
+      "criterion": "Document languages: a mixed DE/EN document paragraph by paragraph; an English contract from Vienna with Austrian numbers; placeholders in the language of the paragraph.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_languages.py",
+          "test": "test_mixed_document_is_separated_paragraph_by_paragraph",
+          "asserts": "Paragraph-by-paragraph separation of DE/EN."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_languages.py",
+          "test": "test_english_contract_from_vienna_in_base_profile",
+          "asserts": "Austrian numbers in an English contract."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_languages.py",
+          "test": "test_placeholders_follow_paragraph_language",
+          "asserts": "[Company] in the English paragraph, [Firma] in the German one."
+        }
+      ]
+    },
+    {
+      "id": "A-20",
+      "criterion": "Models: a file with a deviating checksum is discarded and reported; without models, dropping files is blocked (first-run setup).",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "shell",
+          "runner": "cargo test",
+          "file": "app/src-tauri/src/models.rs",
+          "test": "tampered_file_is_discarded",
+          "asserts": "The downloader discards a file with a wrong SHA-256."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/setup.spec.ts",
+          "test": "Initial setup: a tampered file is rejected and reported",
+          "asserts": "The first-run setup reports the discarded file."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_models.py",
+          "test": "test_without_models_setup_is_required",
+          "asserts": "Without models the sidecar reports setup_required."
+        }
+      ]
+    },
+    {
+      "id": "A-21",
+      "criterion": "Second opinion: fewer open questions at equal or better recall; every AI decision visible and reversible.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_second_opinion.py",
+          "test": "test_policy_protect_decides_only_toward_protection",
+          "asserts": "Without the \"Keep\" option the AI decides only toward protection."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_second_opinion.py",
+          "test": "test_apply_counts_ai_decisions_in_review_report",
+          "asserts": "AI decisions are counted separately in the review report."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Second opinion: AI box, “Resolved by local AI”, reversible",
+          "asserts": "Visible and reversible with one click."
+        },
+        {
+          "kind": "measurement",
+          "layer": "measurement",
+          "runner": "python",
+          "file": "acceptance/second-opinion.json",
+          "test": "\"recall\"",
+          "asserts": "Measurement on the invented corpus: fewer open questions, recall 1.0."
+        }
+      ]
+    },
+    {
+      "id": "A-22",
+      "criterion": "Recall measurement as a release gate: a versioned corpus of at least 200 real, previously pseudonymized documents; precision, recall, false positives and false negatives with and without name lists; plus the second opinion on the same corpus.",
+      "status": "external_evidence_required",
+      "evidence": [
+        {
+          "kind": "ci_gate",
+          "layer": "quality",
+          "runner": "python",
+          "file": "scripts/quality/gate.py",
+          "test": "def apply_gate(",
+          "asserts": "The gate compares precision and recall per category with the baseline (recall may drop by at most 0.5 percentage points), with and without name lists."
+        },
+        {
+          "kind": "ci_gate",
+          "layer": "quality",
+          "runner": "python",
+          "file": "scripts/quality/import_real.py",
+          "test": "def import_real_corpus(",
+          "asserts": "The import contract for a real, previously pseudonymized corpus."
+        }
+      ],
+      "external_check": {
+        "why": "The versioned corpus in the repository is invented (3×200 synthetic documents). Spec 11 requires real, previously pseudonymized documents; those must not leave the operator's device.",
+        "procedure": "For each area of use, select at least 200 real documents, pseudonymize them beforehand, import them with scripts/quality/import_real.py, and run scripts/quality/gate.py and scripts/second_opinion/measure.py locally.",
+        "pass_condition": "Recall and precision per category reach the thresholds set in the gate, with and without name lists; the second opinion lowers the open questions without losing recall.",
+        "artifact": "Content-free measurement report (only counts and metrics) with corpus hash, date and version."
+      }
+    },
+    {
+      "id": "A-23",
+      "criterion": "Performance: a 50-page PDF, 9 files in one entry and 1,000 codes stay usable.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_performance.py",
+          "test": "test_fifty_page_pdf_is_detected_redacted_and_rendered_checked",
+          "asserts": "50 pages: detection, apply and save with redaction and render check within the limits."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_performance.py",
+          "test": "test_nine_files_in_one_entry",
+          "asserts": "9 files: one code per name, all saved."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_performance.py",
+          "test": "test_thousand_codes_in_one_file",
+          "asserts": "1,000 codes with 500 decisions: apply and save scale linearly."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/review.spec.ts",
+          "test": "Performance: 9 files, one with 1,000 codes, remain usable",
+          "asserts": "Opening, menu, view switching, keeping and file switching within the limits."
+        },
+        {
+          "kind": "measurement",
+          "layer": "measurement",
+          "runner": "python",
+          "file": "acceptance/performance.json",
+          "test": "\"pdf_50_pages\"",
+          "asserts": "Measurement with real models (scripts/performance.py)."
+        }
+      ]
+    },
+    {
+      "id": "A-24",
+      "criterion": "Bilingual UI: English is complete, the app language takes effect immediately; coach marks appear once by themselves on first start.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/i18n/translate.spec.ts",
+          "test": "English is complete",
+          "asserts": "Every key of the German reference is present in the English dictionary."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/settings.spec.ts",
+          "test": "General: language and appearance apply immediately, \"restore\" closes",
+          "asserts": "Language and appearance apply immediately, also behind the dialog."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/start.spec.ts",
+          "test": "First start shows notices automatically (first-run behavior)",
+          "asserts": "Once by themselves, not again after a reload."
+        }
+      ]
+    },
+    {
+      "id": "A-25",
+      "criterion": "Layout fidelity for fixed pages: PDF, scan and image appear in review as a page image; every marker sits on its word (<= 1 px at 100 %), also on rotated pages.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_map.py",
+          "test": "test_rotated_pages_show_the_same_pixels_under_each_box",
+          "asserts": "Under every word box the rotated page image (90/180/270) shows the same pixels as the unrotated one."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_map.py",
+          "test": "test_scan_ocr_boxes_land_where_the_ocr_saw_them",
+          "asserts": "OCR boxes of scans (also /Rotate 90) sit where the OCR saw them."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_map.py",
+          "test": "test_exif_rotated_photo_uses_display_pixels",
+          "asserts": "Photos with EXIF orientation: boxes in display space."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/layout.spec.ts",
+          "test": "Fixed pages: page image with markings on its words (≤ 1 px)",
+          "asserts": "Replica, rotated page and scan: every marker within <= 1 px of its word box."
+        }
+      ]
+    },
+    {
+      "id": "A-26",
+      "criterion": "View = file: for PDFs the result view matches the rendering of the saved file (pixel comparison of the placement areas).",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_pdf_export.py",
+          "test": "test_saved_pdf_contains_exactly_the_planned_geometry",
+          "asserts": "Areas, baseline, size, font and color from the apply plan appear exactly so in the saved PDF (0/90/180/270 degrees, CropBox)."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_pdf_export.py",
+          "test": "test_result_image_matches_the_original_outside_the_covers",
+          "asserts": "Control image /pages/{n}/result: pixel-identical to the original outside the placement areas."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/layout.spec.ts",
+          "test": "View = File: Overpaint matches control image (A-26)",
+          "asserts": "Screen against control image per placement area <= 3 % deviating pixels; counter-check against the original > 10 %."
+        }
+      ]
+    },
+    {
+      "id": "A-27",
+      "criterion": "Word and Excel from the file itself: tables, headers and footers, merged cells; every replacement appears where the export puts it; paragraphs that cannot be mapped visibly fall back to text.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_word.py",
+          "test": "test_saved_docx_keeps_the_units_and_carries_each_replacement_in_its_unit",
+          "asserts": "The saved DOCX has the same units and anchors as the preview copy; every replacement sits in its unit."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/layout/flow-anchor.spec.ts",
+          "test": "View = File: each replacement stays in its unit, in the same run",
+          "asserts": "Unit comparison: after replacing, the view shows exactly the text of the saved file (docx-preview, jsdom), every code in the same run."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/layout/flow-anchor.spec.ts",
+          "test": "If text deviates, no mapping – simplified it matches again",
+          "asserts": "A unit that cannot be mapped is not rendered and appears simplified as text."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/word.spec.ts",
+          "test": "Word: pages, table, header/footer, codes in place",
+          "asserts": "The letter appears with table, header and footer; codes in the bold run and in the link text; axe reports nothing."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_spreadsheets.py",
+          "test": "test_saved_xlsx_carries_each_replacement_in_the_cell_the_grid_shows",
+          "asserts": "Cell comparison: the saved XLSX carries every replacement in exactly the cell of the table model, all other cells stay equal."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/layout/grid.spec.ts",
+          "test": "each cell shows the text of the saved file",
+          "asserts": "XLSX and CSV: every cell of the view shows the text the export left in the saved file."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/table.spec.ts",
+          "test": "Excel: widths, heights, merged cells and formats; codes in their cells",
+          "asserts": "Grid with column widths, row height, merged title cell, fill, borders and number formats; codes in their cells; axe reports nothing in light and dark."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/table.spec.ts",
+          "test": "Table: smooth scrolling of 10,000 rows, header and first column stay fixed",
+          "asserts": "Only the cells in the window are in the DOM; at most 3 frames over 50 ms while scrolling; the frozen row and column stay visible."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_word_page_faithful.py",
+          "test": "test_paged_layout_finds_every_place_across_lines_pages_and_stories",
+          "asserts": "Page-faithful: in the office engine's PDF made from the result DOCX of saving, every replacement is located – across line and page breaks, in header and footer; the boxes sit on ink."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_word_page_faithful.py",
+          "test": "test_paged_layout_names_units_it_cannot_find",
+          "asserts": "Page-faithful: a paragraph the engine sets differently gets no marker and is reported as not located."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/word.spec.ts",
+          "test": "Word page-faithful: engine pages, codes with menu, space shows the original",
+          "asserts": "Page-faithful: every occurrence with a marker on the page, code menu, page images for exactly the apply state of the card; axe reports nothing in light and dark."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "playwright",
+          "file": "app/tests/smoke/word.spec.ts",
+          "test": "Word: without saved line breaks view breaks after pages",
+          "asserts": "Without saved page breaks the view breaks pages itself: no page longer than its size, header and footer on every page, tables split between rows, no paragraph simplified."
+        }
+      ]
+    },
+    {
+      "id": "A-29",
+      "criterion": "Scans stay scans: a reversibly masked scan is saved as a PDF, OCR reads every code back, no original value in the image or text layer; an image stays an image with the codes drawn in, otherwise a text file with a notice.",
+      "status": "automated",
+      "evidence": [
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_scan_stays_pdf_with_visible_codes_and_a_text_layer",
+          "asserts": "Scan (0 and 90 degrees): PDF with visible codes (render mode 0) and an invisible text layer (3) on the OCR boxes; every code exactly once, no original value in the text; the OCR read every code back."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_scan_pixels_are_gone_under_every_value",
+          "asserts": "An OCR over the saved scan finds no original value, only the codes."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_text_layer_may_not_carry_a_removed_value",
+          "asserts": "Mandatory check: a removed value in the text layer aborts the export."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_every_code_is_in_the_text_layer_exactly_as_often_as_drawn",
+          "asserts": "Mandatory check: a code once too often in the text layer or unreadable in the image aborts the export."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_saving_an_image_with_codes_keeps_the_image",
+          "asserts": "PNG/JPG stays an image, the code is in it as pixels; control image = saved file."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "sidecar",
+          "runner": "pytest",
+          "file": "sidecar/tests/test_layout_scans_and_images.py",
+          "test": "test_unreadable_image_code_falls_back_to_text_and_says_so",
+          "asserts": "If the OCR does not read the code back, text is saved; the output reports readback_failed."
+        },
+        {
+          "kind": "automated_test",
+          "layer": "frontend",
+          "runner": "vitest",
+          "file": "app/src/lib/saved/saved.spec.ts",
+          "test": "describes what happened to scans and images",
+          "asserts": "Saved and the review report name the text layer or the fallback to text."
+        }
+      ]
+    }
+  ]
+}

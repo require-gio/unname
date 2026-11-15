@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "corpus_id": "interner-abnahmekorpus",
+  "version": "1.0.0",
+  "profiles": [
+    {
+      "profile_id": "de-at-rechnung-v3",
+      "profile_version": "3.0.0",
+      "documents": "/sicherer/staging-pfad/rechnung/documents.jsonl",
+      "persons": "/sicherer/staging-pfad/rechnung/persons.json",
+      "organizations": "/sicherer/staging-pfad/rechnung/organizations.json",
+      "provenance": {
+        "kind": "real_pseudonymized",
+        "source_category": "Rechnungen und Belege",
+        "pseudonymization_method": "Hier das vor dem Import angewandte Verfahren dokumentieren",
+        "pseudonymized_before_inclusion": true,
+        "privacy_reviewed": true,
+        "contains_reidentification_key": false,
+        "approved_by_role": "Datenschutz-Freigaberolle",
+        "approval_date": "2025-01-01"
+      }
+    },
+    {
+      "profile_id": "kanzlei-beratung-v1",
+      "profile_version": "1.0.0",
+      "documents": "/sicherer/staging-pfad/kanzlei/documents.jsonl",
+      "persons": "/sicherer/staging-pfad/kanzlei/persons.json",
+      "organizations": "/sicherer/staging-pfad/kanzlei/organizations.json",
+      "provenance": {
+        "kind": "real_pseudonymized",
+        "source_category": "Kanzlei- und Beratungsunterlagen",
+        "pseudonymization_method": "Hier das vor dem Import angewandte Verfahren dokumentieren",
+        "pseudonymized_before_inclusion": true,
+        "privacy_reviewed": true,
+        "contains_reidentification_key": false,
+        "approved_by_role": "Datenschutz-Freigaberolle",
+        "approval_date": "2025-01-01"
+      }
+    },
+    {
+      "profile_id": "llm-upload-v1",
+      "profile_version": "1.0.0",
+      "documents": "/sicherer/staging-pfad/llm-upload/documents.jsonl",
+      "persons": "/sicherer/staging-pfad/llm-upload/persons.json",
+      "organizations": "/sicherer/staging-pfad/llm-upload/organizations.json",
+      "provenance": {
+        "kind": "real_pseudonymized",
+        "source_category": "Für LLM-Uploads vorgesehene Textdaten",
+        "pseudonymization_method": "Hier das vor dem Import angewandte Verfahren dokumentieren",
+        "pseudonymized_before_inclusion": true,
+        "privacy_reviewed": true,
+        "contains_reidentification_key": false,
+        "approved_by_role": "Datenschutz-Freigaberolle",
+        "approval_date": "2025-01-01"
+      }
+    }
+  ]
+}

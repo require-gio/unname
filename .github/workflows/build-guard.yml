@@ -1,0 +1,96 @@
+name: Build-Guard and Offline Smoke
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-guard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-offline-smoke:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64 – Build portability
+            runner: windows-2025
+            os: windows
+          - name: macOS Apple Silicon
+            runner: macos-14
+            os: macos
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Check target architecture and hosted limits
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $computer = Get-CimInstance Win32_ComputerSystem
+          $os = Get-CimInstance Win32_OperatingSystem
+          $memoryGiB = [math]::Round($computer.TotalPhysicalMemory / 1GB, 1)
+          if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
+            throw "Der Hosted-Build muss auf Windows x64 laufen."
+          }
+          if ($computer.NumberOfLogicalProcessors -lt 2) {
+            throw "Mindestens 2 logische Kerne erforderlich, gefunden: $($computer.NumberOfLogicalProcessors)."
+          }
+          if ($memoryGiB -lt 7) {
+            throw "Mindestens 7 GiB sichtbarer physischer RAM erforderlich, gefunden: $memoryGiB GiB."
+          }
+          "Hosted-Build: $($os.Caption), $($computer.NumberOfLogicalProcessors) Kerne, $memoryGiB GiB RAM."
+
+      - name: Check Apple Silicon architecture
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "arm64" || { echo "macos-14 muss auf Apple Silicon laufen." >&2; exit 1; }
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install JavaScript dependencies reproducibly
+        working-directory: app
+        run: npm ci
+
+      - name: Install pinned Chromium renderer
+        working-directory: app
+        run: npx playwright install chromium
+
+      - name: Type checking
+        working-directory: app
+        run: npm run check
+
+      - name: Unit Tests
+        working-directory: app
+        run: npm test
+
+      - name: Check external sources, font licenses and offline reference
+        working-directory: app
+        run: npm run test:smoke
+
+      - name: Upload smoke diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-smoke-${{ matrix.os }}
+          path: |
+            app/test-results/smoke/
+            app/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

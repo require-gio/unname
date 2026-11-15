@@ -1,0 +1,11 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"rewriteRelativeImportExtensions": true,
+		"sourceMap": true,
+		"strict": true
+	},
+	// `$app/tsconfig` bringt keine Dateiliste mit (Kit 3); sie steht deshalb hier.
+	"include": ["src", "vite.config.ts", "playwright.config.ts", "tests"],
+	"exclude": ["node_modules", "build", "src-tauri"]
+}

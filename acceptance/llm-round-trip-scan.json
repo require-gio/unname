@@ -1,0 +1,44 @@
+{
+  "created_at": "2026-10-26T18:37:50+00:00",
+  "purpose": "A-09 with a scan: the text layer of a reversibly masked scan through a local language model",
+  "models": [
+    "qwen3:4b-instruct-2507-q4_K_M",
+    "gpt-oss:20b"
+  ],
+  "repeats": 2,
+  "temperature": 0.7,
+  "seed": 2026,
+  "tasks": {
+    "answer": "Schreibe eine kurze, freundliche Antwort an den Kunden aus diesem Lieferschein. Sprich ihn mit Namen an, bestätige die Lieferanschrift und nenne Telefon und E-Mail des Shops für Rückfragen.",
+    "table": "Erstelle aus diesem Lieferschein eine Markdown-Tabelle mit den Zeilen Kunde, Anschrift, Telefon des Shops und E-Mail des Shops.",
+    "summarize": "Fasse diesen Lieferschein in zwei Sätzen zusammen."
+  },
+  "text_layer_words": 60,
+  "per_model": {
+    "qwen3:4b-instruct-2507-q4_K_M": {
+      "sent": 16,
+      "exact": 7,
+      "found": 7,
+      "core": 7,
+      "lost": 9,
+      "corrupted": 0
+    },
+    "gpt-oss:20b": {
+      "sent": 16,
+      "exact": 11,
+      "found": 11,
+      "core": 11,
+      "lost": 5,
+      "corrupted": 0
+    }
+  },
+  "lossless": {
+    "qwen3:4b-instruct-2507-q4_K_M": true,
+    "gpt-oss:20b": true
+  },
+  "complete": {
+    "qwen3:4b-instruct-2507-q4_K_M": false,
+    "gpt-oss:20b": false
+  },
+  "runtime_seconds": 78.8
+}

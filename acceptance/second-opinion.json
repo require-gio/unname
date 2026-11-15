@@ -1,0 +1,157 @@
+{
+  "created_at": "2026-11-14T19:29:34+00:00",
+  "model": "zweitmeinung-20261025",
+  "encoder": "intfloat/multilingual-e5-small@614241f622f53c4eeff9890bdc4f31cfecc418b3",
+  "quantization": "dynamic int8 (QInt8), alle MatMul und Gather",
+  "corpus": {
+    "documents": 311,
+    "test_documents": 70,
+    "questions_in_test": 1150,
+    "assessable_questions": 1144,
+    "gold_distribution": {
+      "organization_or_product": 248,
+      "location": 129,
+      "person": 102,
+      "term": 665
+    }
+  },
+  "conditions": {
+    "without_classifier": {
+      "questions": 1144,
+      "open": 1144,
+      "ai_masked": 0,
+      "ai_kept": 0,
+      "recall": 1.0,
+      "precision": 0.4187,
+      "ai_errors": 0,
+      "ai_masked_unnecessarily": 0
+    },
+    "protect": {
+      "questions": 1144,
+      "open": 677,
+      "ai_masked": 467,
+      "ai_kept": 0,
+      "recall": 1.0,
+      "precision": 0.4187,
+      "ai_errors": 0,
+      "ai_masked_unnecessarily": 1
+    },
+    "protect_and_keep_95": {
+      "questions": 1144,
+      "open": 518,
+      "ai_masked": 467,
+      "ai_kept": 159,
+      "recall": 1.0,
+      "precision": 0.4863,
+      "ai_errors": 0,
+      "ai_masked_unnecessarily": 1
+    },
+    "suggest": {
+      "questions": 1144,
+      "open": 1144,
+      "ai_masked": 0,
+      "ai_kept": 0,
+      "recall": 1.0,
+      "precision": 0.4187,
+      "ai_errors": 0,
+      "ai_masked_unnecessarily": 0
+    },
+    "suggest_all_accepted": {
+      "questions": 1144,
+      "open": 4,
+      "ai_masked": 473,
+      "ai_kept": 667,
+      "recall": 0.9875,
+      "precision": 0.9916,
+      "ai_errors": 6,
+      "ai_masked_unnecessarily": 3
+    }
+  },
+  "per_language": {
+    "de": {
+      "without_classifier": {
+        "questions": 466,
+        "open": 466,
+        "ai_masked": 0,
+        "ai_kept": 0,
+        "recall": 1.0,
+        "precision": 0.5386,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 0
+      },
+      "protect": {
+        "questions": 466,
+        "open": 221,
+        "ai_masked": 245,
+        "ai_kept": 0,
+        "recall": 1.0,
+        "precision": 0.5386,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 1
+      },
+      "protect_and_keep_95": {
+        "questions": 466,
+        "open": 162,
+        "ai_masked": 245,
+        "ai_kept": 59,
+        "recall": 1.0,
+        "precision": 0.6167,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 1
+      }
+    },
+    "en": {
+      "without_classifier": {
+        "questions": 678,
+        "open": 678,
+        "ai_masked": 0,
+        "ai_kept": 0,
+        "recall": 1.0,
+        "precision": 0.3363,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 0
+      },
+      "protect": {
+        "questions": 678,
+        "open": 456,
+        "ai_masked": 222,
+        "ai_kept": 0,
+        "recall": 1.0,
+        "precision": 0.3363,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 0
+      },
+      "protect_and_keep_95": {
+        "questions": 678,
+        "open": 356,
+        "ai_masked": 222,
+        "ai_kept": 100,
+        "recall": 1.0,
+        "precision": 0.3945,
+        "ai_errors": 0,
+        "ai_masked_unnecessarily": 0
+      }
+    }
+  },
+  "classifier": {
+    "accuracy_gold_4_labels": 0.9729,
+    "accuracy_gold_protect_yes_no": 0.9913,
+    "calibration_ece_protect": 0.0428,
+    "confusions": {
+      "person→organization_or_product": 9,
+      "location→organization_or_product": 7,
+      "organization_or_product→term": 6,
+      "term→organization_or_product": 3,
+      "organization_or_product→location": 3,
+      "organization_or_product→person": 2,
+      "term→location": 1
+    },
+    "agreement_with_teacher": 0.9624,
+    "ms_per_question_cpu": 8.05
+  },
+  "teacher": {
+    "accuracy_gold_4_labels": 0.9729,
+    "accuracy_gold_protect_yes_no": 0.9781
+  },
+  "ai_kept_despite_needing_mask": []
+}

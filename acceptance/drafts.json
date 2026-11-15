@@ -1,0 +1,154 @@
+{
+  "measured_at": "2026-11-14T11:17:12+00:00",
+  "machine": {
+    "platform": "macOS-27.2.1-arm64-arm-64bit",
+    "python": "3.12.14"
+  },
+  "disk": [
+    {
+      "format": "Text-PDF",
+      "original_bytes": 8729,
+      "draft_bytes": 12267,
+      "factor": 1.41,
+      "artifacts": {
+        "detection.enc": 541,
+        "manifest.enc": 368,
+        "extraction.enc": 2591,
+        "original.enc": 8767
+      }
+    },
+    {
+      "format": "Scan-PDF (OCR)",
+      "original_bytes": 92599,
+      "draft_bytes": 109668,
+      "factor": 1.18,
+      "artifacts": {
+        "detection.enc": 4050,
+        "manifest.enc": 362,
+        "extraction.enc": 12619,
+        "original.enc": 92637
+      }
+    },
+    {
+      "format": "PNG (OCR)",
+      "original_bytes": 41935,
+      "draft_bytes": 57136,
+      "factor": 1.36,
+      "artifacts": {
+        "detection.enc": 4050,
+        "manifest.enc": 367,
+        "extraction.enc": 10746,
+        "original.enc": 41973
+      }
+    },
+    {
+      "format": "JPG (OCR)",
+      "original_bytes": 32665,
+      "draft_bytes": 47859,
+      "factor": 1.47,
+      "artifacts": {
+        "detection.enc": 4050,
+        "manifest.enc": 366,
+        "extraction.enc": 10740,
+        "original.enc": 32703
+      }
+    },
+    {
+      "format": "DOCX",
+      "original_bytes": 38334,
+      "draft_bytes": 40080,
+      "factor": 1.05,
+      "artifacts": {
+        "detection.enc": 631,
+        "manifest.enc": 362,
+        "extraction.enc": 715,
+        "original.enc": 38372
+      }
+    },
+    {
+      "format": "XLSX",
+      "original_bytes": 6156,
+      "draft_bytes": 7766,
+      "factor": 1.26,
+      "artifacts": {
+        "detection.enc": 507,
+        "manifest.enc": 366,
+        "extraction.enc": 699,
+        "original.enc": 6194
+      }
+    },
+    {
+      "format": "CSV",
+      "original_bytes": 171,
+      "draft_bytes": 1491,
+      "factor": 8.72,
+      "artifacts": {
+        "detection.enc": 402,
+        "manifest.enc": 360,
+        "extraction.enc": 520,
+        "original.enc": 209
+      }
+    },
+    {
+      "format": "Scan-PDF 20 S. × 600 Woerter",
+      "original_bytes": 16316,
+      "draft_bytes": 308839,
+      "factor": 18.93,
+      "artifacts": {
+        "detection.enc": 76982,
+        "manifest.enc": 367,
+        "extraction.enc": 215136,
+        "original.enc": 16354
+      }
+    }
+  ],
+  "load": {
+    "files": 10,
+    "seconds": [
+      0.027,
+      0.065,
+      0.027
+    ],
+    "median_seconds": 0.027,
+    "big_scan": {
+      "pages": 20,
+      "ocr_words": 12000,
+      "seconds": [
+        0.083,
+        0.083,
+        0.082
+      ],
+      "median_seconds": 0.083
+    }
+  },
+  "rss": {
+    "entries": 20,
+    "files_per_entry": 3,
+    "max_loaded_jobs": 64,
+    "loaded_jobs_after_each": [
+      3,
+      6,
+      9,
+      12,
+      15,
+      18,
+      21,
+      24,
+      27,
+      30,
+      33,
+      36,
+      39,
+      42,
+      45,
+      48,
+      51,
+      54,
+      57,
+      60
+    ],
+    "rss_before_mb": 493.2,
+    "rss_after_mb": 493.6,
+    "rss_growth_mb": 0.3
+  }
+}

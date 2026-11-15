@@ -1,0 +1,576 @@
+name: Packaging, target-system smoke and release signature
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_run_id:
+        description: Run ID with bundle-inputs-windows-x64 and bundle-inputs-macos-arm64
+        required: true
+        type: string
+      tessdata_revision:
+        description: Full tessdata_best commit (40 hex characters)
+        required: true
+        type: string
+      signed_release:
+        description: Check signed and notarized release path fail-closed
+        required: true
+        default: false
+        type: boolean
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: packaging-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ASSET_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.asset_run_id || vars.BUNDLE_INPUTS_RUN_ID }}
+  TESSDATA_REVISION: ${{ github.event_name == 'workflow_dispatch' && inputs.tessdata_revision || vars.TESSDATA_REVISION }}
+  SIGNED_RELEASE: ${{ github.event_name == 'push' || inputs.signed_release }}
+  GLINER_REVISION: f334163a5d1dcdbacf365c4527538e3da3ecfb18
+
+jobs:
+  inputs:
+    name: Validate pinned build inputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run-ID und Revisionen fail-closed validieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$ASSET_RUN_ID" =~ ^[1-9][0-9]*$ ]] || {
+            echo "BUNDLE_INPUTS_RUN_ID/asset_run_id fehlt oder ist ungültig." >&2
+            exit 1
+          }
+          [[ "$TESSDATA_REVISION" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "TESSDATA_REVISION muss ein vollständiger Commit-Hash sein." >&2
+            exit 1
+          }
+          if [[ "$SIGNED_RELEASE" != "true" && "$SIGNED_RELEASE" != "false" ]]; then
+            echo "SIGNED_RELEASE ist kein Boolean." >&2
+            exit 1
+          fi
+
+  package:
+    name: ${{ matrix.name }}
+    needs: inputs
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows Server x64 – build portability
+            runner: windows-2025
+            platform: windows-hosted
+            os: windows
+            target: x86_64-pc-windows-msvc
+            asset: windows-x64
+          - name: macOS arm64 – package and first launch
+            runner: macos-14
+            platform: macos-arm64
+            os: macos
+            target: aarch64-apple-darwin
+            asset: macos-arm64
+          - name: Windows 11 x64 – actual minimum hardware acceptance
+            runner: [self-hosted, Windows, X64, windows-11, minimum-hardware]
+            platform: windows-11-x64
+            os: windows
+            target: x86_64-pc-windows-msvc
+            asset: windows-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    env:
+      # By default the package is built without models. The smoke test processes real documents
+      # without initial setup and therefore includes models.
+      PRESIDIO_BUNDLE_MODELS: "1"
+      PRESIDIO_GLINER_SNAPSHOT: ${{ github.workspace }}/.bundle-inputs/gliner
+      PRESIDIO_GLINER_REVISION: ${{ env.GLINER_REVISION }}
+      # The macOS package does not include Tesseract (M-9 and C-2 are Windows‑only);
+      # prepare-sidecar-assets.py builds the vision helper instead.
+      PRESIDIO_TESSERACT_ROOT: ${{ matrix.os == 'windows' && format('{0}/.bundle-inputs/tesseract', github.workspace) || '' }}
+      PRESIDIO_TESSDATA_DIR: ${{ matrix.os == 'windows' && format('{0}/.bundle-inputs/tesseract/tessdata', github.workspace) || '' }}
+      PRESIDIO_TESSDATA_REVISION: ${{ env.TESSDATA_REVISION }}
+      PRESIDIO_ASSET_TRUST_LOCK: ${{ github.workspace }}/sidecar/packaging/bundle-inputs.lock.json
+      PRESIDIO_ASSET_TRUST_ID: ${{ matrix.asset }}
+
+    steps:
+      # Labels are only routing metadata. This check must run before any external code and validates
+      # the actual Windows‑11‑x64 / 2‑core / 8 GB target system.
+      - name: Check Windows 11 x64 and minimum hardware fail‑closed
+        if: matrix.platform == 'windows-11-x64'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $os = Get-CimInstance Win32_OperatingSystem
+          $computer = Get-CimInstance Win32_ComputerSystem
+          $memoryGiB = [math]::Round($computer.TotalPhysicalMemory / 1GB, 1)
+          if ($os.Caption -notmatch 'Windows 11' -or $os.ProductType -ne 1) {
+            throw "Erwartet wird Windows 11 Desktop, gefunden: $($os.Caption), ProductType $($os.ProductType)."
+          }
+          if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
+            throw "Der Abnahmerunner ist nicht Windows x64/AMD64."
+          }
+          if ($computer.NumberOfLogicalProcessors -ne 2) {
+            throw "minimum-hardware muss exakt 2 logische Kerne haben; gefunden: $($computer.NumberOfLogicalProcessors)."
+          }
+          if ($memoryGiB -lt 7 -or $memoryGiB -gt 9) {
+            throw "minimum-hardware muss 8 GB RAM (7–9 GiB sichtbar) haben; gefunden: $memoryGiB GiB."
+          }
+          "Abnahmegerät: $($os.Caption), AMD64, 2 Kerne, $memoryGiB GiB RAM."
+
+      - name: Check hosted Windows resources
+        if: matrix.platform == 'windows-hosted'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $computer = Get-CimInstance Win32_ComputerSystem
+          $memoryGiB = [math]::Round($computer.TotalPhysicalMemory / 1GB, 1)
+          if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
+            throw "Der Hosted-Build muss auf Windows x64 laufen."
+          }
+          if ($computer.NumberOfLogicalProcessors -lt 2 -or $memoryGiB -lt 7) {
+            throw "Hosted-Build braucht mindestens 2C/7GiB: $($computer.NumberOfLogicalProcessors)C/$memoryGiB GiB."
+          }
+
+      - name: Check Apple Silicon architecture
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = arm64 || { echo "Erwartet wird echtes Apple Silicon." >&2; exit 1; }
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+          key: ${{ matrix.target }}
+
+      - name: Load pinned external bundle inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-inputs-${{ matrix.asset }}
+          path: .bundle-inputs
+          github-token: ${{ github.token }}
+          run-id: ${{ env.ASSET_RUN_ID }}
+
+      # File names and declared revisions do not prove origin. This step hashes every
+      # downloaded byte against the reviewed repository lock before running Tesseract
+      # (e.g. `--version`) or the package-smoke for the first time. The asset step
+      # re‑checks the same lock immediately before execution.
+      - name: Cryptographically verify bundle inputs before execution
+        shell: bash
+        run: >-
+          python scripts/prepare-sidecar-assets.py
+          --target "${{ matrix.target }}"
+          --verify-input-trust-only
+
+      - name: Fully verify bundle inputs on Windows
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $required = @(
+            (Join-Path $env:PRESIDIO_GLINER_SNAPSHOT 'model.safetensors'),
+            (Join-Path $env:PRESIDIO_GLINER_SNAPSHOT 'gliner_config.json'),
+            (Join-Path $env:PRESIDIO_TESSDATA_DIR 'deu.traineddata'),
+            (Join-Path $env:PRESIDIO_TESSDATA_DIR 'eng.traineddata')
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Bundle-Eingabe fehlt: $path" }
+          }
+
+      - name: Fully verify bundle inputs on macOS
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$PRESIDIO_GLINER_SNAPSHOT/model.safetensors"
+          test -f "$PRESIDIO_GLINER_SNAPSHOT/gliner_config.json"
+          # No tessdata on macOS.
+          test ! -e .bundle-inputs/tesseract
+
+      # OCR with Apple Vision. Built with the runner's Xcode; integration (real detection,
+      # ~50 s cold) runs with it.
+      - name: Build and test Vision helper
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift build -c release --package-path vision-ocr --arch arm64
+          VISION_OCR_INTEGRATION=1 swift test --package-path vision-ocr
+
+      # Download service (XPC). build-distribution.mjs builds and signs it; its tests run here.
+      - name: Test download service
+        if: matrix.os == 'macos'
+        shell: bash
+        run: swift test --package-path download-xpc
+
+      - name: Install reproducible JavaScript dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Install reproducible sidecar dependencies
+        run: uv sync --project sidecar --frozen --group dev
+
+      - name: Install pinned Chromium renderer
+        working-directory: app
+        run: npx playwright install chromium
+
+      - name: Run offline screenshot against shared reference
+        working-directory: app
+        run: npm run test:smoke
+
+      - name: Check Windows release secrets and certificate (fail-closed)
+        id: windows_certificate
+        if: matrix.os == 'windows' && env.SIGNED_RELEASE == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_PFX_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_PFX_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          WINDOWS_CERTIFICATE_SHA1: ${{ secrets.WINDOWS_CERTIFICATE_SHA1 }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $required = @(
+            'WINDOWS_CERTIFICATE_PFX_BASE64',
+            'WINDOWS_CERTIFICATE_PASSWORD',
+            'WINDOWS_CERTIFICATE_SHA1',
+            'WINDOWS_TIMESTAMP_URL'
+          )
+          foreach ($name in $required) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+              throw "$name fehlt; Release-Build wird vor dem Signieren abgebrochen."
+            }
+          }
+          $thumbprint = $env:WINDOWS_CERTIFICATE_SHA1.Replace(' ', '').ToUpperInvariant()
+          if ($thumbprint -notmatch '^[0-9A-F]{40}$') { throw 'WINDOWS_CERTIFICATE_SHA1 ist ungültig.' }
+          $timestamp = [Uri]$env:WINDOWS_TIMESTAMP_URL
+          if ($timestamp.Scheme -ne 'https') { throw 'WINDOWS_TIMESTAMP_URL muss HTTPS verwenden.' }
+
+          $pfxPath = Join-Path $env:RUNNER_TEMP "presidio-signing-$env:GITHUB_RUN_ID.pfx"
+          "pfx_path=$pfxPath" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          [IO.File]::WriteAllBytes(
+            $pfxPath,
+            [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_PFX_BASE64)
+          )
+          $preexisting = Test-Path -LiteralPath "Cert:\CurrentUser\My\$thumbprint"
+          "preexisting=$($preexisting.ToString().ToLowerInvariant())" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation Cert:\CurrentUser\My -Password $password | Out-Null
+          $certificate = Get-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint"
+          if (-not $certificate.HasPrivateKey) { throw 'Code-Signing-Zertifikat hat keinen privaten Schlüssel.' }
+          if ($certificate.NotBefore -gt (Get-Date) -or $certificate.NotAfter -le (Get-Date)) {
+            throw 'Code-Signing-Zertifikat ist noch nicht oder nicht mehr gültig.'
+          }
+          $codeSigningEku = $certificate.EnhancedKeyUsageList.ObjectId.Value -contains '1.3.6.1.5.5.7.3.3'
+          if (-not $codeSigningEku) { throw 'Zertifikat ist nicht für Code Signing freigegeben.' }
+
+      - name: Check macOS release secrets and isolated keychain (fail-closed)
+        id: macos_certificate
+        if: matrix.os == 'macos' && env.SIGNED_RELEASE == 'true'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            test -n "${!name:-}" || { echo "$name fehlt; Release-Build wird abgebrochen." >&2; exit 1; }
+          done
+          certificate="$RUNNER_TEMP/presidio-signing-$GITHUB_RUN_ID.p12"
+          keychain="$RUNNER_TEMP/presidio-signing-$GITHUB_RUN_ID.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+          echo "certificate=$certificate" >> "$GITHUB_OUTPUT"
+          echo "keychain=$keychain" >> "$GITHUB_OUTPUT"
+          printf '%s' "$APPLE_CERTIFICATE" | base64 --decode > "$certificate"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$certificate" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain"
+          security find-identity -v -p codesigning "$keychain" | grep -F "$APPLE_SIGNING_IDENTITY"
+
+      - name: Build unsigned CI distribution
+        if: env.SIGNED_RELEASE != 'true'
+        run: node scripts/build-distribution.mjs --target ${{ matrix.target }} --unsigned
+
+      - name: Build signed Windows distribution
+        if: matrix.os == 'windows' && env.SIGNED_RELEASE == 'true'
+        env:
+          WINDOWS_CERTIFICATE_SHA1: ${{ secrets.WINDOWS_CERTIFICATE_SHA1 }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: node scripts/build-distribution.mjs --target ${{ matrix.target }}
+
+      - name: Build signed and notarized macOS distribution
+        if: matrix.os == 'macos' && env.SIGNED_RELEASE == 'true'
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: node scripts/build-distribution.mjs --target ${{ matrix.target }}
+
+      # Ensure the macOS package does not include Tesseract (required for compliance).
+      - name: Verify macOS package excludes Tesseract
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("sidecar/bundle-assets/asset-manifest.json").read_text())
+          assets = manifest["assets"]
+          files = {entry["path"]: entry for entry in manifest["files"]}
+          assert "tesseract" not in assets and not any(
+              name.startswith("tessdata") for name in assets
+          ), sorted(assets)
+          assert not any(path.startswith(("tesseract/", "licenses/tesseract/")) for path in files)
+          assert files["vision-ocr/unname-vision-ocr"]["kind"] == "binary"
+          print("Mac-Paket ohne Tesseract, Vision-Helfer", assets["vision_ocr"]["revision"])
+          PY
+
+      - name: Check Authenticode for sidecar, app, MSI and NSIS (fail-closed)
+        if: matrix.os == 'windows' && env.SIGNED_RELEASE == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_SHA1: ${{ secrets.WINDOWS_CERTIFICATE_SHA1 }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $targetRoot = "app/src-tauri/target/${{ matrix.target }}/release"
+          $sidecar = "app/src-tauri/binaries/presidio-sidecar-${{ matrix.target }}.exe"
+          $app = Join-Path $targetRoot 'unname.exe'
+          $msi = @(Get-ChildItem -LiteralPath (Join-Path $targetRoot 'bundle/msi') -Filter '*.msi' -File)
+          $nsis = @(Get-ChildItem -LiteralPath (Join-Path $targetRoot 'bundle/nsis') -Filter '*.exe' -File)
+          if ($msi.Count -ne 1 -or $nsis.Count -ne 1) {
+            throw "Erwartet werden genau ein MSI und ein NSIS-Installer; gefunden: $($msi.Count)/$($nsis.Count)."
+          }
+          $files = @($sidecar, $app, $msi[0].FullName, $nsis[0].FullName)
+          $thumbprint = $env:WINDOWS_CERTIFICATE_SHA1.Replace(' ', '').ToUpperInvariant()
+          foreach ($file in $files) {
+            if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Signiertes Artefakt fehlt: $file" }
+            $signature = Get-AuthenticodeSignature -LiteralPath $file
+            if ($signature.Status -ne [System.Management.Automation.SignatureStatus]::Valid) {
+              throw "Authenticode ungültig für ${file}: $($signature.Status) – $($signature.StatusMessage)"
+            }
+            if ($signature.SignerCertificate.Thumbprint -ne $thumbprint) {
+              throw "Unerwartetes Signaturzertifikat für $file."
+            }
+            if ($null -eq $signature.TimeStamperCertificate) {
+              throw "RFC-3161-Zeitstempel fehlt für $file."
+            }
+            "Authenticode geprüft: $file"
+          }
+
+      - name: Check Developer ID, Gatekeeper and notarization (fail-closed)
+        if: matrix.os == 'macos' && env.SIGNED_RELEASE == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle_root="app/src-tauri/target/${{ matrix.target }}/release/bundle"
+          app_bundle="$(find "$bundle_root/macos" -maxdepth 1 -name '*.app' -print -quit)"
+          dmg="$(find "$bundle_root/dmg" -maxdepth 1 -name '*.dmg' -print -quit)"
+          test -n "$app_bundle" && test -d "$app_bundle"
+          test -n "$dmg" && test -f "$dmg"
+          sidecar="$app_bundle/Contents/MacOS/presidio-sidecar"
+          test -x "$sidecar"
+          download_xpc="$app_bundle/Contents/XPCServices/org.unname.desktop.download.xpc"
+          test -x "$download_xpc/Contents/MacOS/unname-download"
+
+          codesign --verify --deep --strict --verbose=2 "$sidecar"
+          codesign --verify --deep --strict --verbose=2 "$download_xpc"
+          codesign --verify --deep --strict --verbose=2 "$app_bundle"
+          codesign --display --verbose=4 "$download_xpc" 2>&1 | grep -Eq 'flags=.*runtime'
+          codesign --display --verbose=4 "$sidecar" 2>&1 | grep -Eq 'flags=.*runtime'
+          codesign --display --verbose=4 "$app_bundle" 2>&1 | grep -Eq 'flags=.*runtime'
+
+          sidecar_entitlements="$RUNNER_TEMP/sidecar-entitlements.plist"
+          app_entitlements="$RUNNER_TEMP/app-entitlements.plist"
+          codesign --display --entitlements :- "$sidecar" > "$sidecar_entitlements" 2>/dev/null
+          codesign --display --entitlements :- "$app_bundle" > "$app_entitlements" 2>/dev/null
+          download_entitlements="$RUNNER_TEMP/download-entitlements.plist"
+          codesign --display --entitlements :- "$download_xpc" > "$download_entitlements" 2>/dev/null
+
+          require_true() {
+            local plist="$1" key="$2"
+            local value
+            value="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist" 2>/dev/null)" || {
+              echo "Entitlement fehlt: $key ($plist)" >&2
+              exit 1
+            }
+            test "$value" = true || { echo "Entitlement ist nicht true: $key" >&2; exit 1; }
+          }
+          require_absent_or_false() {
+            local plist="$1" key="$2" value
+            value="$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist" 2>/dev/null || true)"
+            test "$value" != true || { echo "Release-Entitlement darf nicht true sein: $key" >&2; exit 1; }
+          }
+
+          require_true "$sidecar_entitlements" com.apple.security.app-sandbox
+          require_true "$sidecar_entitlements" com.apple.security.inherit
+          require_absent_or_false "$sidecar_entitlements" com.apple.security.get-task-allow
+          # Sidecar runs in the app's sandbox and does not have its own network entitlement.
+          require_absent_or_false "$sidecar_entitlements" com.apple.security.network.client
+          require_absent_or_false "$sidecar_entitlements" com.apple.security.network.server
+
+          # Download service has its own sandbox with only outbound network; no inbound listening.
+          require_true "$download_entitlements" com.apple.security.app-sandbox
+          require_true "$download_entitlements" com.apple.security.network.client
+          require_absent_or_false "$download_entitlements" com.apple.security.network.server
+          require_absent_or_false "$download_entitlements" com.apple.security.inherit
+          require_absent_or_false "$download_entitlements" com.apple.security.get-task-allow
+
+          require_true "$app_entitlements" com.apple.security.app-sandbox
+          require_true "$app_entitlements" com.apple.security.files.user-selected.read-write
+          require_true "$app_entitlements" com.apple.security.files.bookmarks.app-scope
+          # network.client is required for WKWebView to load UI; network.server is unnecessary due to Unix socket.
+          require_true "$app_entitlements" com.apple.security.network.client
+          require_absent_or_false "$app_entitlements" com.apple.security.network.server
+          require_absent_or_false "$app_entitlements" com.apple.security.get-task-allow
+
+          spctl --assess --type execute --verbose=4 "$app_bundle"
+          xcrun stapler validate "$app_bundle"
+          xcrun stapler validate "$dmg"
+
+      - name: MSI administrative unpack
+        id: windows_bundle
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $bundleRoot = "app/src-tauri/target/${{ matrix.target }}/release/bundle/msi"
+          $packages = @(Get-ChildItem -LiteralPath $bundleRoot -Filter '*.msi' -File)
+          if ($packages.Count -ne 1) { throw "Genau ein MSI erwartet, gefunden: $($packages.Count)." }
+          $destination = Join-Path $env:RUNNER_TEMP "presidio-msi-$env:GITHUB_RUN_ID-${{ matrix.platform }}"
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          $arguments = @('/a', "`"$($packages[0].FullName)`"", '/qn', "TARGETDIR=`"$destination`"")
+          $install = Start-Process msiexec.exe -ArgumentList $arguments -Wait -PassThru
+          if ($install.ExitCode -notin @(0, 3010)) { throw "Administrative MSI-Installation fehlgeschlagen: $($install.ExitCode)." }
+          $apps = @(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'unname.exe' -File)
+          $sidecars = @(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'presidio-sidecar*.exe' -File)
+          if ($apps.Count -ne 1 -or $sidecars.Count -ne 1) {
+            throw "MSI-Inhalt unvollständig: App=$($apps.Count), Sidecar=$($sidecars.Count)."
+          }
+          "app=$($apps[0].FullName)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          "sidecar=$($sidecars[0].FullName)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+
+      - name: Run actual Windows package and sidecar
+        if: matrix.os == 'windows'
+        run: >-
+          node scripts/smoke-packaged-app.mjs
+          --app "${{ steps.windows_bundle.outputs.app }}"
+          --sidecar "${{ steps.windows_bundle.outputs.sidecar }}"
+
+      - name: Mount DMG read‑only
+        id: macos_bundle
+        if: matrix.os == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle_root="app/src-tauri/target/${{ matrix.target }}/release/bundle/dmg"
+          dmg="$(find "$bundle_root" -maxdepth 1 -name '*.dmg' -print -quit)"
+          test -n "$dmg" && test -f "$dmg"
+          mountpoint="$(mktemp -d "$RUNNER_TEMP/presidio-dmg.XXXXXX")"
+          hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mountpoint"
+          app_bundle="$(find "$mountpoint" -maxdepth 2 -name '*.app' -print -quit)"
+          app_binary="$app_bundle/Contents/MacOS/unname"
+          sidecar="$(find "$app_bundle/Contents/MacOS" -maxdepth 1 -type f -name 'presidio-sidecar*' -print -quit)"
+          test -x "$app_binary"
+          test -x "$sidecar"
+          cmp -s app/src-tauri/binaries/presidio-sidecar "$sidecar" || {
+            echo "Das Sidecar im DMG weicht vom geprüften Staging-Binary ab." >&2
+            exit 1
+          }
+          echo "mountpoint=$mountpoint" >> "$GITHUB_OUTPUT"
+          echo "app=$app_binary" >> "$GITHUB_OUTPUT"
+          echo "sidecar=$sidecar" >> "$GITHUB_OUTPUT"
+
+      - name: Run actual macOS DMG and sidecar
+        if: matrix.os == 'macos'
+        run: >-
+          node scripts/smoke-packaged-app.mjs
+          --app "${{ steps.macos_bundle.outputs.app }}"
+          --sidecar "${{ steps.macos_bundle.outputs.sidecar }}"
+          --skip-direct-sidecar
+
+      - name: Detach DMG
+        if: always() && matrix.os == 'macos' && steps.macos_bundle.outputs.mountpoint != ''
+        shell: bash
+        run: hdiutil detach "${{ steps.macos_bundle.outputs.mountpoint }}" -force
+
+      - name: Upload packages and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.SIGNED_RELEASE == 'true' && 'signed' || 'unsigned' }}-${{ matrix.platform }}
+          path: |
+            app/src-tauri/target/${{ matrix.target }}/release/bundle/
+            app/src-tauri/binaries/*.manifest.json
+            THIRD_PARTY_NOTICES/
+          if-no-files-found: error
+          retention-days: ${{ env.SIGNED_RELEASE == 'true' && 30 || 7 }}
+
+      - name: Clean up Windows signing material
+        if: always() && matrix.os == 'windows' && env.SIGNED_RELEASE == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_SHA1: ${{ secrets.WINDOWS_CERTIFICATE_SHA1 }}
+        run: |
+          if ('${{ steps.windows_certificate.outputs.preexisting }}' -eq 'false' -and $env:WINDOWS_CERTIFICATE_SHA1) {
+            $thumbprint = $env:WINDOWS_CERTIFICATE_SHA1.Replace(' ', '').ToUpperInvariant()
+            Remove-Item -LiteralPath "Cert:\CurrentUser\My\$thumbprint" -Force -ErrorAction SilentlyContinue
+          }
+          $pfxPath = '${{ steps.windows_certificate.outputs.pfx_path }}'
+          if ($pfxPath -and (Test-Path -LiteralPath $pfxPath)) {
+            Remove-Item -LiteralPath $pfxPath -Force
+          }
+
+      - name: Clean up macOS signing material
+        if: always() && matrix.os == 'macos' && env.SIGNED_RELEASE == 'true'
+        shell: bash
+        run: |
+          certificate='${{ steps.macos_certificate.outputs.certificate }}'
+          keychain='${{ steps.macos_certificate.outputs.keychain }}'
+          test -z "$certificate" || rm -f "$certificate"
+          test -z "$keychain" || security delete-keychain "$keychain" || true
+
+      - name: Upload smoke diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-smoke-diagnostics-${{ matrix.platform }}
+          path: |
+            app/test-results/smoke/
+            app/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

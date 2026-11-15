@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Wird von Tauri mit der erzeugten Info.plist zusammengeführt (Phase X3).
+  CFBundleLocalizations sagt AppKit, dass die App Deutsch und Englisch kann;
+  ohne das erscheinen Systemdialoge (Öffnen, Sichern) und Standardmenüs auf
+  Englisch, auch wenn macOS auf Deutsch läuft.
+-->
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>de</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+		<string>en</string>
+	</array>
+	<key>NSHumanReadableCopyright</key>
+	<string>© unname contributors · MIT</string>
+</dict>
+</plist>
