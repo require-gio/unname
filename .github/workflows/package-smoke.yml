@@ -33,7 +33,8 @@ env:
   ASSET_RUN_ID: ${{ inputs.asset_run_id }}
   TESSDATA_REVISION: ${{ inputs.tessdata_revision }}
   SIGNED_RELEASE: ${{ inputs.signed_release }}
-  GLINER_REVISION: f334163a5d1dcdbacf365c4527538e3da3ecfb18
+  # Set here because job-level env cannot read the env context.
+  PRESIDIO_GLINER_REVISION: f334163a5d1dcdbacf365c4527538e3da3ecfb18
 
 jobs:
   inputs:
@@ -90,12 +91,11 @@ jobs:
       # without initial setup and therefore includes models.
       PRESIDIO_BUNDLE_MODELS: "1"
       PRESIDIO_GLINER_SNAPSHOT: ${{ github.workspace }}/.bundle-inputs/gliner
-      PRESIDIO_GLINER_REVISION: ${{ env.GLINER_REVISION }}
       # The macOS package does not include Tesseract (M-9 and C-2 are Windows‑only);
       # prepare-sidecar-assets.py builds the vision helper instead.
       PRESIDIO_TESSERACT_ROOT: ${{ matrix.os == 'windows' && format('{0}/.bundle-inputs/tesseract', github.workspace) || '' }}
       PRESIDIO_TESSDATA_DIR: ${{ matrix.os == 'windows' && format('{0}/.bundle-inputs/tesseract/tessdata', github.workspace) || '' }}
-      PRESIDIO_TESSDATA_REVISION: ${{ env.TESSDATA_REVISION }}
+      PRESIDIO_TESSDATA_REVISION: ${{ inputs.tessdata_revision }}
       PRESIDIO_ASSET_TRUST_LOCK: ${{ github.workspace }}/sidecar/packaging/bundle-inputs.lock.json
       PRESIDIO_ASSET_TRUST_ID: ${{ matrix.asset }}
 
