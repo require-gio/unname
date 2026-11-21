@@ -44,9 +44,8 @@ app/src-tauri/gen/
 # ---------------------------------------------------------------------------
 # Modelle und Modelldaten (werden beim Bundling geholt, nicht versioniert)
 # ---------------------------------------------------------------------------
-# Anchored: the frontend has source folders called models/ (Tailwind skips ignored paths).
+# Ignore model data only; source directories named models/ stay versioned.
 /sidecar/models/
-/scripts/models/
 *.onnx
 *.safetensors
 *.bin

@@ -1,5 +1,9 @@
 name: Packaging, target-system smoke and release signature
 
+# Manual only. App release tags (v*) belong to release.yml, which builds the
+# unsigned release packages; this workflow keeps the signed and notarized path
+# for when the certificates exist.
+
 on:
   workflow_dispatch:
     inputs:
@@ -16,9 +20,6 @@ on:
         required: true
         default: false
         type: boolean
-  push:
-    tags:
-      - "v*"
 
 permissions:
   contents: read
@@ -29,9 +30,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ASSET_RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.asset_run_id || vars.BUNDLE_INPUTS_RUN_ID }}
-  TESSDATA_REVISION: ${{ github.event_name == 'workflow_dispatch' && inputs.tessdata_revision || vars.TESSDATA_REVISION }}
-  SIGNED_RELEASE: ${{ github.event_name == 'push' || inputs.signed_release }}
+  ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+  TESSDATA_REVISION: ${{ inputs.tessdata_revision }}
+  SIGNED_RELEASE: ${{ inputs.signed_release }}
   GLINER_REVISION: f334163a5d1dcdbacf365c4527538e3da3ecfb18
 
 jobs:

@@ -1,0 +1,57 @@
+name: Release PR
+
+# Guards pull requests into `release`: they come from main and carry exactly one
+# release:patch|minor|major label. The check reruns when a label changes and shows
+# the version that merging would release. scripts/release.mjs opens such a PR.
+
+on:
+  pull_request:
+    branches: [release]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Release label and version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require main as the source branch
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if [ "$HEAD_REF" != "main" ] || [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::Releases come from main of $GITHUB_REPOSITORY, not $HEAD_REPO:$HEAD_REF."
+            exit 1
+          fi
+
+      # All tags are needed to find the last app version.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Compute the release version from the label
+        env:
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          node scripts/release/version.mjs resolve --labels "$LABELS" > "$RUNNER_TEMP/version.txt"
+          . "$RUNNER_TEMP/version.txt"
+          {
+            echo "### Merging releases **v$version**"
+            echo
+            echo "| Last release | Level | New version |"
+            echo "|---|---|---|"
+            echo "| ${previous/#0.0.0/none} | $level | v$version |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Merging this PR releases v$version ($level)."

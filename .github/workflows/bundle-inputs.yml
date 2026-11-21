@@ -8,6 +8,12 @@ name: Bundle-Eingaben bauen (portables Tesseract)
 # macOS uses Apple Vision for OCR; Tesseract is built only for Windows, the macOS artifact
 # contains only the GLiNER snapshot.
 #
+# Each target gets two trust entries: `<asset>` for the package with models
+# (package-smoke.yml) and `<asset>-release` for the release package without them
+# (release.yml). The Windows Tesseract build is also published as the release
+# `bundle-inputs-<run id>`, so release.yml still finds it after the 90-day
+# artifact retention.
+#
 # Afterwards: verify the trust entries from the summary, copy them into
 # sidecar/packaging/bundle-inputs.lock.json (C-2) and set the repository variable
 # BUNDLE_INPUTS_RUN_ID.
@@ -121,6 +127,42 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # The release package carries no models; its entry covers only Tesseract
+      # (Windows) or nothing at all (macOS).
+      - name: Compute release trust entry (package without models)
+        run: |
+          tesseract=()
+          if [ "${{ matrix.tesseract }}" = "true" ]; then
+            tesseract=(--tesseract-root .bundle-inputs/tesseract)
+          fi
+          python scripts/prepare-sidecar-assets.py \
+            --target "${{ matrix.target }}" \
+            "${tesseract[@]}" \
+            --trust-asset-id "${{ matrix.asset }}-release" \
+            --print-input-trust > "${{ runner.temp }}/trust-${{ matrix.asset }}-release.json"
+          {
+            echo "### Trust entry ${{ matrix.asset }}-release (release package, no models)"
+            echo
+            echo '```json'
+            cat "${{ runner.temp }}/trust-${{ matrix.asset }}-release.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pack the Tesseract build for the release
+        if: matrix.tesseract
+        run: >-
+          python -c "import shutil, sys; shutil.make_archive(sys.argv[1], 'zip', sys.argv[2])"
+          "${{ runner.temp }}/tesseract-${{ matrix.asset }}" .bundle-inputs/tesseract
+
+      - name: Keep the Tesseract package for the release
+        if: matrix.tesseract
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-input-${{ matrix.asset }}
+          path: ${{ runner.temp }}/tesseract-${{ matrix.asset }}.zip
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Bundle-Eingaben ablegen
         uses: actions/upload-artifact@v4
         with:
@@ -133,6 +175,54 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bundle-trust-${{ matrix.asset }}
-          path: ${{ runner.temp }}/trust-${{ matrix.asset }}.json
+          path: |
+            ${{ runner.temp }}/trust-${{ matrix.asset }}.json
+            ${{ runner.temp }}/trust-${{ matrix.asset }}-release.json
           if-no-files-found: error
           retention-days: 90
+
+  publish:
+    name: Publish the Tesseract build as a release
+    needs: tesseract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: bundle-inputs-${{ github.run_id }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-input-*
+          path: release
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bundle-trust-*
+          path: trust
+          merge-multiple: true
+
+      # A prerelease that is never "latest": it is a build input, not an app release.
+      - name: Create release ${{ env.TAG }}
+        shell: bash
+        run: |
+          {
+            echo "Build inputs from run ${{ github.run_id }}. Not an app release."
+            echo
+            echo "release.yml downloads \`tesseract-windows-x64.zip\` from here while the repository"
+            echo "variable \`BUNDLE_INPUTS_RUN_ID\` is \`${{ github.run_id }}\`, and checks every file against"
+            echo "\`sidecar/packaging/bundle-inputs.lock.json\` before any of it runs. Review the entries"
+            echo "below, then copy them into that lock."
+            for entry in trust/*.json; do
+              echo
+              echo '```json'
+              cat "$entry"
+              echo '```'
+            done
+          } > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" release/* trust/*.json --target "$GITHUB_SHA" \
+            --prerelease --latest=false --title "Build inputs (run ${{ github.run_id }})" \
+            --notes-file "$RUNNER_TEMP/notes.md"

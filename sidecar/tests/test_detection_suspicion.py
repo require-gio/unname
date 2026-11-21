@@ -142,11 +142,11 @@ def test_job_titles_and_cloud_services_in_resume_not_name_suspicion() -> None:
 
 def test_bank_and_legal_form_turn_suspicion_into_company() -> None:
     findings = find_name_suspicions(
-        "Uneos AG (Volksbank Freiburg) Freiburg, Partner Kanzlei Beispiel GmbH, Hans Meier"
+        "Union AG (Volksbank Freiburg) Freiburg, Partner Kanzlei Beispiel GmbH, Hans Meier"
     )
 
     assert [(finding.entity_type, finding.text) for finding in findings] == [
-        ("ORGANIZATION", "Uneos AG"),
+        ("ORGANIZATION", "Union AG"),
         ("ORGANIZATION", "Volksbank Freiburg"),
         ("ORGANIZATION", "Partner Kanzlei Beispiel GmbH"),
         ("PERSON", "Hans Meier"),

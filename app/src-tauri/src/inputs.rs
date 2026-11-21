@@ -38,6 +38,7 @@ pub const DRAG_EVENT: &str = "inputs://drag";
 /// Drop zone selection event.
 pub const DROP_EVENT: &str = "inputs://dropped";
 /// Files opened via the dock or "Open with"; retrieve them with `take_opened`.
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub const OPENED_EVENT: &str = "inputs://opened";
 
 /// The sidecar accepts no more files per request (`MAX_FILES_PER_REQUEST`); a
@@ -338,6 +339,7 @@ pub struct OpenedInputs {
 }
 
 impl OpenedInputs {
+    #[cfg(any(target_os = "macos", target_os = "ios", test))]
     pub fn add(&self, paths: impl IntoIterator<Item = PathBuf>) {
         let mut pending = self.paths.lock().expect("Öffnen-Sperre vergiftet");
         for path in paths {
@@ -357,6 +359,7 @@ impl OpenedInputs {
 
 /// `RunEvent::Opened`: Paths are recorded like a staging area, the window comes
 /// to front. The app accepts no other URLs than files.
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 pub fn handle_opened(app: &AppHandle, urls: &[tauri::Url]) {
     let paths: Vec<PathBuf> = urls
         .iter()

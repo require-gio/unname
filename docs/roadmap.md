@@ -6,17 +6,19 @@ work is in the git history. The behavior this serves is in [spec.md](spec.md).
 
 ## Release blockers
 
-These keep unname from being released.
+Unsigned releases go through the release PR and `release.yml`
+([releasing.md](releasing.md)). These items stand between that and a signed,
+complete release.
 
 | Item | What is needed |
 |---|---|
-| **Signing, macOS** | An Apple Developer ID and notarization credentials (`APPLE_SIGNING_IDENTITY` plus an Apple ID or App Store Connect key). A provisioning profile with a keychain access group for the keychain work below. Until then `node scripts/build-distribution.mjs --adhoc` builds an ad hoc signed package with the real sandbox; it is not notarized and opens on other Macs only after "Open anyway". |
-| **Signing, Windows** | A code-signing certificate installed on the build machine, `WINDOWS_CERTIFICATE_SHA1` and an HTTPS `WINDOWS_TIMESTAMP_URL`. |
-| **Model hosting** | The model files go to Hugging Face (`Giorgi-KI/unname-app`) and a GitHub release mirror (`require-gio/unname`). `ner/` and `classifier/` are on Hugging Face; still to upload: the model card, licenses and the mirrors `de`, `en`, `ocr`, then tag `v1` (the app loads from `…/resolve/v1/…`; without the tag Hugging Face answers 404) and create the GitHub release `v1`. Afterwards check every address in `app/src-tauri/models.lock.json` (size, SHA-256, redirects only to allowed hosts). Any later change needs a new manifest **and** a new tag (`v2`); `v1` stays so older app versions still load. `python3 scripts/models/modelle.py spiegel` prepares the upload folder. |
-| **Trust lock** | Run the "Build bundle inputs (portable Tesseract)" workflow (`.github/workflows/bundle-inputs.yml`) once by hand and enter the resulting entries into `sidecar/packaging/bundle-inputs.lock.json` (`scripts/prepare-sidecar-assets.py --print-input-trust` computes them). Without the lock a local package cannot be built for that target; macOS arm64 without models is already entered. |
+| **Signing, macOS** | An Apple Developer ID and notarization credentials (`APPLE_SIGNING_IDENTITY` plus an Apple ID or App Store Connect key). A provisioning profile with a keychain access group for the keychain work below. Until then `release.yml` builds with `node scripts/build-distribution.mjs --adhoc`: an ad hoc signed package with the real sandbox, not notarized, which opens on other Macs only after "Open Anyway". |
+| **Signing, Windows** | A code-signing certificate installed on the build machine, `WINDOWS_CERTIFICATE_SHA1` and an HTTPS `WINDOWS_TIMESTAMP_URL`. Until then `release.yml` builds `--unsigned` and SmartScreen asks once. |
+| **Model hosting** | Hugging Face (`Giorgi-KI/unname-app`, tag `v1`) answers for every address in `app/src-tauri/models.lock.json`, model card and licenses included (status check 2026-11-21). Still to do: run "Model mirror on GitHub" (`.github/workflows/models-mirror.yml`) once to fill the GitHub release `models-v1`, then `python3 scripts/models/mirror.py check` for size, SHA-256 and redirect hosts of every address. Any later change needs a new manifest **and** new tags (`v2`, `models-v2`); `v1` stays so older app versions still load. |
+| **Trust lock** | Run the "Bundle-Eingaben bauen (portables Tesseract)" workflow (`.github/workflows/bundle-inputs.yml`) once by hand and enter the resulting entries into `sidecar/packaging/bundle-inputs.lock.json`; at least `windows-x64-release`, which `release.yml` needs. Then set the repository variable `BUNDLE_INPUTS_RUN_ID` to that run. Without the lock a package cannot be built for that target; `macos-arm64` and `macos-arm64-release` (both without models) are already entered. |
 | **Self-hosted runner** | A Windows 11 x64 runner with exactly 2 logical cores and 8 GB RAM, labels `windows-11` and `minimum-hardware`, for `package-smoke.yml` and A-14. |
-| **Version number** | Decide the first release version (today `app` 0.0.1, sidecar 0.1.0); it flows into the package name, the review report and the diagnostics report. |
-| **CI after pushing** | `bundle-inputs` and `package-smoke` have not run against the renamed directories yet; they run once the branch is pushed. |
+| **Version number** | Chosen with the label of the first release PR: there is no app tag yet, so `release:minor` gives 0.1.0 and `release:major` 1.0.0. The pipeline stamps it into the package name, the review report and the diagnostics report. |
+| **CI after pushing** | `bundle-inputs`, `package-smoke`, `release`, `release-pr` and `models-mirror` have not run yet. Try `release.yml` with "Run workflow" (a dry run without tag or release) before the first release PR. |
 
 ## External acceptance (spec section 11)
 
@@ -35,7 +37,8 @@ for each is under `external_check` in
 The smoke tests imitate the shell and the system dialogs. What only a human can
 operate goes here, once on macOS and once on Windows.
 
-In the signed or installed package:
+In the signed or installed package (the draft release of `release.yml` has
+the unsigned packages):
 
 - **Package smoke with signature**, then a first-run setup with a real download
   through the download service. `lsof -nP -p <sidecar pid> -iTCP` must show no

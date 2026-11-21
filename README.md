@@ -82,6 +82,7 @@ development and building signed packages are in
 | [docs/spec.md](docs/spec.md) | the behavioral contract and the acceptance criteria |
 | [docs/architecture.md](docs/architecture.md) | app ↔ shell ↔ sidecar, transport, vault, drafts, layout viewers |
 | [docs/development.md](docs/development.md) | setup, checks, test layers, building and signing |
+| [docs/releasing.md](docs/releasing.md) | the release PR, the release pipeline and the model mirror on GitHub |
 | [docs/detection.md](docs/detection.md) | the pipeline, profiles, master data, stopwords, second opinion, measuring quality |
 | [docs/acceptance.md](docs/acceptance.md) | how the criteria are proven, and the measurements |
 | [docs/roadmap.md](docs/roadmap.md) | what is still open |

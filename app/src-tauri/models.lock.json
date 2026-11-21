@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "revision": "2026-11-07",
+  "revision": "2026-11-21",
   "sources": {
     "huggingface": {
       "hosts": [
@@ -31,7 +31,7 @@
           "sha256": "559ae3e5c5303b008796a4543b315a66812c9458f4c8196bc91de291c2db716e",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/model.int8.onnx",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--model.int8.onnx"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/ner--model.int8.onnx"
           }
         },
         {
@@ -40,7 +40,7 @@
           "sha256": "76820f91efe9707c302bf98fdf83c246e5aee3d7e7428deef0b6039a317671f1",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/gliner_config.json",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--gliner_config.json"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/ner--gliner_config.json"
           }
         },
         {
@@ -49,7 +49,7 @@
           "sha256": "55a4404060e3e78b1d96de44c532bc87bc06e5808be2606d0160975d6a7b59a7",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/tokenizer.json",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--tokenizer.json"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/ner--tokenizer.json"
           }
         },
         {
@@ -58,7 +58,7 @@
           "sha256": "f20ff41a606741430f2372047916770d0394afa65b0e46d93c046f4ef3c5a236",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/ner/tokenizer_config.json",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/ner--tokenizer_config.json"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/ner--tokenizer_config.json"
           }
         }
       ]
@@ -428,7 +428,7 @@
           "sha256": "f04d63fb8e8d5a107f1430aec6b4518e91715144279df3d49ddac6e06a27d28c",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/model.int8.onnx",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--model.int8.onnx"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/classifier--model.int8.onnx"
           }
         },
         {
@@ -437,7 +437,7 @@
           "sha256": "5b58593a7e63f3c8b69801a92415fc0813dd287a3ba2f767cdf33106806fca11",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/tokenizer.json",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--tokenizer.json"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/classifier--tokenizer.json"
           }
         },
         {
@@ -446,7 +446,7 @@
           "sha256": "9b7e9e01c72c99bf696cec2ff592ef4500f83dc8ef7be2f0b8116772f24e4a9d",
           "urls": {
             "huggingface": "https://huggingface.co/Giorgi-KI/unname-app/resolve/v1/classifier/zweitmeinung.json",
-            "github": "https://github.com/require-gio/unname/releases/download/v1/classifier--zweitmeinung.json"
+            "github": "https://github.com/require-gio/unname/releases/download/models-v1/classifier--zweitmeinung.json"
           }
         }
       ]

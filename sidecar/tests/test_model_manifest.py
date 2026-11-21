@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import re
+import sys
 import zipfile
 from pathlib import Path, PurePosixPath
 from types import ModuleType
@@ -20,6 +22,16 @@ def _tool() -> ModuleType:
     spec = importlib.util.spec_from_file_location("modelle", REPO / "scripts/models/modelle.py")
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _mirror() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("mirror", REPO / "scripts/models/mirror.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    # Dataclasses look up their module in sys.modules while the class is built.
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -117,3 +129,69 @@ def test_package_contains_only_verified_files(tmp_path: Path) -> None:
     (tmp_path / "ner" / "model.int8.onnx").write_bytes(b"x" * len(content))
     with pytest.raises(SystemExit, match="weicht vom Manifest ab"):
         tool.build_package(manifest, {"ner": tmp_path / "ner"}, tmp_path / "zwei.zip")
+
+
+def test_manifest_addresses_match_the_tool() -> None:
+    """A renamed repository or tag in ``modelle.py`` must reach the manifest too."""
+
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert _tool().replace_addresses(manifest)["components"] == manifest["components"]
+
+
+def test_github_mirror_has_its_own_tag_family() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    tool, mirror = _tool(), _mirror()
+    assert mirror.DEFAULT_REPOSITORY == tool.GH_REPO
+    tag, files = mirror.mirror_plan(manifest, tool.GH_REPO, "main")
+    # App releases are tagged v<major>.<minor>.<patch>; the mirror never looks like one.
+    assert tag == tool.GH_SPIEGEL_TAG == "models-v1"
+    assert not re.fullmatch(r"v[0-9.]+", tag)
+    # Only our own files go into the release; spaCy and tessdata stay with the vendor.
+    assert sorted(file.asset for file in files) == [
+        "classifier--model.int8.onnx",
+        "classifier--tokenizer.json",
+        "classifier--zweitmeinung.json",
+        "ner--gliner_config.json",
+        "ner--model.int8.onnx",
+        "ner--tokenizer.json",
+        "ner--tokenizer_config.json",
+    ]
+    for file in files:
+        assert file.download.url.startswith(
+            "https://huggingface.co/Giorgi-KI/unname-app/resolve/main/"
+        )
+
+
+def test_mirror_refuses_a_tag_that_looks_like_an_app_release() -> None:
+    entry = {
+        "path": "model.int8.onnx",
+        "size": 1,
+        "sha256": "0" * 64,
+        "urls": {
+            "huggingface": "https://huggingface.co/o/r/resolve/v1/ner/model.int8.onnx",
+            "github": "https://github.com/o/r/releases/download/v1/ner--model.int8.onnx",
+        },
+    }
+    manifest = {"components": [{"id": "ner", "files": [entry]}]}
+    with pytest.raises(SystemExit, match="looks like an app version"):
+        _mirror().mirror_plan(manifest, "o/r", None)
+    with pytest.raises(SystemExit, match="no addresses in a release of other/repo"):
+        _mirror().mirror_plan(manifest, "other/repo", None)
+
+
+@pytest.mark.parametrize(
+    ("host", "allowed"),
+    [
+        ("us.aws.cdn.hf.co", True),
+        ("cas-bridge.xethub.hf.co", True),
+        ("huggingface.co", True),
+        ("hf.co", False),
+        ("evilhf.co", False),
+        ("huggingface.co.example.org", False),
+        ("release-assets.githubusercontent.com", False),
+    ],
+)
+def test_mirror_redirects_stay_on_the_hosts_of_their_source(host: str, allowed: bool) -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    hosts = manifest["sources"]["huggingface"]["hosts"]
+    assert _mirror().host_allowed(host, hosts) is allowed

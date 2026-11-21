@@ -197,6 +197,8 @@ def test_vision_states_reason_when_helper_is_missing(
 
     from presidio_sidecar.extraction import ocr_vision
 
+    # Frozen builds choose OCR by platform and ignore the development override.
+    monkeypatch.setattr(resources.sys, "platform", "darwin")
     monkeypatch.setenv(resources.OCR_ENGINE_ENV, "apple-vision")
     monkeypatch.delenv(resources.VISION_OCR_ENV, raising=False)
     ocr_vision.reset_probe()

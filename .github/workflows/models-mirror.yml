@@ -1,0 +1,86 @@
+name: Model mirror on GitHub
+
+# The app downloads model files from Hugging Face or, as a second source, from a
+# release of this repository. That release has its own tag family (models-v1,
+# models-v2, …), separate from the app releases (v0.2.0), and is never marked
+# "latest". This workflow copies the files models.lock.json expects there from
+# Hugging Face, checks each against the manifest, uploads what is missing, and
+# then downloads every GitHub address back to prove what the app will get.
+#
+# Run it once for each new mirror tag in the manifest. A file that is already in
+# the release is not replaced; if the check flags it, delete that asset and rerun.
+
+on:
+  workflow_dispatch:
+    inputs:
+      hf_revision:
+        description: Hugging Face revision to copy from (empty = the manifest's own, e.g. v1)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: models-mirror
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  mirror:
+    name: Copy, upload and check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch the files from Hugging Face and verify them
+        id: stage
+        env:
+          HF_REVISION: ${{ inputs.hf_revision }}
+        run: |
+          revision=()
+          [ -z "$HF_REVISION" ] || revision=(--hf-revision "$HF_REVISION")
+          python scripts/models/mirror.py stage --repository "$GITHUB_REPOSITORY" "${revision[@]}" \
+            --output "$RUNNER_TEMP/mirror" --notes "$RUNNER_TEMP/notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Create the release if it is missing
+        env:
+          TAG: ${{ steps.stage.outputs.tag }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG exists."
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" --latest=false \
+              --title "Model files ($TAG)" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
+
+      - name: Upload the missing files
+        env:
+          TAG: ${{ steps.stage.outputs.tag }}
+        run: |
+          present="$(gh release view "$TAG" --json assets --jq '.assets[].name')"
+          for file in "$RUNNER_TEMP/mirror"/*; do
+            name="$(basename "$file")"
+            if grep -qxF "$name" <<< "$present"; then
+              echo "= $name is already there (checked in the next step)"
+            else
+              gh release upload "$TAG" "$file"
+              echo "+ $name"
+            fi
+          done
+
+      - name: Download every GitHub address and check it
+        run: python scripts/models/mirror.py check --source github

@@ -80,6 +80,10 @@ jobs:
         working-directory: app
         run: npm test
 
+      # The release pipeline stamps the version on this Windows runner too (CRLF checkout).
+      - name: Release version logic and stamp
+        run: node --test "scripts/release/*.test.mjs"
+
       - name: Check external sources, font licenses and offline reference
         working-directory: app
         run: npm run test:smoke

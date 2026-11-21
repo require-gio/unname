@@ -252,8 +252,16 @@ signed package with the real sandbox.
 - `quality-gate.yml` – the detection quality gate, the full sidecar suite with
   Ruff, and the Rust suite with `fmt` and warning-free Clippy.
 - `bundle-inputs.yml` – builds the portable Tesseract and the bundle inputs (by
-  hand).
-- `package-smoke.yml` – builds and starts the actual packages. The Windows 11
+  hand), and publishes the Windows Tesseract as the release
+  `bundle-inputs-<run id>` for `release.yml`.
+- `release-pr.yml` and `release.yml` – the release PR from main into `release`
+  and the pipeline its merge starts: version from the PR label, ad hoc signed
+  DMG and unsigned Windows installers, built and started on hosted runners, then
+  tag and draft release. See [releasing.md](releasing.md).
+- `models-mirror.yml` – fills the GitHub release `models-v1` that
+  `models.lock.json` lists as the second model source (by hand).
+- `package-smoke.yml` – builds and starts the actual packages, by hand, and
+  keeps the signed and notarized release path. The Windows 11
   acceptance runs only on a self-hosted x64 runner with the labels `windows-11`
   and `minimum-hardware` and checks exactly two logical cores and 8 GB RAM there.
   Large, pinned bundle inputs are provided as separate GitHub artifacts through

@@ -1,0 +1,381 @@
+name: Release
+
+# Merging the release PR (main → release, see docs/releasing.md) builds and tests
+# the macOS and Windows packages, then tags v<version> and creates a draft GitHub
+# release with them. The version is the highest app tag, bumped by the PR's one
+# release:patch|minor|major label. Tags and the release are only created once both
+# packages are built and tested.
+#
+# "Run workflow" is a dry run: it builds and tests with the chosen level and keeps
+# the packages as workflow artifacts, but creates no tag and no release.
+#
+# Not signed yet: macOS is signed ad hoc (sandbox active, not notarized) and Windows
+# carries no Authenticode signature. package-smoke.yml keeps the signed path for
+# when the certificates exist.
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:
+    inputs:
+      level:
+        description: Bump level for the dry run (builds and tests; no tag, no release)
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    # Explicit bash runs with -o pipefail, on Windows too (Git Bash).
+    shell: bash
+
+jobs:
+  version:
+    name: Version
+    # Creating or deleting the branch is a push without a release PR.
+    if: github.event_name != 'push' || (!github.event.created && !github.event.deleted)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      previous: ${{ steps.resolve.outputs.previous }}
+      level: ${{ steps.resolve.outputs.level }}
+      version: ${{ steps.resolve.outputs.version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      # All tags are needed to find the last app version.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Find the merged release PR
+        id: pr
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # merge_commit_sha is the commit the merge put on release, for merge,
+          # squash and rebase merges alike. A direct push matches no PR.
+          gh api "repos/$GITHUB_REPOSITORY/pulls?state=closed&base=release&sort=updated&direction=desc&per_page=100" \
+            --jq "[.[] | select(.merged_at != null and .merge_commit_sha == \"$GITHUB_SHA\")] | first // empty" \
+            > "$RUNNER_TEMP/pr.json"
+          if [ ! -s "$RUNNER_TEMP/pr.json" ]; then
+            echo "::error::$GITHUB_SHA did not come from a merged pull request. Releases go through a PR from main into release (node scripts/release.mjs)."
+            exit 1
+          fi
+          echo "labels=$(jq -c '[.labels[].name]' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
+          echo "Release PR #$(jq -r .number "$RUNNER_TEMP/pr.json"): $(jq -r .title "$RUNNER_TEMP/pr.json")"
+
+      - name: Resolve the version
+        id: resolve
+        env:
+          LABELS: ${{ steps.pr.outputs.labels }}
+          LEVEL: ${{ inputs.level }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            node scripts/release/version.mjs resolve --labels "$LABELS" --commit "$GITHUB_SHA" > "$RUNNER_TEMP/version.txt"
+          else
+            node scripts/release/version.mjs resolve --level "$LEVEL" > "$RUNNER_TEMP/version.txt"
+          fi
+          tee -a "$GITHUB_OUTPUT" < "$RUNNER_TEMP/version.txt"
+          . "$RUNNER_TEMP/version.txt"
+          kind="Release"
+          [ "$GITHUB_EVENT_NAME" = push ] || kind="Dry run, no tag and no release:"
+          echo "### $kind v$version ($level, last release ${previous/#0.0.0/none})" >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: ${{ matrix.name }}
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS arm64 – DMG, ad hoc signed
+            runner: macos-15
+            os: macos
+            target: aarch64-apple-darwin
+            asset: macos-arm64
+          - name: Windows x64 – NSIS and MSI, unsigned
+            runner: windows-2025
+            os: windows
+            target: x86_64-pc-windows-msvc
+            asset: windows-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      # Release packages carry no models (first-run setup downloads them), so they
+      # use their own trust entries: macOS needs none, Windows only Tesseract.
+      PRESIDIO_ASSET_TRUST_LOCK: ${{ github.workspace }}/sidecar/packaging/bundle-inputs.lock.json
+      PRESIDIO_ASSET_TRUST_ID: ${{ matrix.asset }}-release
+      PRESIDIO_TESSERACT_ROOT: ${{ matrix.os == 'windows' && format('{0}/.bundle-inputs/tesseract', github.workspace) || '' }}
+
+    steps:
+      - name: Check Apple Silicon
+        if: matrix.os == 'macos'
+        run: test "$(uname -m)" = arm64 || { echo "::error::Expected Apple Silicon."; exit 1; }
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      # No Rust cache: a release compiles from scratch.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Stamp version ${{ needs.version.outputs.version }}
+        run: node scripts/release/set-version.mjs "$VERSION"
+
+      # The portable Tesseract comes from the release that "Bundle-Eingaben bauen"
+      # published; artifacts would expire after 90 days.
+      - name: Download the reviewed Tesseract build
+        if: matrix.os == 'windows'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUNDLE_INPUTS_RUN_ID: ${{ vars.BUNDLE_INPUTS_RUN_ID }}
+        run: |
+          if ! [[ "$BUNDLE_INPUTS_RUN_ID" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Set the repository variable BUNDLE_INPUTS_RUN_ID to the run of bundle-inputs.yml whose release holds tesseract-windows-x64.zip."
+            exit 1
+          fi
+          gh release download "bundle-inputs-$BUNDLE_INPUTS_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --pattern tesseract-windows-x64.zip --dir "$RUNNER_TEMP"
+
+      - name: Unpack the Tesseract build
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Expand-Archive -LiteralPath (Join-Path $env:RUNNER_TEMP 'tesseract-windows-x64.zip') `
+            -DestinationPath $env:PRESIDIO_TESSERACT_ROOT
+
+      # Hashes every downloaded byte against the reviewed lock before any of it runs,
+      # and fails if the lock has no release entry for this target.
+      - name: Verify bundle inputs against the trust lock
+        run: python scripts/prepare-sidecar-assets.py --target "${{ matrix.target }}" --verify-input-trust-only
+
+      - name: Install JavaScript dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Install sidecar dependencies
+        run: uv sync --project sidecar --frozen --group dev
+
+      - name: Test Vision helper and download service
+        if: matrix.os == 'macos'
+        run: |
+          xcodebuild -version
+          VISION_OCR_INTEGRATION=1 swift test --package-path vision-ocr
+          swift test --package-path download-xpc
+
+      - name: Build ad hoc signed macOS distribution
+        if: matrix.os == 'macos'
+        run: node scripts/build-distribution.mjs --target "${{ matrix.target }}" --adhoc
+
+      - name: Build unsigned Windows distribution
+        if: matrix.os == 'windows'
+        run: node scripts/build-distribution.mjs --target "${{ matrix.target }}" --unsigned
+
+      # Tauri names the files after the stamped version, so finding them also
+      # checks that the stamp reached the package.
+      - name: Collect release files
+        run: |
+          bundle="app/src-tauri/target/${{ matrix.target }}/release/bundle"
+          mkdir -p dist
+          take() {
+            local matches=( $1 )
+            if [ "${#matches[@]}" -ne 1 ] || [ ! -f "${matches[0]}" ]; then
+              echo "::error::Expected exactly one $1, found: ${matches[*]}"
+              exit 1
+            fi
+            cp "${matches[0]}" "dist/$2"
+            echo "dist/$2 ← ${matches[0]}"
+          }
+          if [ "${{ matrix.os }}" = macos ]; then
+            take "$bundle/dmg/unname_${VERSION}_*.dmg" "unname-$VERSION-macos-arm64.dmg"
+          else
+            take "$bundle/nsis/unname_${VERSION}_*-setup.exe" "unname-$VERSION-windows-x64-setup.exe"
+            take "$bundle/msi/unname_${VERSION}_*.msi" "unname-$VERSION-windows-x64.msi"
+          fi
+
+      - name: Mount the DMG read-only
+        id: dmg
+        if: matrix.os == 'macos'
+        run: |
+          mountpoint="$(mktemp -d "$RUNNER_TEMP/unname-dmg.XXXXXX")"
+          hdiutil attach "dist/unname-$VERSION-macos-arm64.dmg" -nobrowse -readonly -mountpoint "$mountpoint"
+          echo "mountpoint=$mountpoint" >> "$GITHUB_OUTPUT"
+          app_bundle="$(find "$mountpoint" -maxdepth 2 -name '*.app' -print -quit)"
+          sidecar="$app_bundle/Contents/MacOS/presidio-sidecar"
+          test -x "$app_bundle/Contents/MacOS/unname" && test -x "$sidecar"
+          cmp -s app/src-tauri/binaries/presidio-sidecar "$sidecar" || {
+            echo "::error::The sidecar in the DMG differs from the verified staging binary."
+            exit 1
+          }
+          version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_bundle/Contents/Info.plist")"
+          test "$version" = "$VERSION" || { echo "::error::The app reports $version, not $VERSION."; exit 1; }
+          echo "app=$app_bundle/Contents/MacOS/unname" >> "$GITHUB_OUTPUT"
+          echo "sidecar=$sidecar" >> "$GITHUB_OUTPUT"
+
+      - name: Run the app from the DMG
+        if: matrix.os == 'macos'
+        run: >-
+          node scripts/smoke-packaged-app.mjs
+          --app "${{ steps.dmg.outputs.app }}"
+          --sidecar "${{ steps.dmg.outputs.sidecar }}"
+          --skip-direct-sidecar
+
+      - name: Detach the DMG
+        if: always() && steps.dmg.outputs.mountpoint != ''
+        run: hdiutil detach "${{ steps.dmg.outputs.mountpoint }}" -force
+
+      # The setup.exe is what most people download, so the smoke test runs on
+      # what it installs.
+      - name: Install the NSIS package silently
+        id: nsis
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $setup = (Resolve-Path "dist/unname-$($env:VERSION)-windows-x64-setup.exe").Path
+          $target = Join-Path $env:RUNNER_TEMP 'unname-installed'
+          # /D= must come last and stay unquoted.
+          $install = Start-Process -FilePath $setup -ArgumentList '/S', "/D=$target" -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "NSIS installer failed with exit code $($install.ExitCode)." }
+          $apps = @(Get-ChildItem -LiteralPath $target -Recurse -Filter 'unname.exe' -File)
+          $sidecars = @(Get-ChildItem -LiteralPath $target -Recurse -Filter 'presidio-sidecar*.exe' -File)
+          if ($apps.Count -ne 1 -or $sidecars.Count -ne 1) {
+            throw "Installed files incomplete: app=$($apps.Count), sidecar=$($sidecars.Count)."
+          }
+          $version = $apps[0].VersionInfo.ProductVersion
+          if ($version -notlike "$($env:VERSION)*") { throw "unname.exe reports $version, not $($env:VERSION)." }
+          "app=$($apps[0].FullName)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          "sidecar=$($sidecars[0].FullName)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+
+      - name: Run the installed Windows app and sidecar
+        if: matrix.os == 'windows'
+        run: >-
+          node scripts/smoke-packaged-app.mjs
+          --app "${{ steps.nsis.outputs.app }}"
+          --sidecar "${{ steps.nsis.outputs.sidecar }}"
+
+      - name: Check the MSI contents
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $msi = (Resolve-Path "dist/unname-$($env:VERSION)-windows-x64.msi").Path
+          $destination = Join-Path $env:RUNNER_TEMP 'unname-msi'
+          $arguments = @('/a', "`"$msi`"", '/qn', "TARGETDIR=`"$destination`"")
+          $unpack = Start-Process msiexec.exe -ArgumentList $arguments -Wait -PassThru
+          if ($unpack.ExitCode -notin @(0, 3010)) { throw "Administrative MSI unpack failed: $($unpack.ExitCode)." }
+          $apps = @(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'unname.exe' -File)
+          $sidecars = @(Get-ChildItem -LiteralPath $destination -Recurse -Filter 'presidio-sidecar*.exe' -File)
+          if ($apps.Count -ne 1 -or $sidecars.Count -ne 1) {
+            throw "MSI contents incomplete: app=$($apps.Count), sidecar=$($sidecars.Count)."
+          }
+
+      - name: Keep the packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.asset }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Tag and draft release
+    needs: [version, build]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PREVIOUS: ${{ needs.version.outputs.previous }}
+      VERSION: ${{ needs.version.outputs.version }}
+      TAG: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+
+      - name: Write checksums
+        working-directory: dist
+        run: |
+          sha256sum -- * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      # A tag pushed with GITHUB_TOKEN starts no other workflow.
+      - name: Create tag ${{ needs.version.outputs.tag }}
+        run: |
+          existing="$(git rev-parse -q --verify "refs/tags/$TAG^{commit}" || true)"
+          if [ -n "$existing" ]; then
+            if [ "$existing" != "$GITHUB_SHA" ]; then
+              echo "::error::$TAG already exists on $existing, not on $GITHUB_SHA."
+              exit 1
+            fi
+            echo "$TAG already points at $GITHUB_SHA (re-run)."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "unname $VERSION" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG"
+          fi
+
+      - name: Create the draft release
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            sed "s/{{VERSION}}/$VERSION/g" .github/release-notes.md > "$RUNNER_TEMP/notes.md"
+            start=()
+            if git rev-parse -q --verify "refs/tags/v$PREVIOUS" > /dev/null; then
+              start=(--notes-start-tag "v$PREVIOUS")
+            fi
+            # The generated list of merged PRs is appended to the install notes.
+            gh release create "$TAG" dist/* --draft --verify-tag \
+              --title "unname $VERSION" --notes-file "$RUNNER_TEMP/notes.md" \
+              --generate-notes "${start[@]}"
+          fi
+          url="$(gh release view "$TAG" --json url --jq .url)"
+          {
+            echo "### Draft release unname $VERSION"
+            echo
+            echo "Try the packages, then publish: $url"
+          } >> "$GITHUB_STEP_SUMMARY"

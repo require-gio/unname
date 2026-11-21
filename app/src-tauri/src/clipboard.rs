@@ -1,10 +1,11 @@
 //! The shell's clipboard. Restored text contains real names. On macOS it stays
 //! on this device: no Universal Clipboard, marked as hidden and ephemeral so
-//! clipboard managers do not save it, and removed after [`RESTORED_LIFETIME`]
+//! clipboard managers do not save it, and removed after two minutes
 //! if no one else copied something else in the meantime. Masked text, by
 //! contrast, goes to an AI program, even on iPhone, and goes into the clipboard
 //! as before.
 
+#[cfg(target_os = "macos")]
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
@@ -12,6 +13,7 @@ use tauri::AppHandle;
 use tauri_plugin_clipboard_manager::ClipboardExt;
 
 /// How long restored text stays in the clipboard.
+#[cfg(target_os = "macos")]
 pub const RESTORED_LIFETIME: Duration = Duration::from_secs(120);
 
 /// What is copied; where the text may go depends on this.
@@ -37,12 +39,14 @@ pub struct CopyOutcome {
 
 /// The clipboard, insofar as clearing it is needed. The rule remains testable
 /// without AppKit behind the trait.
+#[cfg(any(target_os = "macos", test))]
 trait ChangeCounter {
     fn change_count(&self) -> isize;
     fn clear(&self);
 }
 
 /// Clears only if nothing new was copied since our own copy.
+#[cfg(any(target_os = "macos", test))]
 fn clear_if_unchanged(board: &impl ChangeCounter, expected: isize) -> bool {
     if board.change_count() != expected {
         return false;
