@@ -1,4 +1,4 @@
-name: Bundle-Eingaben bauen (portables Tesseract)
+name: Build bundle inputs (portable Tesseract)
 
 # Users do not install Tesseract themselves; it is included in the signed package.
 # This workflow builds it from source (scripts/tesseract-portable.py, vcpkg at a fixed commit)
@@ -40,7 +40,7 @@ jobs:
       matrix:
         include:
           - name: macOS arm64
-            runner: macos-14
+            runner: macos-15
             target: aarch64-apple-darwin
             asset: macos-arm64
             tesseract: false
@@ -163,7 +163,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Bundle-Eingaben ablegen
+      - name: Store bundle inputs
         uses: actions/upload-artifact@v4
         with:
           name: bundle-inputs-${{ matrix.asset }}
@@ -171,7 +171,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Trust-Eintrag ablegen
+      - name: Store trust-entry
         uses: actions/upload-artifact@v4
         with:
           name: bundle-trust-${{ matrix.asset }}

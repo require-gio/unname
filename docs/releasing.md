@@ -96,7 +96,7 @@ explain both. Once the certificates exist, the signed and notarized path in
 
 ## One-time setup
 
-1. **Windows build inputs.** Run **Bundle-Eingaben bauen (portables Tesseract)**
+1. **Windows build inputs.** Run **Build bundle inputs (portable Tesseract)**
    once (Actions › Run workflow). Its summary shows the trust entries. Review
    them and copy at least `windows-x64-release` into
    [`sidecar/packaging/bundle-inputs.lock.json`](../sidecar/packaging/bundle-inputs.lock.json)

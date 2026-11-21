@@ -73,6 +73,9 @@ _SYSTEM_WINDOWS_DLLS = frozenset(
         "version.dll",
         "wldap32.dll",
         "ws2_32.dll",
+        # In System32 on every supported Windows; vcpkg's libarchive (a Tesseract
+        # dependency) reads XAR archives with it instead of libxml2.
+        "xmllite.dll",
     }
 )
 
@@ -1395,7 +1398,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             snapshot, tesseract, tessdata, _revision, trust = _trusted_inputs_from_args(args)
             _verify_declared_source_trust(snapshot, tesseract, tessdata, trust)
             print(
-                f"Bundle-Eingaben fuer {trust.asset_id!r} stimmen mit {trust.lock_path} ueberein."
+                f"Bundle inputs for {trust.asset_id!r} comply with {trust.lock_path}."
             )
             return 0
         sources = sources_from_args(args)

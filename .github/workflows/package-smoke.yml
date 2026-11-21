@@ -72,7 +72,7 @@ jobs:
             target: x86_64-pc-windows-msvc
             asset: windows-x64
           - name: macOS arm64 – package and first launch
-            runner: macos-14
+            runner: macos-15
             platform: macos-arm64
             os: macos
             target: aarch64-apple-darwin

@@ -24,7 +24,7 @@ jobs:
             runner: windows-2025
             os: windows
           - name: macOS Apple Silicon
-            runner: macos-14
+            runner: macos-15
             os: macos
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(uname -m)" = "arm64" || { echo "macos-14 muss auf Apple Silicon laufen." >&2; exit 1; }
+          test "$(uname -m)" = "arm64" || { echo "macos-15 muss auf Apple Silicon laufen." >&2; exit 1; }
 
       - uses: actions/checkout@v4
 

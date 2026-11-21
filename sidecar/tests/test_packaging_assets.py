@@ -490,6 +490,7 @@ def test_pe_imports_are_read_without_dumpbin(prepare_module: ModuleType, tmp_pat
     )
     assert prepare_module.is_system_dll("KERNEL32.dll")
     assert prepare_module.is_system_dll("api-ms-win-crt-runtime-l1-1-0.dll")
+    assert prepare_module.is_system_dll("XmlLite.dll")
     assert not prepare_module.is_system_dll("leptonica-1.87.0.dll")
 
     binary.write_bytes(b"MZ kaputt")
