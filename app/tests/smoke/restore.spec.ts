@@ -7,6 +7,7 @@ import {
 	harness,
 	open,
 	WITHOUT_CONTENT,
+	lastCopy,
 	type Capture
 } from './harness.js';
 
@@ -165,7 +166,6 @@ test('Milestone G: AI answer with codes from two entries, unknown code, nothing 
 	context,
 	page
 }) => {
-	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: APP_ORIGIN });
 	const { capture } = await restoreHarness(context);
 	await open(page, `/entry/${HERE}/restore`);
 
@@ -220,7 +220,7 @@ test('Milestone G: AI answer with codes from two entries, unknown code, nothing 
 
 	await page.getByRole('button', { name: 'Kopieren' }).click();
 	await expect(page.getByText('Kopiert – mit den echten Namen.')).toBeVisible();
-	expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(WITH_NAMES);
+	expect(lastCopy(capture)).toEqual({ text: WITH_NAMES, kind: 'restored' });
 	await expect
 		.poll(
 			() =>

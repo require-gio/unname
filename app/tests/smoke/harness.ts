@@ -152,6 +152,12 @@ export interface Capture {
 	requests: { method: string; path: string; search: string; body: unknown }[];
 }
 
+/** What the app last handed to the shell's clipboard (`copy_text`). */
+export function lastCopy(capture: Capture): { text: unknown; kind: unknown } | undefined {
+	const last = capture.commands.findLast((call) => call.command === 'copy_text');
+	return last && { text: last.args.text, kind: last.args.kind };
+}
+
 /** Response without body (204), e.g., for `DELETE`. */
 export const WITHOUT_CONTENT = Symbol('204');
 
@@ -318,8 +324,8 @@ export async function harness(
 						case 'read_clipboard_text':
 							return 'Hallo Frau Hofer,\n\nviele Grüße\nJosef Brandstetter';
 						case 'copy_text':
-							// The browser clipboard stands in for the shell's, so tests can read it back.
-							await navigator.clipboard.writeText(String(args.text));
+							// Tests read the text from `capture.commands` (see `lastCopy`), not from
+							// the OS clipboard: Windows turns its line breaks into CRLF.
 							// The plain path of clipboard.rs. Only macOS keeps restored text on the
 							// device and clears it after 120 s; the tests expect the plain messages.
 							return { local_only: false, clears_after_s: null };

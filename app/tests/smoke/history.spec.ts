@@ -208,6 +208,8 @@ test('rename: success, empty title and sidecar error', async ({ context, page })
 	await expect(dialog).toContainText(`#${ref(1)}`);
 	const field = dialog.getByRole('textbox', { name: 'Titel' });
 	await expect(field).toHaveValue('Dokument');
+	// Opens on the title, so typing replaces it and Enter saves.
+	await expect(field).toBeFocused();
 
 	// Escape closes without request, focus returns to the trigger.
 	await page.keyboard.press('Escape');
@@ -249,7 +251,8 @@ test('rename: success, empty title and sidecar error', async ({ context, page })
 	await table(page)
 		.getByRole('button', { name: /^Umbenennen: Projekt Nord/ })
 		.click();
-	await dialog.getByRole('textbox', { name: 'Titel' }).fill('Angebot Süd');
+	await expect(field).toBeFocused();
+	await field.fill('Angebot Süd');
 	await page.keyboard.press('Enter');
 	await expect(dialog).toBeHidden();
 	await expect(page.getByRole('searchbox', { name: /suchen/ })).toBeFocused();

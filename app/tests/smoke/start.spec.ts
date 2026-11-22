@@ -5,6 +5,7 @@ import {
 	FILE,
 	STANDARD,
 	board,
+	lastCopy,
 	entry,
 	harness,
 	open,
@@ -137,7 +138,6 @@ test('Dropping on the window follows the same path', async ({ context, page }) =
 });
 
 test('Live masking in text mode, copy writes and creates an entry', async ({ context, page }) => {
-	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: APP_ORIGIN });
 	const text = 'Hallo Frau Hofer,\n\nviele Grüße\nJosef Brandstetter';
 	const codeA = '<<PERSON_51c2e8d4>>';
 	const codeB = '<<PERSON_3f9a1c07>>';
@@ -212,7 +212,7 @@ test('Live masking in text mode, copy writes and creates an entry', async ({ con
 
 	await page.getByRole('button', { name: 'Kopieren' }).click();
 	await expect(page.getByText(/^Kopiert/)).toBeVisible();
-	expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(output);
+	expect(lastCopy(capture)).toEqual({ text: output, kind: 'masked' });
 	// Afterwards, “restore answer” creates a new entry.
 	await expect(outputCard.getByRole('link', { name: 'Antwort zurückübersetzen' })).toHaveAttribute(
 		'href',
