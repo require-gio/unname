@@ -233,10 +233,11 @@ jobs:
           hdiutil attach "dist/unname-$VERSION-macos-arm64.dmg" -nobrowse -readonly -mountpoint "$mountpoint"
           echo "mountpoint=$mountpoint" >> "$GITHUB_OUTPUT"
           app_bundle="$(find "$mountpoint" -maxdepth 2 -name '*.app' -print -quit)"
-          sidecar="$app_bundle/Contents/MacOS/presidio-sidecar"
+          # A onedir folder in Resources: a onefile sidecar cannot start in the sandbox.
+          sidecar="$app_bundle/Contents/Resources/presidio-sidecar/presidio-sidecar"
           test -x "$app_bundle/Contents/MacOS/unname" && test -x "$sidecar"
-          cmp -s app/src-tauri/binaries/presidio-sidecar "$sidecar" || {
-            echo "::error::The sidecar in the DMG differs from the verified staging binary."
+          node scripts/sidecar-artifact.mjs same app/src-tauri/binaries/presidio-sidecar-macos "$app_bundle/Contents/Resources/presidio-sidecar" || {
+            echo "::error::The sidecar in the DMG differs from the verified staging folder."
             exit 1
           }
           version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_bundle/Contents/Info.plist")"
@@ -246,6 +247,7 @@ jobs:
 
       - name: Run the app from the DMG
         if: matrix.os == 'macos'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.dmg.outputs.app }}"
@@ -281,6 +283,8 @@ jobs:
 
       - name: Run the installed Windows app and sidecar
         if: matrix.os == 'windows'
+        # The test takes a few minutes at most; a hang should fail, not hold the job.
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.nsis.outputs.app }}"

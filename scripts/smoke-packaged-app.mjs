@@ -90,16 +90,57 @@ function processEnd(proc_handle) {
 async function terminate(proc_handle, signal = "SIGTERM") {
   if (!proc_handle || proc_handle.exitCode !== null || proc_handle.signalCode !== null)
     return;
-  proc_handle.kill(signal);
+  if (process.platform === "win32") {
+    await terminateWindowsTree(proc_handle);
+  } else {
+    proc_handle.kill(signal);
+    try {
+      await mitTimeout(
+        processEnd(proc_handle),
+        15_000,
+        "Prozessende dauerte zu lang.",
+      );
+    } catch {
+      proc_handle.kill("SIGKILL");
+      await processEnd(proc_handle);
+    }
+  }
+  // A surviving grandchild could still hold the write ends of these pipes;
+  // Node would then wait for them forever after the last check.
+  proc_handle.stdout?.destroy();
+  proc_handle.stderr?.destroy();
+}
+
+/**
+ * On Windows, kill() ends only the given process (TerminateProcess). The
+ * onefile sidecar's Python child would survive it as an orphan — started with
+ * --keep-running-without-parent it never exits, and it keeps this script's
+ * pipes open. The leaves of the tree go first, so the onefile bootloader can
+ * remove its unpack folder and exit by itself; whatever is still running after
+ * the grace period is ended with taskkill /T /F.
+ */
+async function terminateWindowsTree(proc_handle) {
+  const tree = getDescendants(windowsProcesses(), proc_handle.pid);
+  const parents = new Set(tree.map((entry) => entry.ppid));
+  for (const leaf of tree.filter((entry) => !parents.has(entry.pid))) {
+    try {
+      process.kill(leaf.pid);
+    } catch {
+      // Already gone.
+    }
+  }
   try {
+    await mitTimeout(processEnd(proc_handle), 5_000, "Prozessende dauerte zu lang.");
+  } catch {
+    spawnSync("taskkill", ["/PID", String(proc_handle.pid), "/T", "/F"], {
+      stdio: "ignore",
+      windowsHide: true,
+    });
     await mitTimeout(
       processEnd(proc_handle),
       15_000,
-      "Prozessende dauerte zu lang.",
+      `Prozess ${proc_handle.pid} ließ sich nicht beenden.`,
     );
-  } catch {
-    proc_handle.kill("SIGKILL");
-    await processEnd(proc_handle);
   }
 }
 
@@ -438,30 +479,35 @@ async function warteAufAppSidecar(appProzess) {
         `App endete vor dem Sidecar-Start (Code ${appProzess.exitCode}, Signal ${appProzess.signalCode}).`,
       );
     }
-    const kinder = getDescendants(processes(), appProzess.pid);
-    const sidecar = kinder.find(isSidecarProcess);
-    if (sidecar && process.platform !== "win32") {
-      // Ensure the bundled sidecar listens on the Unix socket, not on a TCP port.
-      if (loopbackListener(sidecar.pid).length > 0) {
-        throw new Error(
-          "Gebündeltes Sidecar lauscht auf TCP statt am Unix-Socket (Phase Z1).",
-        );
-      }
-      for (const path_arg of socketListener(sidecar.pid)) {
-        if (await respondsOnSocket(path_arg))
-          return { sidecar, listener: [{ address: "unix", port: path_arg }] };
-      }
-    } else if (sidecar) {
-      const listener = loopbackListener(sidecar.pid);
-      if (listener.length > 0) {
-        if (listener.some(({ address }) => !isLoopback(address))) {
+    // The onefile sidecar on Windows runs as two processes: the bootloader the
+    // app spawns, and the child it starts, which alone holds the listener.
+    // Both carry the same name, so every one of them is checked. (The macOS
+    // onedir sidecar is a single process.)
+    const sidecars = getDescendants(processes(), appProzess.pid).filter(
+      isSidecarProcess,
+    );
+    for (const sidecar of sidecars) {
+      if (process.platform !== "win32") {
+        // Ensure the bundled sidecar listens on the Unix socket, not on a TCP port.
+        if (loopbackListener(sidecar.pid).length > 0) {
           throw new Error(
-            `Gebündeltes Sidecar lauscht nicht nur auf Loopback: ${JSON.stringify(listener)}`,
+            "Gebündeltes Sidecar lauscht auf TCP statt am Unix-Socket (Phase Z1).",
           );
         }
-        for (const address_str of listener) {
-          if (await respondsAsSidecar(address_str)) return { sidecar, listener };
+        for (const path_arg of socketListener(sidecar.pid)) {
+          if (await respondsOnSocket(path_arg))
+            return { sidecar, listener: [{ address: "unix", port: path_arg }] };
         }
+        continue;
+      }
+      const listener = loopbackListener(sidecar.pid);
+      if (listener.some(({ address }) => !isLoopback(address))) {
+        throw new Error(
+          `Gebündeltes Sidecar lauscht nicht nur auf Loopback: ${JSON.stringify(listener)}`,
+        );
+      }
+      for (const address_str of listener) {
+        if (await respondsAsSidecar(address_str)) return { sidecar, listener };
       }
     }
     await pause(POLL_MS);
@@ -577,5 +623,6 @@ try {
       process.kill(appSidecarPid, "SIGKILL");
     }
   }
-  rmSync(stateDirectory, { recursive: true, force: true });
+  // Windows may hold file handles for a moment after a process ended.
+  rmSync(stateDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
 }

@@ -10,6 +10,9 @@ bun.lockb
 /build/
 /src-tauri/target/
 /src-tauri/gen/
+# Build output of scripts/build-sidecar.mjs and build-download-xpc.mjs; the macOS
+# sidecar folder carries the JSON files of its Python packages.
+/src-tauri/binaries/
 
 # Erzeugt von scripts/models/modelle.py (Hashes und Größen der Modelle).
 /src-tauri/models.lock.json

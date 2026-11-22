@@ -197,7 +197,7 @@ Rules that keep the view honest:
 | `org.unname.desktop.download` | XPC service with its own sandbox and the only network right in the package. Checks HTTPS, host and redirects; the shell checks size and SHA-256. See [download-xpc/README.md](../download-xpc/README.md). |
 | Sandbox entitlements | The app has `network.client` (WKWebView needs it) but no `network.server`; helpers inherit the sandbox. |
 | Name detection | GLiNER on ONNX Runtime with its own runner (`detection/gliner_onnx.py`), CPU only, no PyTorch at runtime. |
-| Frozen sidecar | A onedir build; in a release only the bundled binary and `assets/` from the signed package count. |
+| Frozen sidecar | On macOS a PyInstaller onedir folder in `Contents/Resources/presidio-sidecar` (a onefile bootloader cannot start in the App Sandbox); on Windows a onefile binary next to `unname.exe`. In a release only the bundled sidecar and its `assets/` from the signed package count. |
 
 ## Frontend structure
 

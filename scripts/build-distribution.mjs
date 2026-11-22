@@ -21,12 +21,18 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { chmodSync, copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+
+import { SIDECAR_EXECUTABLE, artifactSha256, sidecarLayout } from './sidecar-artifact.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const APP = resolve(ROOT, 'app');
+// tauri.bundle.macos.conf.json copies this folder to Contents/Resources/presidio-sidecar;
+// the app starts Contents/Resources/presidio-sidecar/presidio-sidecar (sidecar.rs).
+const MAC_SIDECAR_STAGED = resolve(APP, 'src-tauri', 'binaries', 'presidio-sidecar-macos');
+const MAC_SIDECAR_IN_BUNDLE = ['Contents', 'Resources', SIDECAR_EXECUTABLE];
+const LIBRARY_VALIDATION_EXCEPTION = 'com.apple.security.cs.disable-library-validation';
 const NOTARIZATION_VARIABLES = [
 	'APPLE_ID',
 	'APPLE_PASSWORD',
@@ -80,11 +86,13 @@ if (mac) {
 	run(process.execPath, xpcArgs, ROOT);
 }
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+// Node refuses to spawn npm.cmd without a shell on Windows (CVE-2024-27980:
+// spawnSync EINVAL), so the Tauri CLI runs through Node itself, on every
+// platform. Tauri still runs beforeBuildCommand through its own shell.
+const tauriCli = resolve(APP, 'node_modules', '@tauri-apps', 'cli', 'tauri.js');
+if (!existsSync(tauriCli)) fail(`Tauri-CLI fehlt (${tauriCli}); vorher npm ci in app/ ausführen.`);
 const tauriArgs = [
-	'run',
-	'tauri',
-	'--',
+	tauriCli,
 	'build',
 	'--ci',
 	'--target',
@@ -109,7 +117,8 @@ if (unsigned) {
 	tauriArgs.push('--config', 'src-tauri/tauri.release.windows.conf.json');
 }
 
-run(npm, tauriArgs, APP, tauriEnvironment);
+run(process.execPath, tauriArgs, APP, tauriEnvironment);
+if (mac) verifyBundledMacSidecar(target);
 if (adhoc) verifyAdhocApp(target);
 
 console.log(
@@ -197,23 +206,45 @@ function prepareNativeSidecar(path, value) {
 		return;
 	}
 
-	// Sign all collected Mach-O files and the outer one-file binary together with
-	// SidecarEntitlements.plist. Re-signing here would overwrite those helper entitlements.
-	run('codesign', ['--verify', '--deep', '--strict', '--verbose=2', path], ROOT);
-	verifyMacHelperSignature(path);
+	// PyInstaller already signed every Mach-O file of the onedir folder with the
+	// sidecar entitlements (build-sidecar.mjs verified each one). Re-signing here
+	// would overwrite those helper entitlements.
+	const executable = resolve(path, SIDECAR_EXECUTABLE);
+	run('codesign', ['--verify', '--strict', '--verbose=2', executable], ROOT);
+	verifyMacHelperSignature(executable);
 }
 
 function stageMacSidecar(path, requireReleaseSignature) {
-	const staged = resolve(APP, 'src-tauri', 'binaries', 'presidio-sidecar');
-	copyFileSync(path, staged);
-	chmodSync(staged, 0o755);
-	if (sha256(staged) !== sha256(path)) {
+	rmSync(MAC_SIDECAR_STAGED, { recursive: true, force: true });
+	cpSync(path, MAC_SIDECAR_STAGED, { recursive: true, verbatimSymlinks: true });
+	if (artifactSha256(MAC_SIDECAR_STAGED) !== artifactSha256(path)) {
 		fail('Das für den macOS-App-Bundle bereitgestellte Sidecar weicht vom Build-Artefakt ab.');
 	}
 	if (requireReleaseSignature) {
-		run('codesign', ['--verify', '--deep', '--strict', '--verbose=2', staged], ROOT);
-		verifyMacHelperSignature(staged);
+		const executable = resolve(MAC_SIDECAR_STAGED, SIDECAR_EXECUTABLE);
+		run('codesign', ['--verify', '--strict', '--verbose=2', executable], ROOT);
+		verifyMacHelperSignature(executable);
 	}
+}
+
+/**
+ * Tauri copies the staged folder into the bundle and must not change it: a
+ * resolved symlink or a lost executable bit breaks the sidecar, and a re-sign
+ * would replace its entitlements.
+ */
+function verifyBundledMacSidecar(value) {
+	const folder = resolve(APP, 'src-tauri', 'target', value, 'release', 'bundle', 'macos');
+	const bundles = existsSync(folder) ? readdirSync(folder).filter((name) => name.endsWith('.app')) : [];
+	if (bundles.length !== 1) fail(`Genau ein .app-Bundle erwartet in ${folder}, gefunden: ${bundles.length}`);
+	const bundled = resolve(folder, bundles[0], ...MAC_SIDECAR_IN_BUNDLE);
+	if (!existsSync(resolve(bundled, SIDECAR_EXECUTABLE))) {
+		fail(`Das Sidecar fehlt im App-Bundle: ${resolve(bundled, SIDECAR_EXECUTABLE)}`);
+	}
+	if (artifactSha256(bundled) !== artifactSha256(MAC_SIDECAR_STAGED)) {
+		fail('Das Sidecar im App-Bundle weicht vom bereitgestellten Ordner ab.');
+	}
+	if (!unsigned) verifyMacHelperSignature(resolve(bundled, SIDECAR_EXECUTABLE));
+	console.log(`\n  ✓ Sidecar im Bundle unverändert (${MAC_SIDECAR_IN_BUNDLE.join('/')}).`);
 }
 
 function verifyMacHelperSignature(path) {
@@ -242,6 +273,13 @@ function verifyMacHelperSignature(path) {
 			fail(`Das macOS-Sidecar trägt ${entitlement}.`);
 		}
 	}
+	// Ad hoc signatures have no Team ID, so the onedir libraries only load with
+	// this exception (SidecarEntitlements.adhoc.plist). A Developer ID build
+	// shares one Team ID and must keep library validation.
+	const escaped = LIBRARY_VALIDATION_EXCEPTION.replaceAll('.', '\\.');
+	const exception = new RegExp(`<key>${escaped}</key>\\s*<true\\s*/>`).test(output);
+	if (adhoc && !exception) fail(`Das ad-hoc-Sidecar trägt ${LIBRARY_VALIDATION_EXCEPTION} nicht.`);
+	if (release && exception) fail(`Das Release-Sidecar trägt ${LIBRARY_VALIDATION_EXCEPTION}.`);
 }
 
 /**
@@ -293,11 +331,11 @@ function verifyArtifactManifest(path, value, requireCodesigned) {
 		manifest.schema !== 1 ||
 		manifest.target !== value ||
 		manifest.binary !== basename(path) ||
-		manifest.pyinstaller !== 'onefile'
+		manifest.pyinstaller !== sidecarLayout(value)
 	) {
 		fail('Artefaktmanifest und angefordertes Sidecar stimmen nicht überein.');
 	}
-	if (manifest.sha256 !== sha256(path)) {
+	if (manifest.sha256 !== artifactSha256(path)) {
 		fail('SHA-256 des Sidecars stimmt nicht mit seinem Artefaktmanifest überein.');
 	}
 	if (requireCodesigned && manifest.codesigned !== true) {
@@ -308,14 +346,11 @@ function verifyArtifactManifest(path, value, requireCodesigned) {
 function refreshArtifactManifest(path, value, codesigned) {
 	const manifestPath = artifactManifestPath(path, value);
 	const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-	manifest.sha256 = sha256(path);
+	manifest.sha256 = artifactSha256(path);
 	manifest.codesigned = codesigned;
 	writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 }
 
-function sha256(path) {
-	return createHash('sha256').update(readFileSync(path)).digest('hex');
-}
 
 function allPresent(...names) {
 	return names.every((name) => Boolean(process.env[name]?.trim()));

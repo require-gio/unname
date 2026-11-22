@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Build the Python sidecar as a Tauri-compatible PyInstaller one-file binary.
+ * Build the Python sidecar with PyInstaller: a onedir folder on macOS, a
+ * Tauri-compatible onefile binary on Windows (see sidecar-artifact.mjs).
  *
  * This script only orchestrates: asset preparation and PyInstaller run
  * inside the locked sidecar/uv environment. No cross-compilation is performed;
@@ -8,9 +9,16 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
+
+import {
+  SIDECAR_EXECUTABLE,
+  artifactSha256,
+  frameworkBundles,
+  machOFiles,
+  sidecarLayout,
+} from "./sidecar-artifact.mjs";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const SIDECAR = resolve(ROOT, "sidecar");
@@ -21,6 +29,14 @@ const DEFAULT_ENTITLEMENTS = resolve(
   "app",
   "src-tauri",
   "SidecarEntitlements.plist",
+);
+// Ad hoc signatures carry no Team ID, so library validation would reject every
+// library of the folder; this variant adds only that exception.
+const ADHOC_ENTITLEMENTS = resolve(
+  ROOT,
+  "app",
+  "src-tauri",
+  "SidecarEntitlements.adhoc.plist",
 );
 
 const HELP = `
@@ -40,7 +56,8 @@ Optionen:
   --tessdata-revision REV   Voller Commit-Hash der tessdata-Quelle (nicht macOS)
   --spacy-model PFAD        Optionaler de_core_news_lg-Datenordner
   --assets-dir PFAD         Staging-Ausgabe (Vorgabe sidecar/bundle-assets)
-  --output-dir PFAD         Binary-Ausgabe (Vorgabe app/src-tauri/binaries)
+  --output-dir PFAD         Ausgabe (Vorgabe app/src-tauri/binaries); macOS
+                            erhaelt einen onedir-Ordner, Windows eine .exe
   --skip-prepare            Vorhandenes, zielgleiches Asset-Manifest verwenden
   --assets-only             Nach erfolgreicher Asset-Vorbereitung beenden
   --codesign-identity ID    macOS-Identity (sonst APPLE_SIGNING_IDENTITY)
@@ -164,9 +181,6 @@ function addOption(args, option, value) {
   if (value) args.push(option, value);
 }
 
-function sha256(path) {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
-}
 
 const options = parseArgs(process.argv.slice(2));
 const host = hostTriple();
@@ -222,13 +236,10 @@ if (assetMetadata.schema !== 1 || assetMetadata.target !== target) {
 if (options.assetsOnly) process.exit(0);
 
 let entitlements = options.entitlements;
-if (
-  process.platform === "darwin" &&
-  options.codesignIdentity &&
-  !entitlements &&
-  existsSync(DEFAULT_ENTITLEMENTS)
-) {
-  entitlements = DEFAULT_ENTITLEMENTS;
+if (process.platform === "darwin" && options.codesignIdentity && !entitlements) {
+  const preferred =
+    options.codesignIdentity === "-" ? ADHOC_ENTITLEMENTS : DEFAULT_ENTITLEMENTS;
+  if (existsSync(preferred)) entitlements = preferred;
 }
 if (
   process.platform === "darwin" &&
@@ -245,6 +256,14 @@ if (entitlements && !existsSync(entitlements)) fail(`Entitlements fehlen: ${enti
 mkdirSync(options.outputDirectory, { recursive: true });
 const workDirectory = resolve(SIDECAR, ".pyinstaller", target);
 const binaryBase = `presidio-sidecar-${target}`;
+const layout = sidecarLayout(target);
+const artifact = resolve(
+  options.outputDirectory,
+  process.platform === "win32" ? `${binaryBase}.exe` : binaryBase,
+);
+// A build of the other layout leaves a file where a folder must go (or the
+// reverse), and PyInstaller refuses to replace it.
+rmSync(artifact, { recursive: true, force: true });
 const pyinstaller = [
   "run",
   "--project",
@@ -262,6 +281,8 @@ const pyinstaller = [
 const buildEnvironment = {
   PRESIDIO_SIDECAR_TARGET: target,
   PRESIDIO_SIDECAR_BINARY_NAME: binaryBase,
+  PRESIDIO_SIDECAR_LAYOUT: layout,
+  PRESIDIO_SIDECAR_EXECUTABLE_NAME: SIDECAR_EXECUTABLE,
   PRESIDIO_SIDECAR_ASSETS: resolve(options.assetsDirectory),
   PRESIDIO_CODESIGN_IDENTITY: options.codesignIdentity ?? "",
   PRESIDIO_ENTITLEMENTS_FILE: entitlements ?? "",
@@ -270,24 +291,48 @@ const buildEnvironment = {
 };
 run("uv", pyinstaller, buildEnvironment);
 
-const executable = resolve(
-  options.outputDirectory,
-  process.platform === "win32" ? `${binaryBase}.exe` : binaryBase,
-);
+const executable =
+  layout === "onedir" ? resolve(artifact, SIDECAR_EXECUTABLE) : artifact;
 if (!existsSync(executable)) fail(`PyInstaller-Ausgabe fehlt: ${executable}`);
 
+if (process.platform === "darwin" && options.codesignIdentity && layout === "onedir") {
+  // PyInstaller rebuilds the layout of collected frameworks (Python.framework)
+  // but seals them only when it builds an .app. In a onedir folder the
+  // framework binary's signature expects a _CodeSignature that is missing, and
+  // codesign --verify (like notarization) rejects it. Sign each framework as a
+  // bundle with the same options PyInstaller uses for every binary.
+  for (const framework of frameworkBundles(artifact)) {
+    run("codesign", [
+      "--sign",
+      options.codesignIdentity,
+      "--force",
+      "--all-architectures",
+      "--timestamp",
+      "--options=runtime",
+      framework,
+    ]);
+  }
+}
+
 if (process.platform === "darwin" && options.codesignIdentity) {
-  run("codesign", ["--verify", "--deep", "--strict", "--verbose=2", executable]);
+  // In a onedir folder every library is its own signed file; all of them must
+  // verify, or the sandboxed process cannot load them.
+  const signed = layout === "onedir" ? machOFiles(artifact) : [executable];
+  for (const path of signed) {
+    run("codesign", ["--verify", "--strict", path]);
+  }
+  console.log(`Signaturen geprueft: ${signed.length} Mach-O-Datei(en).`);
 }
 
 const artifactManifest = {
   schema: 1,
   target,
-  binary: basename(executable),
-  sha256: sha256(executable),
-  asset_manifest_sha256: sha256(assetManifest),
+  binary: basename(artifact),
+  ...(layout === "onedir" ? { executable: SIDECAR_EXECUTABLE } : {}),
+  sha256: artifactSha256(artifact),
+  asset_manifest_sha256: artifactSha256(assetManifest),
   codesigned: Boolean(process.platform === "darwin" && options.codesignIdentity),
-  pyinstaller: "onefile",
+  pyinstaller: layout,
 };
 const artifactManifestPath = resolve(
   options.outputDirectory,
@@ -299,5 +344,5 @@ writeFileSync(
   "utf8",
 );
 
-console.log(`Sidecar-Binary gebaut: ${executable}`);
+console.log(`Sidecar gebaut (${layout}): ${executable}`);
 console.log(`Artefaktmanifest: ${artifactManifestPath}`);

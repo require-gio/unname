@@ -158,10 +158,10 @@ const STEPS = [
     lang: true,
   },
   {
-    name: "Release: Versionslogik und Versionsstempel",
+    name: "Skripte: Versionslogik, Versionsstempel und Sidecar-Artefakt",
     cwd: ROOT,
     cmd: "node",
-    args: ["--test", "scripts/release/*.test.mjs"],
+    args: ["--test", "scripts/release/*.test.mjs", "scripts/*.test.mjs"],
   },
   {
     name: "Vertrag: API-Typen v2 aktuell (Pydantic → Schema → api.gen.ts)",

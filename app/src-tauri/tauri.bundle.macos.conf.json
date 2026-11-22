@@ -2,7 +2,7 @@
 	"bundle": {
 		"macOS": {
 			"files": {
-				"MacOS/presidio-sidecar": "binaries/presidio-sidecar",
+				"Resources/presidio-sidecar": "binaries/presidio-sidecar-macos",
 				"XPCServices/org.unname.desktop.download.xpc": "binaries/org.unname.desktop.download.xpc"
 			}
 		}

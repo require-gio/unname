@@ -404,7 +404,7 @@ jobs:
           dmg="$(find "$bundle_root/dmg" -maxdepth 1 -name '*.dmg' -print -quit)"
           test -n "$app_bundle" && test -d "$app_bundle"
           test -n "$dmg" && test -f "$dmg"
-          sidecar="$app_bundle/Contents/MacOS/presidio-sidecar"
+          sidecar="$app_bundle/Contents/Resources/presidio-sidecar/presidio-sidecar"
           test -x "$sidecar"
           download_xpc="$app_bundle/Contents/XPCServices/org.unname.desktop.download.xpc"
           test -x "$download_xpc/Contents/MacOS/unname-download"
@@ -444,6 +444,8 @@ jobs:
           # Sidecar runs in the app's sandbox and does not have its own network entitlement.
           require_absent_or_false "$sidecar_entitlements" com.apple.security.network.client
           require_absent_or_false "$sidecar_entitlements" com.apple.security.network.server
+          # Only ad hoc builds need this; a Developer ID shares one Team ID with every library.
+          require_absent_or_false "$sidecar_entitlements" com.apple.security.cs.disable-library-validation
 
           # Download service has its own sandbox with only outbound network; no inbound listening.
           require_true "$download_entitlements" com.apple.security.app-sandbox
@@ -488,6 +490,7 @@ jobs:
 
       - name: Run actual Windows package and sidecar
         if: matrix.os == 'windows'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.windows_bundle.outputs.app }}"
@@ -506,11 +509,11 @@ jobs:
           hdiutil attach "$dmg" -nobrowse -readonly -mountpoint "$mountpoint"
           app_bundle="$(find "$mountpoint" -maxdepth 2 -name '*.app' -print -quit)"
           app_binary="$app_bundle/Contents/MacOS/unname"
-          sidecar="$(find "$app_bundle/Contents/MacOS" -maxdepth 1 -type f -name 'presidio-sidecar*' -print -quit)"
+          sidecar="$app_bundle/Contents/Resources/presidio-sidecar/presidio-sidecar"
           test -x "$app_binary"
           test -x "$sidecar"
-          cmp -s app/src-tauri/binaries/presidio-sidecar "$sidecar" || {
-            echo "Das Sidecar im DMG weicht vom geprüften Staging-Binary ab." >&2
+          node scripts/sidecar-artifact.mjs same app/src-tauri/binaries/presidio-sidecar-macos "$app_bundle/Contents/Resources/presidio-sidecar" || {
+            echo "Das Sidecar im DMG weicht vom geprüften Staging-Ordner ab." >&2
             exit 1
           }
           echo "mountpoint=$mountpoint" >> "$GITHUB_OUTPUT"
@@ -519,6 +522,7 @@ jobs:
 
       - name: Run actual macOS DMG and sidecar
         if: matrix.os == 'macos'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.macos_bundle.outputs.app }}"

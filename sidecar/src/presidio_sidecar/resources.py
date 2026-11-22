@@ -1,7 +1,8 @@
 """Resolution and validation of resources bundled with PyInstaller.
 
 A frozen sidecar must not rely on the working directory or on global model/OCR installations.
-PyInstaller extracts a one-file binary to ``sys._MEIPASS``; under that lives the build-generated,
+``sys._MEIPASS`` is PyInstaller's folder of bundled files: ``_internal`` of the onedir build on
+macOS, the unpack folder of the onefile binary on Windows. Under it lives the build-generated,
 hashed ``assets`` folder.
 
 In development the repository paths remain. ``PRESIDIO_BUNDLE_ASSETS_DIR`` can point to a prepared
@@ -181,7 +182,7 @@ def repository_root() -> Path:
 
 
 def frozen_runtime_root() -> Path:
-    """Read-only unpack folder created by PyInstaller."""
+    """Read-only folder of PyInstaller's bundled files (``sys._MEIPASS``)."""
 
     raw_root = getattr(sys, "_MEIPASS", None)
     if not is_frozen() or not isinstance(raw_root, str) or not raw_root:

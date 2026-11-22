@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+		Only for ad hoc builds (the adhoc option of build-distribution.mjs); a
+		Developer ID release uses SidecarEntitlements.plist.
+
+		The two App Sandbox entitlements are the same as there. The Hardened
+		Runtime exception is needed because an ad hoc signature has no Team ID:
+		library validation would then refuse every library of the onedir folder
+		("mapping process and mapped file (non-platform) have different Team IDs").
+		With a Developer ID all of them share the Team ID and the exception is not
+		needed, so build-distribution.mjs rejects it there.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.inherit</key>
+	<true/>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+</dict>
+</plist>

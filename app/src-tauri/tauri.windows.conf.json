@@ -1,6 +1,7 @@
 {
 	"bundle": {
 		"targets": ["msi", "nsis"],
+		"licenseFile": "../../LICENSE",
 		"windows": {
 			"allowDowngrades": false,
 			"digestAlgorithm": "sha256",
