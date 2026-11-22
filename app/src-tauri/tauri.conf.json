@@ -34,7 +34,6 @@
 		"targets": "all",
 		"publisher": "unname contributors",
 		"license": "MIT",
-		"licenseFile": "../../LICENSE",
 		"resources": {
 			"../../THIRD_PARTY_NOTICES": "THIRD_PARTY_NOTICES"
 		},
