@@ -7,6 +7,7 @@ import {
 	harness,
 	open,
 	WITHOUT_CONTENT,
+	lastCopy,
 	type Capture
 } from './harness.js';
 
@@ -165,7 +166,6 @@ test('Milestone G: AI answer with codes from two entries, unknown code, nothing 
 	context,
 	page
 }) => {
-	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: APP_ORIGIN });
 	const { capture } = await restoreHarness(context);
 	await open(page, `/entry/${HERE}/restore`);
 
@@ -220,7 +220,7 @@ test('Milestone G: AI answer with codes from two entries, unknown code, nothing 
 
 	await page.getByRole('button', { name: 'Kopieren' }).click();
 	await expect(page.getByText('Kopiert – mit den echten Namen.')).toBeVisible();
-	expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(WITH_NAMES);
+	expect(lastCopy(capture)).toEqual({ text: WITH_NAMES, kind: 'restored' });
 	await expect
 		.poll(
 			() =>
@@ -281,7 +281,9 @@ test('File from AI: saved, preview, open, save as, delete', async ({ context, pa
 		capture.commands.find((command) => command.command === 'save_restored_file')?.args
 	).toEqual({
 		id: 'r1',
-		title: 'Datei mit echten Namen speichern'
+		title: 'Datei mit echten Namen speichern',
+		// Only a confirmed cloud target (iCloud, OneDrive …) is written without asking again.
+		confirmCloud: false
 	});
 	await expect
 		.poll(() => capture.commands.find((command) => command.command === 'open_restored_file')?.args)

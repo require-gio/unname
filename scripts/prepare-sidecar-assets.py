@@ -1397,9 +1397,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.verify_input_trust_only:
             snapshot, tesseract, tessdata, _revision, trust = _trusted_inputs_from_args(args)
             _verify_declared_source_trust(snapshot, tesseract, tessdata, trust)
-            print(
-                f"Bundle inputs for {trust.asset_id!r} comply with {trust.lock_path}."
-            )
+            print(f"Bundle inputs for {trust.asset_id!r} comply with {trust.lock_path}.")
             return 0
         sources = sources_from_args(args)
         manifest = prepare_assets(sources)

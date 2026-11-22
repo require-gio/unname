@@ -168,6 +168,9 @@ jobs:
         with:
           name: bundle-inputs-${{ matrix.asset }}
           path: .bundle-inputs
+          # The folder itself is hidden, and the trust hashes cover hidden files
+          # in it (the snapshot's .gitattributes) as well.
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 

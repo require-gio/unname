@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -321,6 +322,23 @@ def _replace(api: Harness, entry_id: str, file_id: str, name: str, content: str)
     )
 
 
+def _evict(api: Harness, entry_id: str, file_id: str) -> None:
+    """Cooldown over: the job leaves memory once its detection is in the draft state.
+
+    The worker reports a job complete before its hook writes the detection; evicted
+    in between, the job would come back from the older manifest as ``queued``.
+    """
+
+    key = api.services.entries().draft_key(entry_id)
+    assert key is not None
+    drafts = api.services.drafts().open(entry_id, key)
+    deadline = time.monotonic() + 5
+    while drafts.read_manifest(file_id).state != "detected":
+        assert time.monotonic() < deadline, "Detection was not saved to the draft state."
+        time.sleep(0.01)
+    api.services.jobs().delete(file_id)
+
+
 def test_edit_again_no_longer_needs_original(api: Harness) -> None:
     """After the cooldown, the file is loaded from the saved state without marking as
     expired or re-reading; the same decision is kept."""
@@ -336,8 +354,7 @@ def test_edit_again_no_longer_needs_original(api: Harness) -> None:
     saved = _save(api, entry_id, REVERSIBLE, files=[keep_petra]).json()
     assert _publish(api, entry_id, saved, api.tmp_path / "ziel").status_code == 200
 
-    # Cooldown over: the job leaves memory.
-    api.services.jobs().delete(job_id)
+    _evict(api, entry_id, job_id)
     assert not api.services.jobs().is_loaded(job_id)
     entry = api.client.get(f"/entries/{entry_id}", headers=AUTH).json()
     assert entry["files"][0]["status"] == "review"
@@ -402,7 +419,7 @@ def test_legacy_entry_rereads_the_original(api: Harness) -> None:
     # Re-reading also puts legacy data into the draft state.
     assert api.services.entries().draft_key(entry_id) is not None
     assert api.services.drafts().has_entry(entry_id)
-    api.services.jobs().delete(new_id)
+    _evict(api, entry_id, new_id)
     assert (
         api.client.get(f"/entries/{entry_id}", headers=AUTH).json()["files"][0]["status"]
         == "review"

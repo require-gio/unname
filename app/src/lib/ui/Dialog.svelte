@@ -20,6 +20,7 @@
 		withoutFrame = false,
 		children,
 		fuss,
+		onOpenFocus,
 		onCloseFocus,
 		class: className
 	}: {
@@ -30,6 +31,12 @@
 		withoutFrame?: boolean;
 		children: Snippet;
 		fuss?: Snippet;
+		/**
+		 * Where focus should go on opening; call `event.preventDefault()` and
+		 * focus it yourself. Otherwise Bits UI focuses the first tabbable
+		 * element one frame later, which is the close button.
+		 */
+		onOpenFocus?: (event: Event) => void;
 		/**
 		 * Where focus should go after closing; call `event.preventDefault()`
 		 * to keep it (e.g., if the trigger element was removed).
@@ -52,6 +59,7 @@
 			class="fixed inset-0 z-50 bg-scrim motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0"
 		/>
 		<Dialog.Content
+			onOpenAutoFocus={onOpenFocus}
 			onCloseAutoFocus={onCloseFocus}
 			class={cn(
 				'fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100vh-80px)] w-[calc(100vw-80px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl bg-surface text-ink shadow-dialog outline-none',

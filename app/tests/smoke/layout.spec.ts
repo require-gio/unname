@@ -221,6 +221,22 @@ async function pageLoaded(page: Page): Promise<void> {
 }
 
 /**
+ * Shows the page of `file`. A tab switch is a navigation, so the previous file
+ * stays on screen for a moment; on a slow machine a measurement would read it.
+ */
+async function showFile(page: Page, file: File, switchTab: boolean): Promise<void> {
+	const tab = page.getByRole('tab', { name: new RegExp(file.name) });
+	if (switchTab) await tab.click();
+	await expect(tab).toHaveAttribute('aria-selected', 'true');
+	const { width, height } = file.fixture.layout.pages[0];
+	await expect(page.locator('[data-page] svg').first()).toHaveAttribute(
+		'viewBox',
+		`0 0 ${width} ${height}`
+	);
+	await pageLoaded(page);
+}
+
+/**
  * Expected rectangle per line of a finding in screen pixels:
  * word boxes of the layout map × rendered width ÷ page width, plus 1 px margin.
  */
@@ -276,8 +292,7 @@ test('Fixed pages: page image with markings on its words (≤ 1 px)', async ({ c
 	await open(page, '/entry/e-1/review');
 
 	for (const [index, file] of FILES.entries()) {
-		if (index > 0) await page.getByRole('tab', { name: new RegExp(file.name) }).click();
-		await pageLoaded(page);
+		await showFile(page, file, index > 0);
 		await expect(page.getByRole('img', { name: 'Seite 1 von 1' })).toBeVisible();
 		const list = await deviations(page, file);
 		expect(list.length, file.name).toBeGreaterThanOrEqual(file.fixture.places.length);
@@ -286,7 +301,7 @@ test('Fixed pages: page image with markings on its words (≤ 1 px)', async ({ c
 });
 
 test('Page | Text: toggle, code menu via keyboard, reference image', async ({ context, page }) => {
-	await layoutHarness(context);
+	const { capture } = await layoutHarness(context);
 	await open(page, '/entry/e-1/review');
 	await pageLoaded(page);
 
@@ -311,7 +326,18 @@ test('Page | Text: toggle, code menu via keyboard, reference image', async ({ co
 	await appearance.getByRole('radio', { name: 'Text', exact: true }).click();
 	await expect(page.locator('[data-page]')).toHaveCount(0);
 	await expect(page.locator('article[data-column="einzeln"]')).toContainText('MUSTERGASSE');
-	expect(await page.evaluate(() => localStorage.getItem('unname.appearance'))).toBe('text');
+	// The entry remembers its view; new entries keep the device default.
+	await expect
+		.poll(() =>
+			capture.requests.some(
+				(request) =>
+					request.method === 'PUT' &&
+					request.path === '/entries/e-1/view' &&
+					(request.body as { representation?: string })?.representation === 'text'
+			)
+		)
+		.toBe(true);
+	expect(await page.evaluate(() => localStorage.getItem('unname.appearance'))).toBeNull();
 
 	await page.reload({ waitUntil: 'networkidle' });
 	await expect(page.locator('article[data-column="einzeln"]')).toBeVisible();
@@ -379,8 +405,7 @@ test('Result: Overpaint according to placement plan, Peek and Space', async ({ c
 	await pageLoaded(page);
 
 	for (const [index, file] of FILES.entries()) {
-		if (index > 0) await page.getByRole('tab', { name: new RegExp(file.name) }).click();
-		await pageLoaded(page);
+		await showFile(page, file, index > 0);
 		// All positions except the open question are overpainted – area and text from the plan.
 		const uebermalt = file.fixture.placements.filter((p) => p.finding_id !== 'f_tel');
 		await expect(page.locator('[data-overpaint]')).toHaveCount(uebermalt.length);
@@ -434,9 +459,8 @@ test('Result: Overpaint according to placement plan, Peek and Space', async ({ c
 	await page.keyboard.up('Space');
 	await expect(page.locator('[data-overpaint]')).toHaveCount(3);
 
-	await expect(page.getByRole('note').filter({ hasText: 'Unsichtbarer Text' })).toHaveText(
-		/Seite 1: Unsichtbarer Text – 1 Stelle/
-	);
+	// Invisible text carries a dashed frame on its page instead of a note.
+	await expect(page.getByRole('img', { name: 'Unsichtbarer Text' })).toHaveCount(1);
 	await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
@@ -523,8 +547,7 @@ test('View = File: Overpaint matches control image (A-26)', async ({ context, pa
 	await page.evaluate(async () => document.fonts.ready);
 
 	for (const [index, file] of FILES.entries()) {
-		if (index > 0) await page.getByRole('tab', { name: new RegExp(file.name) }).click();
-		await pageLoaded(page);
+		await showFile(page, file, index > 0);
 		await page.mouse.move(1, 1);
 		// Open questions stay visible in original view; saved entries are masked – we compare the overpainted spots.
 		const plans = file.fixture.placements.filter((plan) => plan.finding_id !== 'f_tel');

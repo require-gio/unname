@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import Button from '#lib/ui/Button.svelte';
 	import Dialog from '#lib/ui/Dialog.svelte';
 	import Field from '#lib/ui/Field.svelte';
@@ -52,6 +53,23 @@
 
 	const reference = $derived(entry ? displayReference(entry) : '');
 
+	let form = $state<HTMLFormElement>();
+
+	/**
+	 * Open on the title, selected, since renaming usually replaces it. Bits UI
+	 * would focus the close button a frame later, so a quick Enter closed the
+	 * dialog instead of saving.
+	 */
+	function focusTitle(event: Event): void {
+		event.preventDefault();
+		// Called while the content mounts; the form is bound after this tick.
+		void tick().then(() => {
+			const input = form?.querySelector('input');
+			input?.focus();
+			input?.select();
+		});
+	}
+
 	async function submit(event: SubmitEvent): Promise<void> {
 		event.preventDefault();
 		if (!entry || pending) return;
@@ -90,9 +108,10 @@
 	title={t('history.rename.title')}
 	description={t('history.rename.description', { reference })}
 	width="sm"
+	onOpenFocus={focusTitle}
 	{onCloseFocus}
 >
-	<form id="rename-entry" novalidate onsubmit={submit} class="flex flex-col gap-2">
+	<form bind:this={form} id="rename-entry" novalidate onsubmit={submit} class="flex flex-col gap-2">
 		<Field label={t('history.rename.field')} {error}>
 			{#snippet children({ id, describedby, invalid })}
 				<TextInput

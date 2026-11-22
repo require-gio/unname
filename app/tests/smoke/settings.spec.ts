@@ -5,6 +5,7 @@ import {
 	WITHOUT_CONTENT,
 	SETTINGS,
 	board,
+	lastCopy,
 	entry,
 	harness,
 	open
@@ -482,17 +483,17 @@ test('Names & Terms: lists, terms, patterns with try, template', async ({ contex
 });
 
 test('Technical: empty diagnostic report, developer mode', async ({ context, page }) => {
-	await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: APP_ORIGIN });
 	const { capture } = await harness(context);
 	await open(page);
 	await page.getByRole('button', { name: 'Einstellungen' }).click();
 	const settings = dialog(page);
 	await settings.getByRole('button', { name: 'Technik' }).click();
 
-	await expect(settings.getByText('bereit · nur über 127.0.0.1')).toBeVisible();
+	await expect(settings.getByText('bereit · nur auf diesem Gerät')).toBeVisible();
 	await settings.getByRole('button', { name: 'Diagnosebericht kopieren' }).click();
 	await expect(page.getByText(/Diagnosebericht kopiert/)).toBeVisible();
-	const report = await page.evaluate(() => navigator.clipboard.readText());
+	const report = String(lastCopy(capture)?.text);
+	expect(lastCopy(capture)?.kind).toBe('plain');
 	expect(report).toContain('unname · Diagnosebericht');
 	expect(report).toContain('Neustarts: 0');
 

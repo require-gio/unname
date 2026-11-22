@@ -5,7 +5,7 @@
  */
 
 import assert from "node:assert/strict";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -62,16 +62,14 @@ test("a re-run reuses the tag already on the commit instead of bumping again", (
   assert.equal(result.reused, true);
 });
 
+/** Copies of the real files with the given line ending, whatever the checkout uses. */
 function copyVersionFiles(lineEnding) {
   const root = mkdtempSync(join(tmpdir(), "unname-version-"));
   for (const [file] of LOCATIONS) {
     const target = join(root, file);
     mkdirSync(dirname(target), { recursive: true });
-    cpSync(resolve(ROOT, file), target);
-    if (lineEnding === "\r\n") {
-      const text = readFileSync(target, "utf8").replace(/\r?\n/g, "\r\n");
-      writeFileSync(target, text, "utf8");
-    }
+    const text = readFileSync(resolve(ROOT, file), "utf8").replace(/\r?\n/g, lineEnding);
+    writeFileSync(target, text, "utf8");
   }
   return root;
 }
