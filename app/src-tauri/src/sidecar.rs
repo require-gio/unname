@@ -1014,22 +1014,20 @@ fn check_socket_path(path: &Path) -> Result<(), String> {
 
 /// Finds the command to start.
 ///
-/// The bundled binary (`externalBin`, from Phase 6.1) takes precedence. As long
-/// as it is missing, a dev build falls back to the uv environment in the
+/// The bundled sidecar (`bundled_command`) takes precedence. As long as it is
+/// missing, a dev build falls back to the uv environment in the
 /// repository—otherwise one would have to build a binary for every sidecar
 /// change.
 ///
 /// Important: `shell().sidecar()` only constructs a path and does not check if
-/// anything exists there. Without the existence check below, the shell would
-/// enter an infinite loop of start attempts against a non-existent file.
+/// anything exists there. Without the existence checks in `bundled_command`,
+/// the shell would enter an infinite loop of start attempts against a
+/// non-existent file.
 fn resolve_command(
     app: &AppHandle,
 ) -> Result<(tauri_plugin_shell::process::Command, String), String> {
-    let (command, origin) = if sidecar_binary_present() {
-        app.shell()
-            .sidecar(SIDECAR_NAME)
-            .map(|command| (command, "gebündeltes Binary".to_string()))
-            .map_err(|error| format!("Gebündeltes Sidecar-Binary nicht startbar: {error}"))?
+    let (command, origin) = if let Some(command) = bundled_command(app)? {
+        (command, "gebündeltes Binary".to_string())
     } else {
         if !cfg!(debug_assertions) {
             return Err(format!(
@@ -1053,10 +1051,44 @@ fn resolve_command(
     Ok((command, origin))
 }
 
+/// The sidecar the package carries, if any.
+///
+/// On macOS it is a PyInstaller onedir folder in `Contents/Resources`
+/// (`tauri.bundle.macos.conf.json`). A onefile binary cannot start inside the
+/// App Sandbox, and the folder cannot go into `Contents/MacOS`, where codesign
+/// treats every file as code that must carry its own signature.
+#[cfg(target_os = "macos")]
+fn bundled_command(
+    app: &AppHandle,
+) -> Result<Option<tauri_plugin_shell::process::Command>, String> {
+    let Ok(resources) = app.path().resource_dir() else {
+        return Ok(None);
+    };
+    let executable = resources.join(SIDECAR_NAME).join(SIDECAR_NAME);
+    Ok(executable
+        .is_file()
+        .then(|| app.shell().command(executable)))
+}
+
+/// Elsewhere it is the onefile binary next to the executable (`externalBin`).
+#[cfg(not(target_os = "macos"))]
+fn bundled_command(
+    app: &AppHandle,
+) -> Result<Option<tauri_plugin_shell::process::Command>, String> {
+    if !sidecar_binary_present() {
+        return Ok(None);
+    }
+    app.shell()
+        .sidecar(SIDECAR_NAME)
+        .map(Some)
+        .map_err(|error| format!("Gebündeltes Sidecar-Binary nicht startbar: {error}"))
+}
+
 /// Is a sidecar binary present next to the executable?
 ///
-/// Tauri appends the target system to the name (`…-aarch64-apple-darwin`), so
-/// we check the prefix rather than a fixed name.
+/// Tauri appends the target system to the name (`…-x86_64-pc-windows-msvc`),
+/// so we check the prefix rather than a fixed name.
+#[cfg(not(target_os = "macos"))]
 fn sidecar_binary_present() -> bool {
     let Ok(exe) = std::env::current_exe() else {
         return false;

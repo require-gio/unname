@@ -552,6 +552,8 @@ def test_pyinstaller_spec_passes_binaries_signature_and_entitlements(
     entitlements.write_text("<plist/>", encoding="utf-8")
     monkeypatch.setenv("PRESIDIO_SIDECAR_TARGET", "aarch64-apple-darwin")
     monkeypatch.setenv("PRESIDIO_SIDECAR_BINARY_NAME", "presidio-sidecar-test")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_LAYOUT", "onedir")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_EXECUTABLE_NAME", "presidio-sidecar")
     monkeypatch.setenv("PRESIDIO_SIDECAR_ASSETS", str(assets))
     monkeypatch.setenv("PRESIDIO_CODESIGN_IDENTITY", "Developer ID Application: Test")
     monkeypatch.setenv("PRESIDIO_ENTITLEMENTS_FILE", str(entitlements))
@@ -573,8 +575,16 @@ def test_pyinstaller_spec_passes_binaries_signature_and_entitlements(
             self.binaries = kwargs["binaries"]
             self.datas = kwargs["datas"]
 
-    def fake_exe(*_args, **kwargs):  # noqa: ANN202
+    exe_object = object()
+
+    def fake_exe(*args, **kwargs):  # noqa: ANN202
+        captured["exe_args"] = args
         captured["exe"] = kwargs
+        return exe_object
+
+    def fake_collect(*args, **kwargs):  # noqa: ANN202
+        captured["collect_args"] = args
+        captured["collect"] = kwargs
         return object()
 
     runpy.run_path(
@@ -584,6 +594,7 @@ def test_pyinstaller_spec_passes_binaries_signature_and_entitlements(
             "Analysis": FakeAnalysis,
             "PYZ": lambda _pure: object(),
             "EXE": fake_exe,
+            "COLLECT": fake_collect,
         },
     )
 
@@ -594,6 +605,114 @@ def test_pyinstaller_spec_passes_binaries_signature_and_entitlements(
     assert executable["codesign_identity"] == "Developer ID Application: Test"
     assert executable["entitlements_file"] == str(entitlements)
     assert executable["target_arch"] == "arm64"
+    # onedir: the executable leaves the binaries to COLLECT, which signs them
+    # with the identity and entitlements it inherits from the executable.
+    assert executable["exclude_binaries"] is True
+    assert executable["name"] == "presidio-sidecar"
+    collect_args = captured["collect_args"]
+    assert collect_args[0] is exe_object
+    assert (str(native), "assets/tesseract/lib") in collect_args[1]
+    assert (str(data), "assets/models/gliner") in collect_args[2]
+    assert captured["collect"]["name"] == "presidio-sidecar-test"
+
+
+def test_pyinstaller_spec_builds_onefile_without_collect(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import PyInstaller.utils.hooks
+
+    assets = tmp_path / "assets"
+    native = assets / "tesseract/tesseract.exe"
+    _write(native, b"MZ")
+    (assets / "asset-manifest.json").write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "target": "x86_64-pc-windows-msvc",
+                "files": [{"path": "tesseract/tesseract.exe", "kind": "binary"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("PRESIDIO_SIDECAR_TARGET", "x86_64-pc-windows-msvc")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_BINARY_NAME", "presidio-sidecar-test")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_LAYOUT", "onefile")
+    monkeypatch.delenv("PRESIDIO_SIDECAR_EXECUTABLE_NAME", raising=False)
+    monkeypatch.setenv("PRESIDIO_SIDECAR_ASSETS", str(assets))
+    monkeypatch.delenv("PRESIDIO_CODESIGN_IDENTITY", raising=False)
+    monkeypatch.delenv("PRESIDIO_ENTITLEMENTS_FILE", raising=False)
+    monkeypatch.setattr(PyInstaller.utils.hooks, "collect_all", lambda _package: ([], [], []))
+    monkeypatch.setattr(PyInstaller.utils.hooks, "collect_submodules", lambda _package: [])
+    monkeypatch.setattr(
+        PyInstaller.utils.hooks,
+        "copy_metadata",
+        lambda _distribution, recursive: [],
+    )
+
+    captured: dict[str, object] = {}
+
+    class FakeAnalysis:
+        def __init__(self, _scripts, **kwargs) -> None:  # noqa: ANN001
+            self.pure = []
+            self.scripts = []
+            self.binaries = kwargs["binaries"]
+            self.datas = kwargs["datas"]
+
+    def fake_exe(*args, **kwargs):  # noqa: ANN202
+        captured["exe_args"] = args
+        captured["exe"] = kwargs
+        return object()
+
+    def no_collect(*_args, **_kwargs):  # noqa: ANN202
+        raise AssertionError("onefile darf COLLECT nicht aufrufen")
+
+    runpy.run_path(
+        str(SPEC_FILE),
+        init_globals={
+            "SPECPATH": str(REPOSITORY / "sidecar"),
+            "Analysis": FakeAnalysis,
+            "PYZ": lambda _pure: object(),
+            "EXE": fake_exe,
+            "COLLECT": no_collect,
+        },
+    )
+
+    executable = captured["exe"]
+    assert executable["name"] == "presidio-sidecar-test"
+    assert "exclude_binaries" not in executable
+    # onefile packs binaries and data into the executable itself.
+    assert (str(native), "assets/tesseract") in captured["exe_args"][2]
+
+
+@pytest.mark.parametrize(
+    ("layout", "executable_name", "message"),
+    [
+        ("", "presidio-sidecar", "PRESIDIO_SIDECAR_LAYOUT"),
+        ("onedir", "", "PRESIDIO_SIDECAR_EXECUTABLE_NAME"),
+    ],
+)
+def test_pyinstaller_spec_rejects_missing_layout_settings(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    layout: str,
+    executable_name: str,
+    message: str,
+) -> None:
+    assets = tmp_path / "assets"
+    assets.mkdir()
+    (assets / "asset-manifest.json").write_text(
+        json.dumps({"schema": 1, "target": "aarch64-apple-darwin", "files": []}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("PRESIDIO_SIDECAR_TARGET", "aarch64-apple-darwin")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_BINARY_NAME", "presidio-sidecar-test")
+    monkeypatch.setenv("PRESIDIO_SIDECAR_LAYOUT", layout)
+    monkeypatch.setenv("PRESIDIO_SIDECAR_EXECUTABLE_NAME", executable_name)
+    monkeypatch.setenv("PRESIDIO_SIDECAR_ASSETS", str(assets))
+
+    with pytest.raises(SystemExit, match=message):
+        runpy.run_path(str(SPEC_FILE), init_globals={"SPECPATH": str(REPOSITORY / "sidecar")})
 
 
 def test_build_script_accepts_target_alias_and_tauri_naming_convention(

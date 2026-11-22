@@ -14,7 +14,9 @@ export default defineConfig(
 		ignores: [
 			// Rust build artifacts; contain generated JavaScript.
 			'src-tauri/target/',
-			'src-tauri/gen/'
+			'src-tauri/gen/',
+			// Sidecar and download service builds (Python packages may ship JavaScript).
+			'src-tauri/binaries/'
 		]
 	},
 	js.configs.recommended,

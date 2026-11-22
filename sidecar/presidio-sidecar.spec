@@ -4,8 +4,11 @@
 The spec is executed by ``scripts/build-sidecar.mjs`` on the exact target platform.
 Native Tesseract files and the Vision helper (macOS) are intentionally included via
 ``binaries``: only then does PyInstaller normalize macOS install names/rpaths and
-sign the entire Mach-O dependency chain (with ``SidecarEntitlements.plist``) before
-packing the Onefile archive.
+sign the entire Mach-O dependency chain (with ``SidecarEntitlements.plist``).
+
+``PRESIDIO_SIDECAR_LAYOUT`` chooses the shape (``scripts/sidecar-artifact.mjs``):
+``onedir`` on macOS, because a onefile bootloader cannot start inside the App
+Sandbox, and ``onefile`` on Windows, where Tauri expects a single ``externalBin``.
 """
 
 import json
@@ -24,11 +27,18 @@ TARGET = os.environ.get("PRESIDIO_SIDECAR_TARGET", "").strip()
 BINARY_NAME = os.environ.get("PRESIDIO_SIDECAR_BINARY_NAME", "").strip()
 CODESIGN_IDENTITY = os.environ.get("PRESIDIO_CODESIGN_IDENTITY") or None
 ENTITLEMENTS_FILE = os.environ.get("PRESIDIO_ENTITLEMENTS_FILE") or None
+LAYOUT = os.environ.get("PRESIDIO_SIDECAR_LAYOUT", "").strip()
+#: In a onedir build: the executable inside the folder named ``BINARY_NAME``.
+EXECUTABLE_NAME = os.environ.get("PRESIDIO_SIDECAR_EXECUTABLE_NAME", "").strip()
 
 if not TARGET or not BINARY_NAME:
     raise SystemExit(
         "PRESIDIO_SIDECAR_TARGET und PRESIDIO_SIDECAR_BINARY_NAME muessen gesetzt sein."
     )
+if LAYOUT not in ("onefile", "onedir"):
+    raise SystemExit("PRESIDIO_SIDECAR_LAYOUT muss onefile oder onedir sein.")
+if LAYOUT == "onedir" and not EXECUTABLE_NAME:
+    raise SystemExit("Ein onedir-Build braucht PRESIDIO_SIDECAR_EXECUTABLE_NAME.")
 if not MANIFEST_PATH.is_file():
     raise SystemExit(
         f"Vorbereitete Assets fehlen: {MANIFEST_PATH}. Erst prepare-sidecar-assets.py ausfuehren."
@@ -123,13 +133,7 @@ analysis = Analysis(
 )
 pyz = PYZ(analysis.pure)
 
-executable = EXE(
-    pyz,
-    analysis.scripts,
-    analysis.binaries,
-    analysis.datas,
-    [],
-    name=BINARY_NAME,
+executable_options = dict(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -141,3 +145,33 @@ executable = EXE(
     codesign_identity=CODESIGN_IDENTITY,
     entitlements_file=ENTITLEMENTS_FILE,
 )
+
+if LAYOUT == "onefile":
+    executable = EXE(
+        pyz,
+        analysis.scripts,
+        analysis.binaries,
+        analysis.datas,
+        [],
+        name=BINARY_NAME,
+        **executable_options,
+    )
+else:
+    # COLLECT signs every collected binary with the executable's identity and
+    # entitlements, so the whole folder carries one signature chain.
+    executable = EXE(
+        pyz,
+        analysis.scripts,
+        [],
+        exclude_binaries=True,
+        name=EXECUTABLE_NAME,
+        **executable_options,
+    )
+    COLLECT(
+        executable,
+        analysis.binaries,
+        analysis.datas,
+        strip=False,
+        upx=False,
+        name=BINARY_NAME,
+    )

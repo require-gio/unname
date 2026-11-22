@@ -438,9 +438,10 @@ async function warteAufAppSidecar(appProzess) {
         `App endete vor dem Sidecar-Start (Code ${appProzess.exitCode}, Signal ${appProzess.signalCode}).`,
       );
     }
-    // The PyInstaller one-file sidecar runs as two processes: the bootloader the
+    // The onefile sidecar on Windows runs as two processes: the bootloader the
     // app spawns, and the child it starts, which alone holds the listener.
-    // Both carry the same name, so every one of them is checked.
+    // Both carry the same name, so every one of them is checked. (The macOS
+    // onedir sidecar is a single process.)
     const sidecars = getDescendants(processes(), appProzess.pid).filter(
       isSidecarProcess,
     );

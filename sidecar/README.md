@@ -219,18 +219,27 @@ and versioned and writes `sidecar/bundle-assets/` atomically. Before running the
 bundled Tesseract, it verifies Tesseract (with `--with-models` also GLiNER and
 tessdata) byte for byte against `sidecar/packaging/bundle-inputs.lock.json`.
 Missing production hashes are deliberately not an unsafe fallback but block the
-package build. After that, `scripts/build-sidecar.mjs` creates a binary with a
-Tauri-compatible name under `app/src-tauri/binaries/`:
+package build. After that, `scripts/build-sidecar.mjs` builds the sidecar under
+`app/src-tauri/binaries/`:
 
 ```bash
-node scripts/build-sidecar.mjs --target aarch64-apple-darwin
-node scripts/build-sidecar.mjs --target x86_64-pc-windows-msvc
+node scripts/build-sidecar.mjs --target aarch64-apple-darwin    # folder presidio-sidecar-aarch64-apple-darwin/
+node scripts/build-sidecar.mjs --target x86_64-pc-windows-msvc  # presidio-sidecar-x86_64-pc-windows-msvc.exe
 ```
 
+On macOS it is a onedir folder (executable `presidio-sidecar` plus `_internal/`),
+which the app bundle carries in `Contents/Resources/presidio-sidecar`. A onefile
+binary cannot run there: its bootloader coordinates with its unpacked child
+through a System V semaphore, and the App Sandbox denies that. Windows keeps the
+onefile binary that Tauri expects as `externalBin`.
+
 PyInstaller cannot cross-compile; every command must run on the matching
-platform and architecture. On macOS, `--require-signing` demands a Developer ID
-and also signs the collected native Tesseract libraries with the hardened runtime
-and `SidecarEntitlements.plist`.
+platform and architecture. On macOS, `--require-signing` demands a Developer ID;
+PyInstaller signs every collected Mach-O file with the hardened runtime and
+`SidecarEntitlements.plist`. An ad hoc build (`--codesign-identity -`) uses
+`SidecarEntitlements.adhoc.plist` instead, which adds
+`com.apple.security.cs.disable-library-validation`: without a Team ID, library
+validation would refuse every library of the folder.
 
 ### Hardware and device choice
 

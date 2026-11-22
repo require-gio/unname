@@ -1,4 +1,4 @@
-"""Absolute import entry point for the PyInstaller onefile binary."""
+"""Absolute import entry point for the frozen PyInstaller sidecar."""
 
 from presidio_sidecar.__main__ import main
 

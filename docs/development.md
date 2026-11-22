@@ -188,7 +188,11 @@ On macOS, `build-distribution.mjs` also builds the download service
 (`scripts/build-download-xpc.mjs`: `swift build`, bundle
 `org.unname.desktop.download.xpc`, signed with `download-xpc/Entitlements.plist`
 and – in a release – the Developer ID) into `app/src-tauri/binaries/`; Tauri puts
-it into `Contents/XPCServices`.
+it into `Contents/XPCServices`. The sidecar is a onedir folder there, staged as
+`app/src-tauri/binaries/presidio-sidecar-macos/` and bundled as
+`Contents/Resources/presidio-sidecar/` (why: [sidecar/README.md](../sidecar/README.md)).
+After the Tauri build the script checks that the folder in the bundle matches
+the staged one file by file, symlinks and permissions included.
 
 The asset step deliberately downloads nothing. For macOS (`*-apple-darwin`) it
 builds the Vision helper itself (`swift build`, or a prebuilt one through
