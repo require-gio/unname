@@ -438,30 +438,34 @@ async function warteAufAppSidecar(appProzess) {
         `App endete vor dem Sidecar-Start (Code ${appProzess.exitCode}, Signal ${appProzess.signalCode}).`,
       );
     }
-    const kinder = getDescendants(processes(), appProzess.pid);
-    const sidecar = kinder.find(isSidecarProcess);
-    if (sidecar && process.platform !== "win32") {
-      // Ensure the bundled sidecar listens on the Unix socket, not on a TCP port.
-      if (loopbackListener(sidecar.pid).length > 0) {
-        throw new Error(
-          "Gebündeltes Sidecar lauscht auf TCP statt am Unix-Socket (Phase Z1).",
-        );
-      }
-      for (const path_arg of socketListener(sidecar.pid)) {
-        if (await respondsOnSocket(path_arg))
-          return { sidecar, listener: [{ address: "unix", port: path_arg }] };
-      }
-    } else if (sidecar) {
-      const listener = loopbackListener(sidecar.pid);
-      if (listener.length > 0) {
-        if (listener.some(({ address }) => !isLoopback(address))) {
+    // The PyInstaller one-file sidecar runs as two processes: the bootloader the
+    // app spawns, and the child it starts, which alone holds the listener.
+    // Both carry the same name, so every one of them is checked.
+    const sidecars = getDescendants(processes(), appProzess.pid).filter(
+      isSidecarProcess,
+    );
+    for (const sidecar of sidecars) {
+      if (process.platform !== "win32") {
+        // Ensure the bundled sidecar listens on the Unix socket, not on a TCP port.
+        if (loopbackListener(sidecar.pid).length > 0) {
           throw new Error(
-            `Gebündeltes Sidecar lauscht nicht nur auf Loopback: ${JSON.stringify(listener)}`,
+            "Gebündeltes Sidecar lauscht auf TCP statt am Unix-Socket (Phase Z1).",
           );
         }
-        for (const address_str of listener) {
-          if (await respondsAsSidecar(address_str)) return { sidecar, listener };
+        for (const path_arg of socketListener(sidecar.pid)) {
+          if (await respondsOnSocket(path_arg))
+            return { sidecar, listener: [{ address: "unix", port: path_arg }] };
         }
+        continue;
+      }
+      const listener = loopbackListener(sidecar.pid);
+      if (listener.some(({ address }) => !isLoopback(address))) {
+        throw new Error(
+          `Gebündeltes Sidecar lauscht nicht nur auf Loopback: ${JSON.stringify(listener)}`,
+        );
+      }
+      for (const address_str of listener) {
+        if (await respondsAsSidecar(address_str)) return { sidecar, listener };
       }
     }
     await pause(POLL_MS);
