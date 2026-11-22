@@ -247,6 +247,7 @@ jobs:
 
       - name: Run the app from the DMG
         if: matrix.os == 'macos'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.dmg.outputs.app }}"
@@ -282,6 +283,8 @@ jobs:
 
       - name: Run the installed Windows app and sidecar
         if: matrix.os == 'windows'
+        # The test takes a few minutes at most; a hang should fail, not hold the job.
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.nsis.outputs.app }}"

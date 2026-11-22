@@ -490,6 +490,7 @@ jobs:
 
       - name: Run actual Windows package and sidecar
         if: matrix.os == 'windows'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.windows_bundle.outputs.app }}"
@@ -521,6 +522,7 @@ jobs:
 
       - name: Run actual macOS DMG and sidecar
         if: matrix.os == 'macos'
+        timeout-minutes: 10
         run: >-
           node scripts/smoke-packaged-app.mjs
           --app "${{ steps.macos_bundle.outputs.app }}"

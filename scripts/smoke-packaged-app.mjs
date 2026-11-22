@@ -90,16 +90,57 @@ function processEnd(proc_handle) {
 async function terminate(proc_handle, signal = "SIGTERM") {
   if (!proc_handle || proc_handle.exitCode !== null || proc_handle.signalCode !== null)
     return;
-  proc_handle.kill(signal);
+  if (process.platform === "win32") {
+    await terminateWindowsTree(proc_handle);
+  } else {
+    proc_handle.kill(signal);
+    try {
+      await mitTimeout(
+        processEnd(proc_handle),
+        15_000,
+        "Prozessende dauerte zu lang.",
+      );
+    } catch {
+      proc_handle.kill("SIGKILL");
+      await processEnd(proc_handle);
+    }
+  }
+  // A surviving grandchild could still hold the write ends of these pipes;
+  // Node would then wait for them forever after the last check.
+  proc_handle.stdout?.destroy();
+  proc_handle.stderr?.destroy();
+}
+
+/**
+ * On Windows, kill() ends only the given process (TerminateProcess). The
+ * onefile sidecar's Python child would survive it as an orphan — started with
+ * --keep-running-without-parent it never exits, and it keeps this script's
+ * pipes open. The leaves of the tree go first, so the onefile bootloader can
+ * remove its unpack folder and exit by itself; whatever is still running after
+ * the grace period is ended with taskkill /T /F.
+ */
+async function terminateWindowsTree(proc_handle) {
+  const tree = getDescendants(windowsProcesses(), proc_handle.pid);
+  const parents = new Set(tree.map((entry) => entry.ppid));
+  for (const leaf of tree.filter((entry) => !parents.has(entry.pid))) {
+    try {
+      process.kill(leaf.pid);
+    } catch {
+      // Already gone.
+    }
+  }
   try {
+    await mitTimeout(processEnd(proc_handle), 5_000, "Prozessende dauerte zu lang.");
+  } catch {
+    spawnSync("taskkill", ["/PID", String(proc_handle.pid), "/T", "/F"], {
+      stdio: "ignore",
+      windowsHide: true,
+    });
     await mitTimeout(
       processEnd(proc_handle),
       15_000,
-      "Prozessende dauerte zu lang.",
+      `Prozess ${proc_handle.pid} ließ sich nicht beenden.`,
     );
-  } catch {
-    proc_handle.kill("SIGKILL");
-    await processEnd(proc_handle);
   }
 }
 
@@ -582,5 +623,6 @@ try {
       process.kill(appSidecarPid, "SIGKILL");
     }
   }
-  rmSync(stateDirectory, { recursive: true, force: true });
+  // Windows may hold file handles for a moment after a process ended.
+  rmSync(stateDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
 }
