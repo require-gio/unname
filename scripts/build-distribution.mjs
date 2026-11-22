@@ -80,11 +80,13 @@ if (mac) {
 	run(process.execPath, xpcArgs, ROOT);
 }
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+// Node refuses to spawn npm.cmd without a shell on Windows (CVE-2024-27980:
+// spawnSync EINVAL), so the Tauri CLI runs through Node itself, on every
+// platform. Tauri still runs beforeBuildCommand through its own shell.
+const tauriCli = resolve(APP, 'node_modules', '@tauri-apps', 'cli', 'tauri.js');
+if (!existsSync(tauriCli)) fail(`Tauri-CLI fehlt (${tauriCli}); vorher npm ci in app/ ausführen.`);
 const tauriArgs = [
-	'run',
-	'tauri',
-	'--',
+	tauriCli,
 	'build',
 	'--ci',
 	'--target',
@@ -109,7 +111,7 @@ if (unsigned) {
 	tauriArgs.push('--config', 'src-tauri/tauri.release.windows.conf.json');
 }
 
-run(npm, tauriArgs, APP, tauriEnvironment);
+run(process.execPath, tauriArgs, APP, tauriEnvironment);
 if (adhoc) verifyAdhocApp(target);
 
 console.log(
