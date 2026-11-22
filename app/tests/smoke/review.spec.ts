@@ -982,7 +982,8 @@ test('narrow window: question bar collapsed below 1200 px, sidebar collapsed bel
 	const bar = page.getByRole('complementary', { name: 'Prüfen' });
 	await expect(bar.getByRole('button', { name: 'Leiste ausklappen' })).toBeVisible();
 	await expect(bar.getByRole('button', { name: '2 Fragen offen' })).toBeVisible();
-	await expect(page.getByRole('button', { name: 'Seitenleiste einklappen' })).toBeVisible();
+	// Review collapses the sidebar to give the document room, even above 1040 px.
+	await expect(page.getByRole('button', { name: 'Seitenleiste ausklappen' })).toBeVisible();
 	// Save and move open questions to the tabs.
 	await expect(page.getByRole('button', { name: 'Alle 3 speichern' })).toBeEnabled();
 	await page.getByRole('button', { name: '2 Fragen offen' }).first().click();

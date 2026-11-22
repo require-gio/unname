@@ -206,17 +206,22 @@
 		if (!currentFile || !scroller || !entryView.viewLoaded || pendingPosition) return;
 		const top = scroller.getBoundingClientRect().top;
 		const bottom = scroller.getBoundingClientRect().bottom;
-		const position = pagesView
-			? pageViewer?.readPosition(top, bottom)
-			: pageFaithfulView
-				? faithfulViewer?.readPosition(top, bottom)
-				: flowView
-					? flowViewer?.readPosition(top)
-					: gridView
-						? gridViewer?.readPosition()
-						: article
-							? readTextPosition(article, top)
-							: null;
+		// At the very top, remember the top itself: restoring the first visible word
+		// would scroll past the header and put that word under the floating tabs.
+		const position =
+			scroller.scrollTop < 1
+				? { page: 1, anchor: null }
+				: pagesView
+					? pageViewer?.readPosition(top, bottom)
+					: pageFaithfulView
+						? faithfulViewer?.readPosition(top, bottom)
+						: flowView
+							? flowViewer?.readPosition(top)
+							: gridView
+								? gridViewer?.readPosition()
+								: article
+									? readTextPosition(article, top)
+									: null;
 		entryView.updateView({
 			active_file_id: currentFile.id,
 			representation:

@@ -59,7 +59,7 @@
 		<h2 id="{id}-title" class="text-body font-semibold">{t('restore.output')}</h2>
 		<span class="inline-flex items-center gap-2.5 text-label text-muted">
 			<span id="{id}-mark">{t('restore.mark')}</span>
-			<Switch bind:checked={mark} labelledby="{id}-markieren" />
+			<Switch bind:checked={mark} labelledby="{id}-mark" />
 		</span>
 	</div>
 	{#if mode === 'text'}

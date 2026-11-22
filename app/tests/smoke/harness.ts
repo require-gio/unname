@@ -317,6 +317,12 @@ export async function harness(
 						}
 						case 'read_clipboard_text':
 							return 'Hallo Frau Hofer,\n\nviele Grüße\nJosef Brandstetter';
+						case 'copy_text':
+							// The browser clipboard stands in for the shell's, so tests can read it back.
+							await navigator.clipboard.writeText(String(args.text));
+							// The plain path of clipboard.rs. Only macOS keeps restored text on the
+							// device and clears it after 120 s; the tests expect the plain messages.
+							return { local_only: false, clears_after_s: null };
 						default:
 							throw new Error(`Unerwartet: ${command}`);
 					}

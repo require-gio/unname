@@ -489,7 +489,7 @@ test('Technical: empty diagnostic report, developer mode', async ({ context, pag
 	const settings = dialog(page);
 	await settings.getByRole('button', { name: 'Technik' }).click();
 
-	await expect(settings.getByText('bereit · nur über 127.0.0.1')).toBeVisible();
+	await expect(settings.getByText('bereit · nur auf diesem Gerät')).toBeVisible();
 	await settings.getByRole('button', { name: 'Diagnosebericht kopieren' }).click();
 	await expect(page.getByText(/Diagnosebericht kopiert/)).toBeVisible();
 	const report = await page.evaluate(() => navigator.clipboard.readText());

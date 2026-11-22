@@ -281,7 +281,9 @@ test('File from AI: saved, preview, open, save as, delete', async ({ context, pa
 		capture.commands.find((command) => command.command === 'save_restored_file')?.args
 	).toEqual({
 		id: 'r1',
-		title: 'Datei mit echten Namen speichern'
+		title: 'Datei mit echten Namen speichern',
+		// Only a confirmed cloud target (iCloud, OneDrive …) is written without asking again.
+		confirmCloud: false
 	});
 	await expect
 		.poll(() => capture.commands.find((command) => command.command === 'open_restored_file')?.args)
